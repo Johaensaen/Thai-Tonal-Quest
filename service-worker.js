@@ -1,6 +1,6 @@
 self.addEventListener("install", event => {
     event.waitUntil(
-        caches.open("thai-tonal-quest-v1").then(cache => cache.addAll([
+        caches.open("thai-tonal-quest-v2").then(cache => cache.addAll([
             "./",
             "./index.html",
             "./style.css",
@@ -19,7 +19,7 @@ self.addEventListener("activate", event => {
     event.waitUntil(
         caches.keys().then(cacheNames => Promise.all(
             cacheNames
-                .filter(cacheName => cacheName.startsWith("thai-tonal-quest-") && cacheName !== "thai-tonal-quest-v1")
+                .filter(cacheName => cacheName.startsWith("thai-tonal-quest-") && cacheName !== "thai-tonal-quest-v2")
                 .map(cacheName => caches.delete(cacheName))
         )).then(() => self.clients.claim())
     );

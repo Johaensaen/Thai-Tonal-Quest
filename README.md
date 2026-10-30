@@ -1,16 +1,18 @@
 # Thai Tonal Quest
 
 Eine kleine, offline nutzbare Web-App zum Lernen thailändischer Wörter und der
-fünf Töne. Sie enthält ein integriertes Anfängerprogramm mit fünf aufeinander
-aufbauenden Lektionen und jeweils fünf einsilbigen Wörtern.
+fünf Töne. Der geführte Lernpfad verbindet thematische Tageslektionen mit
+gemischten Tonlagen, Übungshinweisen und kurzen Prüfungsfragen.
 
 ## Lernpfad
 
-Die erste Ton-Lektion ist sofort verfügbar. Nach Abschluss wird die nächste
-freigeschaltet; bereits gelernte Wörter bleiben im Trainings- und Prüfungsmodus
-für die Wiederholung erhalten. Lektionen, Erfahrungspunkte und eigene Wörter
-werden lokal im Browser gespeichert. Für den integrierten Grundwortschatz ist
-keine manuelle Pflege, Anmeldung oder externe API erforderlich.
+Die erste Tageslektion ist sofort verfügbar und umfasst zehn Wörter. Üben mit
+Umschrift und Tonhinweis wechselt sich mit Fragen ohne Hinweise ab. Nach zehn
+beantworteten Wörtern wird die Lektion automatisch abgeschlossen; die nächste
+wird am folgenden lokalen Kalendertag freigeschaltet. Nach dem Grundkurs gibt es
+jeden Tag eine neue gemischte Wiederholung. Fortschritt, Erfahrungspunkte und
+eigene Wörter werden lokal im Browser gespeichert. Für den integrierten
+Grundwortschatz ist keine Anmeldung oder externe API erforderlich.
 
 Unter „Eigene Wörter“ lassen sich weiterhin persönliche Ergänzungen speichern.
 Die Umschrift und Tonangaben des Starterwortschatzes sind als Lernhilfe gedacht;
