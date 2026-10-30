@@ -27,3 +27,10 @@ die Zustellung verzögern. Ist die App geschlossen, kann GitHub Pages keine
 Push-Nachricht senden. Eine verpasste Erinnerung wird beim nächsten Öffnen der
 App nachgeholt. Push-Nachrichten bei geschlossener App benötigen einen
 zusätzlichen Push-Dienst mit zeitgesteuertem Backend.
+
+## Als App installieren
+
+Die App kann über Chrome auf Android installiert werden, wenn sie über eine
+sichere HTTPS-Verbindung geöffnet wird. Öffne das Chrome-Menü und wähle
+„App installieren“ oder „Zum Startbildschirm hinzufügen“. Das App-Symbol und
+das Browser-Favicon werden aus den mitgelieferten Icons geladen.

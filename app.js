@@ -1,27 +1,15 @@
-// --- PWA Setup ---
-const manifestData = {
-    name: "Thai Tonal Quest",
-        short_name: "ThaiQuest",
-            start_url: window.location.href,
-                display: "standalone",
-                    background_color: "#0f172a",
-                        theme_color: "#0f172a",
-                            icons: [{ src: "./icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }]
-                            };
-                            document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], {type: 'application/json'}));
-
-                            if ('serviceWorker' in navigator) {
-                                window.addEventListener('load', () => {
-                                    navigator.serviceWorker.register('./service-worker.js')
-                                        .then(() => {
-                                            window.dispatchEvent(new Event('thai-quest-service-worker-ready'));
-                                        })
-                                        .catch(error => {
-                                            console.error('Service Worker konnte nicht registriert werden:', error);
-                                            window.dispatchEvent(new CustomEvent('thai-quest-service-worker-error', { detail: error }));
-                                        });
-                                }, { once: true });
-                            }
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(() => {
+                window.dispatchEvent(new Event("thai-quest-service-worker-ready"));
+            })
+            .catch(error => {
+                console.error("Service Worker konnte nicht registriert werden:", error);
+                window.dispatchEvent(new CustomEvent("thai-quest-service-worker-error", { detail: error }));
+            });
+    }, { once: true });
+}
 
 const dailyReminderMessages = [
     "Fünf Minuten Thai genügen heute. Bereit für eine kleine Runde?",
