@@ -49,6 +49,159 @@ const courseLessons = [
             { thai: "ไหน", translit: "nǎi", meaning: "wo / welcher", tone: 4, lesson: 3 },
             { thai: "ปลา", translit: "bplaa", meaning: "Fisch", tone: 0, lesson: 3 }
         ]
+    },
+    {
+        id: 4,
+        name: "4. Familie & Menschen",
+        description: "Sprich über Familie, Freunde und Menschen in deinem Alltag.",
+        words: [
+            { thai: "พ่อ", translit: "phɔ̂ɔ", meaning: "Vater", tone: 2, lesson: 4 },
+            { thai: "พี่", translit: "phîi", meaning: "älteres Geschwister", tone: 2, lesson: 4 },
+            { thai: "น้อง", translit: "nɔ̂ɔng", meaning: "jüngeres Geschwister", tone: 2, lesson: 4 },
+            { thai: "ลูก", translit: "lûuk", meaning: "Kind / Sohn / Tochter", tone: 2, lesson: 4 },
+            { thai: "เพื่อน", translit: "phûean", meaning: "Freund / Freundin", tone: 2, lesson: 4 },
+            { thai: "เด็ก", translit: "dèk", meaning: "Kind", tone: 1, lesson: 4 },
+            { thai: "ผู้หญิง", translit: "phûu-yǐng", meaning: "Frau", tone: 2, lesson: 4 },
+            { thai: "ผู้ชาย", translit: "phûu-chaai", meaning: "Mann", tone: 2, lesson: 4 },
+            { thai: "ครู", translit: "khruu", meaning: "Lehrer / Lehrerin", tone: 0, lesson: 4 },
+            { thai: "นักเรียน", translit: "nák-rian", meaning: "Schüler / Schülerin", tone: 3, lesson: 4 }
+        ]
+    },
+    {
+        id: 5,
+        name: "5. Unterwegs",
+        description: "Finde dich mit Verkehrsmitteln und Richtungen zurecht.",
+        words: [
+            { thai: "ถนน", translit: "thà-nǒn", meaning: "Straße", tone: 1, lesson: 5 },
+            { thai: "รถไฟ", translit: "rót-fai", meaning: "Zug", tone: 3, lesson: 5 },
+            { thai: "สถานี", translit: "sà-thǎa-nii", meaning: "Bahnhof / Station", tone: 1, lesson: 5 },
+            { thai: "สนามบิน", translit: "sà-nǎam-bin", meaning: "Flughafen", tone: 1, lesson: 5 },
+            { thai: "โรงแรม", translit: "rooŋ-raem", meaning: "Hotel", tone: 0, lesson: 5 },
+            { thai: "ตั๋ว", translit: "dtǔa", meaning: "Fahrkarte / Ticket", tone: 4, lesson: 5 },
+            { thai: "ซ้าย", translit: "sáai", meaning: "links", tone: 3, lesson: 5 },
+            { thai: "ขวา", translit: "khwǎa", meaning: "rechts", tone: 4, lesson: 5 },
+            { thai: "ตรงไป", translit: "dtrong-bpai", meaning: "geradeaus", tone: 0, lesson: 5 },
+            { thai: "เดิน", translit: "doen", meaning: "gehen / laufen", tone: 0, lesson: 5 }
+        ]
+    },
+    {
+        id: 6,
+        name: "6. Essen bestellen",
+        description: "Bestelle Essen und beschreibe, was dir schmeckt.",
+        words: [
+            { thai: "ผัก", translit: "phàk", meaning: "Gemüse", tone: 1, lesson: 6 },
+            { thai: "ผลไม้", translit: "phǒn-lá-máai", meaning: "Obst", tone: 4, lesson: 6 },
+            { thai: "เนื้อ", translit: "nûea", meaning: "Fleisch", tone: 2, lesson: 6 },
+            { thai: "ไก่", translit: "kài", meaning: "Huhn / Hähnchen", tone: 1, lesson: 6 },
+            { thai: "เผ็ด", translit: "phèt", meaning: "scharf", tone: 1, lesson: 6 },
+            { thai: "หวาน", translit: "wǎan", meaning: "süß", tone: 4, lesson: 6 },
+            { thai: "อร่อย", translit: "à-ròi", meaning: "lecker", tone: 1, lesson: 6 },
+            { thai: "จาน", translit: "jaan", meaning: "Teller", tone: 0, lesson: 6 },
+            { thai: "ช้อน", translit: "chɔ́ɔn", meaning: "Löffel", tone: 3, lesson: 6 },
+            { thai: "อิ่ม", translit: "ìim", meaning: "satt", tone: 1, lesson: 6 }
+        ]
+    },
+    {
+        id: 7,
+        name: "7. Einkaufen & bezahlen",
+        description: "Frage nach Preisen und erledige kleine Einkäufe.",
+        words: [
+            { thai: "ราคา", translit: "raa-khaa", meaning: "Preis", tone: 0, lesson: 7 },
+            { thai: "เท่าไร", translit: "thâo-rai", meaning: "wie viel", tone: 2, lesson: 7 },
+            { thai: "เงิน", translit: "ngoen", meaning: "Geld", tone: 0, lesson: 7 },
+            { thai: "แพง", translit: "phaaeng", meaning: "teuer", tone: 0, lesson: 7 },
+            { thai: "ถูก", translit: "thùuk", meaning: "billig / günstig", tone: 1, lesson: 7 },
+            { thai: "ซื้อ", translit: "sûe", meaning: "kaufen", tone: 2, lesson: 7 },
+            { thai: "ขาย", translit: "khǎai", meaning: "verkaufen", tone: 4, lesson: 7 },
+            { thai: "ร้าน", translit: "ráan", meaning: "Geschäft / Laden", tone: 3, lesson: 7 },
+            { thai: "ตลาด", translit: "dtà-làat", meaning: "Markt", tone: 1, lesson: 7 },
+            { thai: "จ่าย", translit: "jàai", meaning: "bezahlen", tone: 1, lesson: 7 }
+        ]
+    },
+    {
+        id: 8,
+        name: "8. Zeit & Tagesablauf",
+        description: "Sprich über heute, morgen und die Tageszeiten.",
+        words: [
+            { thai: "วันนี้", translit: "wan-níi", meaning: "heute", tone: 3, lesson: 8 },
+            { thai: "พรุ่งนี้", translit: "phrûng-níi", meaning: "morgen", tone: 2, lesson: 8 },
+            { thai: "เมื่อวาน", translit: "mûea-waan", meaning: "gestern", tone: 2, lesson: 8 },
+            { thai: "เวลา", translit: "wee-laa", meaning: "Zeit / Uhrzeit", tone: 0, lesson: 8 },
+            { thai: "ตอนนี้", translit: "dtɔɔn-níi", meaning: "jetzt", tone: 3, lesson: 8 },
+            { thai: "เช้า", translit: "châo", meaning: "Morgen (Tageszeit)", tone: 2, lesson: 8 },
+            { thai: "บ่าย", translit: "bàai", meaning: "Nachmittag", tone: 1, lesson: 8 },
+            { thai: "เย็น", translit: "yen", meaning: "Abend / kühl", tone: 0, lesson: 8 },
+            { thai: "กลางคืน", translit: "glaang-khuen", meaning: "Nacht", tone: 0, lesson: 8 },
+            { thai: "นาที", translit: "naa-thii", meaning: "Minute", tone: 0, lesson: 8 }
+        ]
+    },
+    {
+        id: 9,
+        name: "9. Alltag & Tätigkeiten",
+        description: "Erzähle, was du jeden Tag machst.",
+        words: [
+            { thai: "ตื่น", translit: "dtùen", meaning: "aufwachen", tone: 1, lesson: 9 },
+            { thai: "อาบน้ำ", translit: "àap-náam", meaning: "duschen / baden", tone: 1, lesson: 9 },
+            { thai: "ทำงาน", translit: "tham-ngaan", meaning: "arbeiten", tone: 0, lesson: 9 },
+            { thai: "เรียน", translit: "rian", meaning: "lernen / studieren", tone: 0, lesson: 9 },
+            { thai: "อ่าน", translit: "àan", meaning: "lesen", tone: 1, lesson: 9 },
+            { thai: "เขียน", translit: "khǐan", meaning: "schreiben", tone: 4, lesson: 9 },
+            { thai: "ฟัง", translit: "fang", meaning: "hören / zuhören", tone: 0, lesson: 9 },
+            { thai: "เปิด", translit: "bpə̀ət", meaning: "öffnen / einschalten", tone: 1, lesson: 9 },
+            { thai: "ปิด", translit: "bpìt", meaning: "schließen / ausschalten", tone: 1, lesson: 9 },
+            { thai: "ชอบ", translit: "chɔ̂ɔp", meaning: "mögen", tone: 2, lesson: 9 }
+        ]
+    },
+    {
+        id: 10,
+        name: "10. Orte & Orientierung",
+        description: "Beschreibe, wo Dinge und Orte liegen.",
+        words: [
+            { thai: "ที่นี่", translit: "thîi-nîi", meaning: "hier", tone: 2, lesson: 10 },
+            { thai: "ที่นั่น", translit: "thîi-nân", meaning: "dort", tone: 2, lesson: 10 },
+            { thai: "ข้างหน้า", translit: "khâang-nâa", meaning: "vorne / davor", tone: 2, lesson: 10 },
+            { thai: "ข้างหลัง", translit: "khâang-lǎng", meaning: "hinten / dahinter", tone: 2, lesson: 10 },
+            { thai: "ข้างใน", translit: "khâang-nai", meaning: "drinnen / innen", tone: 2, lesson: 10 },
+            { thai: "ข้างนอก", translit: "khâang-nɔ̂ɔk", meaning: "draußen / außen", tone: 2, lesson: 10 },
+            { thai: "ใกล้", translit: "glâi", meaning: "nah", tone: 2, lesson: 10 },
+            { thai: "ไกล", translit: "glai", meaning: "weit / fern", tone: 0, lesson: 10 },
+            { thai: "บน", translit: "bon", meaning: "auf / oben", tone: 0, lesson: 10 },
+            { thai: "ใต้", translit: "dtâi", meaning: "unter / unten", tone: 2, lesson: 10 }
+        ]
+    },
+    {
+        id: 11,
+        name: "11. Gefühle & Gesundheit",
+        description: "Sag, wie es dir geht und was du brauchst.",
+        words: [
+            { thai: "สบาย", translit: "sà-baai", meaning: "bequem / wohlauf", tone: 1, lesson: 11 },
+            { thai: "เหนื่อย", translit: "nùai", meaning: "müde / erschöpft", tone: 1, lesson: 11 },
+            { thai: "ป่วย", translit: "bpùai", meaning: "krank", tone: 1, lesson: 11 },
+            { thai: "เจ็บ", translit: "jèp", meaning: "verletzt / schmerzhaft", tone: 1, lesson: 11 },
+            { thai: "สุขภาพ", translit: "sùk-khà-phâap", meaning: "Gesundheit", tone: 1, lesson: 11 },
+            { thai: "ร้อน", translit: "rɔ́ɔn", meaning: "heiß", tone: 3, lesson: 11 },
+            { thai: "หนาว", translit: "nǎao", meaning: "kalt", tone: 4, lesson: 11 },
+            { thai: "กลัว", translit: "glǔa", meaning: "Angst haben", tone: 4, lesson: 11 },
+            { thai: "ดีใจ", translit: "dii-jai", meaning: "froh / erfreut", tone: 0, lesson: 11 },
+            { thai: "เสียใจ", translit: "sǐa-jai", meaning: "traurig / bedauern", tone: 4, lesson: 11 }
+        ]
+    },
+    {
+        id: 12,
+        name: "12. Fragen & freundlich sein",
+        description: "Stelle einfache Fragen und komm höflich ins Gespräch.",
+        words: [
+            { thai: "อะไร", translit: "à-rai", meaning: "was", tone: 1, lesson: 12 },
+            { thai: "ใคร", translit: "khrai", meaning: "wer", tone: 0, lesson: 12 },
+            { thai: "ทำไม", translit: "tham-mai", meaning: "warum", tone: 0, lesson: 12 },
+            { thai: "เมื่อไร", translit: "mûea-rai", meaning: "wann", tone: 2, lesson: 12 },
+            { thai: "ที่ไหน", translit: "thîi-nǎi", meaning: "wo", tone: 2, lesson: 12 },
+            { thai: "อย่างไร", translit: "yàang-rai", meaning: "wie", tone: 1, lesson: 12 },
+            { thai: "เข้าใจ", translit: "khâo-jai", meaning: "verstehen", tone: 2, lesson: 12 },
+            { thai: "ช่วยด้วย", translit: "chûai-dûai", meaning: "Hilfe! / Bitte hilf!", tone: 2, lesson: 12 },
+            { thai: "ขอโทษ", translit: "khɔ̌ɔ-thôot", meaning: "Entschuldigung", tone: 4, lesson: 12 },
+            { thai: "ขอบคุณ", translit: "khɔ̀ɔp-khun", meaning: "danke", tone: 1, lesson: 12 }
+        ]
     }
 ];
 
@@ -92,7 +245,7 @@ const toneDetails = {
 };
 
 const firstIncompleteLesson = courseLessons.findIndex(lesson => !savedDailyLessons[lesson.id]?.completed);
-const completedLessonCount = firstIncompleteLesson === -1 ? courseLessons.length : firstIncompleteLesson;
+let completedLessonCount = firstIncompleteLesson === -1 ? courseLessons.length : firstIncompleteLesson;
 const unlockedLessonCount = Math.min(completedLessonCount + 1, courseLessons.length);
 const lessons = Object.fromEntries(courseLessons.map((lesson, index) => {
     const saved = savedDailyLessons[lesson.id] || {};
@@ -100,7 +253,10 @@ const lessons = Object.fromEntries(courseLessons.map((lesson, index) => {
         name: lesson.name,
         completed: index < completedLessonCount && saved.completed === true,
         completedAt: typeof saved.completedAt === "string" ? saved.completedAt : "",
-        progress: Number.isInteger(saved.progress) ? Math.min(Math.max(saved.progress, 0), lesson.words.length) : 0
+        progress: Number.isInteger(saved.progress) ? Math.min(Math.max(saved.progress, 0), lesson.words.length) : 0,
+        examWords: Array.isArray(saved.examWords) ? saved.examWords.filter(word => typeof word === "string") : [],
+        examProgress: Number.isInteger(saved.examProgress) ? Math.min(Math.max(saved.examProgress, 0), 5) : 0,
+        examScore: Number.isInteger(saved.examScore) ? Math.min(Math.max(saved.examScore, 0), 5) : 0
     }];
 }));
 let vocabs = [
@@ -191,6 +347,10 @@ function installProgressiveCourse() {
         .daily-choices { display: grid; gap: 9px; margin-top: 20px; }
         .daily-choice { padding: 12px; border: 1px solid #475569; border-radius: 10px; background: #1e293b; color: #f8fafc; font: inherit; cursor: pointer; }
         .daily-choice:hover { border-color: #38bdf8; }
+        .daily-answer-input { box-sizing: border-box; width: 100%; margin-top: 16px; padding: 12px; border: 1px solid #475569; border-radius: 10px; background: #0f172a; color: #f8fafc; font: inherit; }
+        .daily-answer-actions { display: grid; gap: 8px; margin-top: 10px; }
+        .daily-answer-switch { padding: 8px; border: 0; background: transparent; color: #38bdf8; font: inherit; cursor: pointer; }
+        .daily-exam-result { margin: 18px 0; padding: 14px; border-radius: 10px; background: #1e293b; }
         .daily-feedback { margin: 18px 0; padding: 12px; border-radius: 10px; background: #1e293b; }
         .daily-feedback.is-correct { color: #86efac; }
         .daily-feedback.is-incorrect { color: #fca5a5; }
@@ -222,7 +382,7 @@ function installProgressiveCourse() {
             review.completed;
 
         container.innerHTML = `
-            <p class="course-intro">Jede Tageslektion hat 10 Wörter. Du wechselst zwischen Üben mit Ton-Hinweisen und kleinen Prüfungsfragen. Nach dem zehnten Wort ist die Lektion automatisch abgeschlossen.</p>
+            <p class="course-intro">Dein Pfad umfasst ${courseLessons.length} Themen mit jeweils 10 neuen Wörtern. Lerne täglich ein Thema, tippe Antworten selbst ein oder wähle aus. Am Themenende wartet automatisch eine kurze Prüfung ohne Hinweise; danach geht es am nächsten Tag weiter. Training und die freie Prüfung bleiben zusätzlich optional.</p>
             ${courseLessons.map((lesson, index) => {
                 const state = lessons[lesson.id];
                 const completed = state.completed;
@@ -232,7 +392,9 @@ function installProgressiveCourse() {
                 const status = completed
                     ? "✓ Abgeschlossen"
                     : isAvailable
-                        ? "Heute verfügbar"
+                        ? state.progress >= lesson.words.length
+                            ? `Themenprüfung (${state.examProgress}/5)`
+                            : "Heute verfügbar"
                         : isCurrent
                             ? "Morgen geht's weiter"
                             : "🔒 Noch gesperrt";
@@ -241,7 +403,7 @@ function installProgressiveCourse() {
                         <span class="course-word" lang="th">${escapeHtml(word.thai)}</span>`).join("")}</div>`
                     : "";
                 const action = isAvailable
-                    ? `<button class="action-btn btn-primary" type="button" onclick="startDailyLesson(${lesson.id})">${state.progress ? `Weiterlernen (${state.progress}/10)` : "Tageslektion starten"}</button>`
+                    ? `<button class="action-btn btn-primary" type="button" onclick="startDailyLesson(${lesson.id})">${state.progress >= lesson.words.length ? `Prüfung fortsetzen (${state.examProgress}/5)` : state.progress ? `Weiterlernen (${state.progress}/10)` : "Tageslektion starten"}</button>`
                     : `<span class="course-status">${status}</span>`;
                 return `<article class="course-lesson ${completed ? "is-complete" : isCurrent ? "is-current" : "is-locked"}">
                     <div class="course-lesson-heading"><div>
@@ -249,7 +411,7 @@ function installProgressiveCourse() {
                         <h3>${escapeHtml(lesson.name)}</h3>
                     </div>${action}</div>
                     <p>${escapeHtml(lesson.description)}</p>
-                    ${isCurrent && !completed ? `<p class="course-progress">${state.progress} von 10 Wörtern gelernt</p>` : ""}
+                    ${isCurrent && !completed ? `<p class="course-progress">${state.progress < 10 ? `${state.progress} von 10 Wörtern gelernt` : `Themenprüfung: ${state.examProgress} von 5 Fragen`}</p>` : ""}
                     ${words}
                 </article>`;
             }).join("")}
@@ -293,51 +455,122 @@ function installProgressiveCourse() {
         const previous = index > 0 ? lessons[courseLessons[index - 1].id] : null;
         const progress = lessons[lesson.id].progress;
         if (previous && (!previous.completed || (!progress && previous.completedAt >= localDateKey()))) return null;
-        return { id: lesson.id, name: lesson.name, words: lesson.words, progress };
+        const state = lessons[lesson.id];
+        if (progress >= lesson.words.length && state.examWords.length !== 5) {
+            state.examWords = chooseTopicExamWords(lesson.words);
+            state.examProgress = 0;
+            state.examScore = 0;
+            saveDailyLessons();
+        }
+        const savedExamWords = state.examWords
+            .map(thai => lesson.words.find(word => word.thai === thai))
+            .filter(Boolean);
+        return {
+            id: lesson.id,
+            name: lesson.name,
+            words: lesson.words,
+            progress,
+            phase: progress >= lesson.words.length ? "exam" : "learn",
+            examWords: savedExamWords.length === 5 ? savedExamWords : [],
+            examProgress: state.examProgress,
+            examScore: state.examScore,
+            answerMode: "typed"
+        };
     };
 
-    window.recordDailyLessonAnswer = function recordCourseLessonAnswer(id, nextProgress) {
-        if (!activeDailySession || String(activeDailySession.id) !== String(id) ||
-            nextProgress !== activeDailySession.progress + 1 ||
-            nextProgress > activeDailySession.words.length) return false;
+    function updateLearningStreak() {
+        const today = localDateKey();
+        const lastStudyDate = localStorage.getItem("thai_quest_last_study_date");
+        if (lastStudyDate === today) return;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        streak = !lastStudyDate || lastStudyDate === localDateKey(yesterday) ? streak + 1 : 1;
+        localStorage.setItem("thai_quest_last_study_date", today);
+    }
 
-        activeDailySession.progress = nextProgress;
+    function chooseTopicExamWords(words) {
+        const shuffled = [...words];
+        for (let index = shuffled.length - 1; index > 0; index--) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+        }
+        return shuffled.slice(0, 5).map(word => word.thai);
+    }
+
+    window.recordDailyLessonAnswer = function recordCourseLessonAnswer(id, nextProgress, correct = false) {
+        if (!activeDailySession || String(activeDailySession.id) !== String(id)) return false;
         if (activeDailySession.id === "review") {
+            if (nextProgress !== activeDailySession.progress + 1 ||
+                nextProgress > activeDailySession.words.length) return false;
+            activeDailySession.progress = nextProgress;
             const review = getDailyReview();
             review.progress = nextProgress;
             if (nextProgress === 10) review.completed = true;
             saveDailyReview(review);
             if (nextProgress === 10) {
                 xp += 50;
+                updateLearningStreak();
                 updateHUD();
             }
             return nextProgress === 10;
         }
 
         const state = lessons[id];
-        state.progress = nextProgress;
-        if (nextProgress === 10) {
-            state.completed = true;
-            state.completedAt = localDateKey();
-            xp += 50;
-            updateHUD();
-            const newlyUnlocked = courseLessons[id];
-            if (newlyUnlocked) {
-                const existing = new Set(vocabs.map(word => word.thai));
-                const newlyUnlockedWords = [
-                    ...newlyUnlocked.words,
-                    ...customVocabs.filter(word => word.lesson === newlyUnlocked.id)
-                ];
-                newlyUnlockedWords.forEach(word => {
-                    if (!existing.has(word.thai)) {
-                        vocabs.push(word);
-                        existing.add(word.thai);
+        if (activeDailySession.phase === "exam") {
+            if (nextProgress !== state.examProgress + 1 || nextProgress > 5) return false;
+            state.examProgress = nextProgress;
+            if (correct) state.examScore += 1;
+            activeDailySession.examProgress = nextProgress;
+            activeDailySession.examScore = state.examScore;
+            if (nextProgress === 5 && state.examScore >= 4) {
+                state.completed = true;
+                state.completedAt = localDateKey();
+                completedLessonCount = Math.min(completedLessonCount + 1, courseLessons.length);
+                xp += 50;
+                updateLearningStreak();
+                const newlyUnlocked = courseLessons[id];
+                if (newlyUnlocked) {
+                    const existing = new Set(vocabs.map(word => word.thai));
+                    const newlyUnlockedWords = [
+                        ...newlyUnlocked.words,
+                        ...customVocabs.filter(word => word.lesson === newlyUnlocked.id)
+                    ];
+                    newlyUnlockedWords.forEach(word => {
+                        if (!existing.has(word.thai)) {
+                            vocabs.push(word);
+                            existing.add(word.thai);
+                        }
+                    });
+                    if (lessonSelect) {
+                        lessonSelect.innerHTML = courseLessons.slice(0, completedLessonCount + 1).map(lesson =>
+                            `<option value="${lesson.id}">${escapeHtml(lesson.name)}</option>`
+                        ).join("");
                     }
-                });
+                }
+                updateHUD();
+            } else if (nextProgress === 5) {
+                state.examProgress = 0;
+                state.examScore = 0;
+                state.examWords = chooseTopicExamWords(courseLessons[id - 1].words);
             }
+            saveDailyLessons();
+            return nextProgress === 5 && state.completed;
+        }
+
+        if (nextProgress !== state.progress + 1 || nextProgress > activeDailySession.words.length) return false;
+        state.progress = nextProgress;
+        activeDailySession.progress = nextProgress;
+        if (nextProgress === activeDailySession.words.length) {
+            state.examWords = chooseTopicExamWords(activeDailySession.words);
+            state.examProgress = 0;
+            state.examScore = 0;
+            activeDailySession.phase = "exam";
+            activeDailySession.examWords = state.examWords
+                .map(thai => activeDailySession.words.find(word => word.thai === thai))
+                .filter(Boolean);
         }
         saveDailyLessons();
-        return nextProgress === 10;
+        return false;
     };
 
     window.startDailyLesson = function startCourseLesson(id) {
@@ -347,18 +580,19 @@ function installProgressiveCourse() {
             return;
         }
         activeDailySession = session;
-        renderDailyQuestion(session.progress);
+        renderDailyQuestion(session.phase === "exam" ? session.examProgress : session.progress);
     };
 
     function renderDailyQuestion(index, feedback = null) {
-        const word = activeDailySession.words[index];
+        const isExam = activeDailySession.phase === "exam";
+        const questionWords = isExam ? activeDailySession.examWords : activeDailySession.words;
+        const word = questionWords[index];
         if (!word) {
             renderDailyCompletion();
             return;
         }
 
-        const isPractice = index % 2 === 0;
-        const title = isPractice ? "🏋️ Üben mit Hinweisen" : "🎓 Prüfung ohne Hinweise";
+        const title = isExam ? "🎓 Themenprüfung · ohne Hinweise" : "📚 Neues Wort lernen";
         const candidates = [...new Map(vocabs
             .filter(candidate => candidate.meaning !== word.meaning)
             .map(candidate => [candidate.meaning, candidate.meaning])).values()];
@@ -375,52 +609,102 @@ function installProgressiveCourse() {
         container.innerHTML = `
             <div class="daily-session-title">
                 <span class="course-tone">${title}</span>
-                <span class="course-status">${index + 1} / 10</span>
+                <span class="course-status">${index + 1} / ${isExam ? 5 : 10}</span>
             </div>
-            <div class="daily-progress-track"><div class="daily-progress-fill" style="width:${index * 10}%"></div></div>
+            <div class="daily-progress-track"><div class="daily-progress-fill" style="width:${index / (isExam ? 5 : 10) * 100}%"></div></div>
             <div class="daily-question">
                 <div class="word-row" style="justify-content:center">
                     <div class="daily-question-word" lang="th">${escapeHtml(word.thai)}</div>
                     <button class="audio-btn" type="button" data-daily-audio="${escapeHtml(word.thai)}" aria-label="Wort anhören">🔊</button>
                 </div>
-                ${isPractice ? `<p class="daily-question-hint">${escapeHtml(word.translit)} · ${escapeHtml(toneDetails[word.tone].name)}</p>` : ""}
-                <p>${isPractice ? "Was bedeutet dieses Wort?" : "Erinnerst du dich an die Bedeutung?"}</p>
+                ${!isExam ? `<p class="daily-question-hint">${escapeHtml(word.translit)} · ${escapeHtml(toneDetails[word.tone].name)}</p>` : ""}
+                <p>${isExam ? "Schreibe die Bedeutung aus dem Gedächtnis auf." : "Was bedeutet dieses Wort?"}</p>
                 ${feedback ? `
                     <div class="daily-feedback ${feedback.correct ? "is-correct" : "is-incorrect"}">
                         ${feedback.correct ? "Richtig! Gut gemacht." : `Noch nicht ganz. Die richtige Bedeutung ist: ${escapeHtml(word.meaning)}.`}
-                        <p>Ton: ${escapeHtml(toneDetails[word.tone].name)}</p>
+                        ${!isExam ? `<p>Ton: ${escapeHtml(toneDetails[word.tone].name)}</p>` : ""}
                     </div>
+                    ${feedback.examFinished ? `<div class="daily-exam-result">${feedback.passed
+                        ? "Themenprüfung bestanden! Du kannst morgen mit dem nächsten Thema weitermachen."
+                        : `Noch nicht bestanden: ${feedback.score} von 5 richtig. Versuch es gleich noch einmal.`}</div>` : ""}
                     <button class="action-btn btn-primary" type="button" onclick="continueDailyLesson()">Weiter ➔</button>
-                ` : `<div class="daily-choices">${options.map((option, optionIndex) => `
-                    <button class="daily-choice" type="button" onclick="answerDailyLesson(${index}, ${optionIndex})">${escapeHtml(option)}</button>`).join("")}</div>`}
+                ` : isExam || activeDailySession.answerMode === "typed" ? `
+                    <form class="daily-answer-actions" onsubmit="submitDailyTypedAnswer(event, ${index})">
+                        <input class="daily-answer-input" type="text" name="answer" autocomplete="off" required
+                            aria-label="Deine Antwort" placeholder="Deine Antwort auf Deutsch">
+                        <button class="action-btn btn-primary" type="submit">Antwort prüfen</button>
+                    </form>
+                    ${!isExam ? `<button class="daily-answer-switch" type="button" onclick="setDailyAnswerMode('choices', ${index})">Lieber eine Antwort auswählen</button>` : ""}
+                ` : `
+                    <div class="daily-choices">${options.map((option, optionIndex) => `
+                        <button class="daily-choice" type="button" onclick="answerDailyLesson(${index}, ${optionIndex})">${escapeHtml(option)}</button>`).join("")}</div>
+                    <button class="daily-answer-switch" type="button" onclick="setDailyAnswerMode('typed', ${index})">Antwort selbst eintippen</button>
+                `}
             </div>
         `;
         container.querySelector("[data-daily-audio]")?.addEventListener("click", event => {
             playAudio(event.currentTarget.dataset.dailyAudio);
         });
-        if (!feedback) {
-            window.dailyAnswerOptions = options;
-        }
+        activeDailySession.options = options;
     }
 
-    window.answerDailyLesson = function answerCourseLesson(index, optionIndex) {
-        if (!activeDailySession || index !== activeDailySession.progress ||
-            !Array.isArray(window.dailyAnswerOptions)) return;
-        const word = activeDailySession.words[index];
-        const selectedMeaning = window.dailyAnswerOptions[optionIndex];
+    function normalizeMeaning(value) {
+        return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+            .toLocaleLowerCase("de").replace(/[.,!?]/g, "").trim();
+    }
+
+    function meaningMatches(answer, meaning) {
+        const normalizedAnswer = normalizeMeaning(answer);
+        return normalizedAnswer === normalizeMeaning(meaning) ||
+            meaning.split("/").some(alias => normalizeMeaning(alias) === normalizedAnswer);
+    }
+
+    window.setDailyAnswerMode = function setCourseAnswerMode(mode, index) {
+        if (!activeDailySession || activeDailySession.phase === "exam" ||
+            !["typed", "choices"].includes(mode)) return;
+        activeDailySession.answerMode = mode;
+        renderDailyQuestion(index);
+    };
+
+    window.submitDailyTypedAnswer = function submitCourseTypedAnswer(event, index) {
+        event.preventDefault();
+        const answer = new FormData(event.currentTarget).get("answer");
+        if (typeof answer === "string") window.answerDailyLesson(index, answer);
+    };
+
+    window.answerDailyLesson = function answerCourseLesson(index, answer) {
+        if (!activeDailySession) return;
+        const isExam = activeDailySession.phase === "exam";
+        const expectedIndex = isExam ? activeDailySession.examProgress : activeDailySession.progress;
+        if (index !== expectedIndex) return;
+        const word = isExam ? activeDailySession.examWords[index] : activeDailySession.words[index];
+        if (!word) return;
+        const selectedMeaning = typeof answer === "number"
+            ? activeDailySession.options[answer]
+            : answer;
         if (typeof selectedMeaning !== "string") return;
-        const correct = selectedMeaning === word.meaning;
-        if (correct) {
+        const correct = meaningMatches(selectedMeaning, word.meaning);
+        if (correct && !isExam) {
             xp += 5;
             updateHUD();
         }
-        const completed = window.recordDailyLessonAnswer(activeDailySession.id, index + 1);
-        window.dailyAnswerOptions = null;
+        const nextProgress = index + 1;
+        const completed = window.recordDailyLessonAnswer(activeDailySession.id, nextProgress, correct);
         if (completed) {
             renderDailyCompletion();
             return;
         }
-        renderDailyQuestion(index, { correct });
+        if (!isExam && activeDailySession.phase === "exam") {
+            renderDailyQuestion(0);
+            return;
+        }
+        const examFinished = isExam && nextProgress === 5;
+        renderDailyQuestion(index, {
+            correct,
+            examFinished,
+            passed: examFinished && lessons[activeDailySession.id].completed,
+            score: activeDailySession.examScore
+        });
     };
 
     window.continueDailyLesson = function continueCourseLesson() {
@@ -430,12 +714,12 @@ function installProgressiveCourse() {
 
     function renderDailyCompletion() {
         const isReview = activeDailySession?.id === "review";
-        const title = isReview ? "Tageswiederholung geschafft!" : "Tageslektion abgeschlossen!";
+        const title = isReview ? "Tageswiederholung geschafft!" : "Themenprüfung bestanden!";
         container.innerHTML = `
             <div class="daily-question">
                 <div style="font-size:3rem">🎉</div>
                 <h3>${title}</h3>
-                <p>Du hast alle 10 Wörter bearbeitet. +50 XP Bonus!</p>
+                <p>${isReview ? "Du hast alle 10 Wörter wiederholt." : "Du hast 10 neue Wörter gelernt und die Prüfung bestanden."} +50 XP Bonus!</p>
                 <button class="action-btn btn-primary" type="button" onclick="finishDailyLesson()">Weiter zum Lernpfad</button>
             </div>
         `;
@@ -462,9 +746,9 @@ function installProgressiveCourse() {
     const addTab = navButtons.find(button => button.getAttribute("onclick") === "switchTab('add')");
     const lessonsTitle = document.querySelector("#section-lessons h3");
     const addTitle = document.querySelector("#section-add h3, #section-add h2");
-    if (lessonTab) lessonTab.textContent = "📅 Tageslektion";
+    if (lessonTab) lessonTab.textContent = "🗺️ Lernpfad";
     if (addTab) addTab.textContent = "+ Eigene Wörter";
-    if (lessonsTitle) lessonsTitle.textContent = "Dein täglicher Lernpfad";
+    if (lessonsTitle) lessonsTitle.textContent = `Dein täglicher Lernpfad · ${courseLessons.length} Themen`;
     if (addTitle) addTitle.textContent = "Eigenes Wort hinzufügen (optional)";
 
     if (container) {

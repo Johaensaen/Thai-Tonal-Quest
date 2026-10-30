@@ -310,7 +310,7 @@ function setupDailyReminderUI() {
 window.addEventListener("load", setupDailyReminderUI, { once: true });
 
                                                     let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
-                                                    let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
+                                                    let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 0;
 
                                                     let currentTrainIndex = null;
                                                     let currentExamIndex = null;
@@ -334,7 +334,9 @@ window.addEventListener("load", setupDailyReminderUI, { once: true });
                                                                                                 localStorage.setItem('thai_quest_streak', streak);
                                                                                                 }
 
-                                                                                                function switchTab(tab) {
+                                                    updateHUD();
+
+                                                                                                    function switchTab(tab) {
                                                                                                     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                                                                                                         document.getElementById('section-train').classList.add('hidden');
                                                                                                             document.getElementById('section-exam').classList.add('hidden');
@@ -354,7 +356,7 @@ window.addEventListener("load", setupDailyReminderUI, { once: true });
                                                                                                                                                                                                 } else if(tab === 'lessons') {
                                                                                                                                                                                                         document.querySelector('[onclick="switchTab(\'lessons\')"]').classList.add('active');
                                                                                                                                                                                                                 document.getElementById('section-lessons').classList.remove('hidden');
-                                                                                                                                                                                                                        document.getElementById('mode-subtitle').innerText = "Lernpakete & Lektionen";
+                                                                                                                                                                                                                        document.getElementById('mode-subtitle').innerText = "Dein täglicher Lernpfad";
                                                                                                                                                                                                                                 renderLessons();
                                                                                                                                                                                                                                     } else if(tab === 'add') {
                                                                                                                                                                                                                                             document.querySelector('[onclick="switchTab(\'add\')"]').classList.add('active');
