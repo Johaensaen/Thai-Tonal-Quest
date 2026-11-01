@@ -8,12 +8,12 @@ const manifestData = {
     theme_color: "#0f172a",
     icons: [{ src: "https://via.placeholder.com/192.png?text=🇹🇭", sizes: "192x192", type: "image/png" }]
 };
-document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], { type: 'application/json' }));
+document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], {type: 'application/json'}));
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const swCode = `self.addEventListener('fetch', (e) => {});`;
-        navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'text/javascript' }))).catch(() => { });
+        navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], {type: 'text/javascript'}))).catch(() => {});
     });
 }
 
@@ -47,33 +47,33 @@ function updateHUD() {
 
 function switchTab(tab) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-mix').classList.add('hidden');
     document.getElementById('section-train').classList.add('hidden');
     document.getElementById('section-exam').classList.add('hidden');
-    document.getElementById('section-mix').classList.add('hidden');
     document.getElementById('section-lessons').classList.add('hidden');
     document.getElementById('section-add').classList.add('hidden');
 
-    if (tab === 'mix') {
+    if(tab === 'mix') {
         document.querySelector('[onclick="switchTab(\'mix\')"]').classList.add('active');
         document.getElementById('section-mix').classList.remove('hidden');
         document.getElementById('mode-subtitle').innerText = "🎲 Duolingo-Mix (Zufällige Aufgabentypen)";
         loadRandomMixMission();
-    } else if (tab === 'train') {
+    } else if(tab === 'train') {
         document.querySelector('[onclick="switchTab(\'train\')"]').classList.add('active');
         document.getElementById('section-train').classList.remove('hidden');
         document.getElementById('mode-subtitle').innerText = "🏋️ Trainingsmodus (Mit magnetischer Anleitung)";
         loadTrainCard();
-    } else if (tab === 'exam') {
+    } else if(tab === 'exam') {
         document.querySelector('[onclick="switchTab(\'exam\')"]').classList.add('active');
         document.getElementById('section-exam').classList.remove('hidden');
         document.getElementById('mode-subtitle').innerText = "🎓 Prüfungsmodus (Keine Hilfslinie - Aus dem Kopf!)";
         loadExamCard();
-    } else if (tab === 'lessons') {
+    } else if(tab === 'lessons') {
         document.querySelector('[onclick="switchTab(\'lessons\')"]').classList.add('active');
         document.getElementById('section-lessons').classList.remove('hidden');
         document.getElementById('mode-subtitle').innerText = "Lernpakete & Lektionen";
         renderLessons();
-    } else if (tab === 'add') {
+    } else if(tab === 'add') {
         document.querySelector('[onclick="switchTab(\'add\')"]').classList.add('active');
         document.getElementById('section-add').classList.remove('hidden');
         document.getElementById('mode-subtitle').innerText = "Neues Wort hinzufügen";
@@ -83,12 +83,11 @@ function switchTab(tab) {
 // ==================== MIX-QUEST (ZUFÄLLIGE AUFGABEN) ====================
 function loadRandomMixMission() {
     updateHUD();
-    if (vocabs.length === 0) {
+    if (!vocabs || vocabs.length === 0) {
         document.getElementById('card-content-mix').innerHTML = "<p>Keine Vokabeln vorhanden.</p>";
         return;
     }
 
-    // Wähle zufällig einen von 4 Aufgabentypen aus
     const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match'];
     const chosenType = missionTypes[Math.floor(Math.random() * missionTypes.length)];
 
@@ -106,7 +105,6 @@ function loadRandomMixMission() {
     }
 }
 
-// Typ 1: Magnetisches Zeichnen im Mix
 function renderMixTrainCanvas(v) {
     setTimeout(() => playAudio(v.thai), 300);
     const container = document.getElementById('card-content-mix');
@@ -130,7 +128,6 @@ function renderMixTrainCanvas(v) {
     setupMixCanvas('mixTrainCanvas', v.tone, true);
 }
 
-// Typ 2: Freies Zeichnen im Mix
 function renderMixExamCanvas(v) {
     setTimeout(() => playAudio(v.thai), 300);
     const container = document.getElementById('card-content-mix');
@@ -154,22 +151,20 @@ function renderMixExamCanvas(v) {
     setupMixCanvas('mixExamCanvas', v.tone, false);
 }
 
-// Typ 3: Audio Multiple Choice
 function renderMixAudioMC(v) {
     setTimeout(() => playAudio(v.thai), 400);
-
-    // Finde 3 falsche Bedeutungen
+    
     let options = [v.meaning];
-    while (options.length < 4 && options.length < vocabs.length) {
+    while(options.length < 4 && options.length < vocabs.length) {
         let randMeaning = vocabs[Math.floor(Math.random() * vocabs.length)].meaning;
-        if (!options.includes(randMeaning)) options.push(randMeaning);
+        if(!options.includes(randMeaning)) options.push(randMeaning);
     }
     options.sort(() => Math.random() - 0.5);
 
     let htmlOptions = '';
     options.forEach(opt => {
-        let isCorrect = (opt === v.meaning) ? 'true' : 'false';
-        htmlOptions += `<button class="action-btn" style="background:#283548; margin-bottom:8px;" onclick="checkAudioMC(${isCorrect})">${opt}</button>`;
+        let correctCheck = (opt === v.meaning) ? "true" : "false";
+        htmlOptions += `<button class="action-btn" style="background:#283548; margin-bottom:8px;" onclick="checkAudioMC(${correctCheck})">${opt}</button>`;
     });
 
     const container = document.getElementById('card-content-mix');
@@ -186,7 +181,7 @@ function renderMixAudioMC(v) {
 }
 
 function checkAudioMC(isCorrect) {
-    if (isCorrect) {
+    if(isCorrect) {
         xp += 10;
         alert("Richtig gehört! 🎉 +10 XP");
     } else {
@@ -195,18 +190,17 @@ function checkAudioMC(isCorrect) {
     loadRandomMixMission();
 }
 
-// Typ 4: Ton-Kurven Matching
 function renderMixToneMatch(v) {
     let options = [v.tone];
-    while (options.length < 4) {
+    while(options.length < 4) {
         let randTone = Math.floor(Math.random() * 5);
-        if (!options.includes(randTone)) options.push(randTone);
+        if(!options.includes(randTone)) options.push(randTone);
     }
     options.sort(() => Math.random() - 0.5);
 
     let htmlOptions = '';
     options.forEach(t => {
-        htmlOptions += `<button class="action-btn" style="background:#283548; font-size:1.5rem;" onclick="checkToneMatch(${t}, ${v.tone})">${toneSymbols[t]} ${toneDetails[t].name.split(' ')[0]}</button>`;
+        htmlOptions += `<button class="action-btn" style="background:#283548; font-size:1.2rem;" onclick="checkToneMatch(${t}, ${v.tone})">${toneSymbols[t]} ${toneDetails[t].name.split(' ')[0]}</button>`;
     });
 
     const container = document.getElementById('card-content-mix');
@@ -222,7 +216,7 @@ function renderMixToneMatch(v) {
 }
 
 function checkToneMatch(selected, correct) {
-    if (selected === correct) {
+    if(selected === correct) {
         xp += 15;
         playAudio(vocabs[currentMixIndex].thai);
         alert("Perfekt zugeordnet! 🎉 +15 XP");
@@ -233,17 +227,16 @@ function checkToneMatch(selected, correct) {
 }
 
 function resolveMixMission(rewardXP, playSnd) {
-    if (playSnd && vocabs[currentMixIndex]) {
+    if(playSnd && vocabs[currentMixIndex]) {
         playAudio(vocabs[currentMixIndex].thai);
     }
     xp += rewardXP;
     loadRandomMixMission();
 }
 
-// Generische Canvas-Setup-Funktion für den Mix-Modus
 function setupMixCanvas(canvasId, tone, hasGhost) {
     const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
+    if(!canvas) return;
     const ctx = canvas.getContext('2d');
     canvas.width = canvas.parentElement.clientWidth;
     canvas.height = canvas.parentElement.clientHeight;
@@ -251,18 +244,39 @@ function setupMixCanvas(canvasId, tone, hasGhost) {
     let points = [];
     let isDrawing = false;
 
-    if (hasGhost) drawGhost(ctx, canvas, tone);
+    if(hasGhost) drawGhost(ctx, canvas, tone);
 
-    canvas.onmousedown = (e) => { isDrawing = true; points = [{ x: e.offsetX, y: e.offsetY }]; };
+    const getCoord = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+    };
+
+    canvas.onmousedown = (e) => { isDrawing = true; points = [getCoord(e)]; };
     canvas.onmousemove = (e) => {
-        if (!isDrawing) return;
-        points.push({ x: e.offsetX, y: e.offsetY });
+        if(!isDrawing) return;
+        points.push(getCoord(e));
         redrawCanvas(ctx, canvas, points, tone, hasGhost, false);
     };
     canvas.onmouseup = () => {
-        if (!isDrawing) return;
+        if(!isDrawing) return;
         isDrawing = false;
-        if (hasGhost && points.length > 3) {
+        if(hasGhost && points.length > 3) {
+            drawPerfectCurve(ctx, canvas, tone);
+            playAudio(vocabs[currentMixIndex].thai);
+        }
+    };
+
+    canvas.ontouchstart = (e) => { isDrawing = true; points = [getCoord(e)]; e.preventDefault(); };
+    canvas.ontouchmove = (e) => {
+        if(!isDrawing) return;
+        points.push(getCoord(e));
+        redrawCanvas(ctx, canvas, points, tone, hasGhost, false);
+        e.preventDefault();
+    };
+    canvas.ontouchend = () => {
+        if(!isDrawing) return;
+        isDrawing = false;
+        if(hasGhost && points.length > 3) {
             drawPerfectCurve(ctx, canvas, tone);
             playAudio(vocabs[currentMixIndex].thai);
         }
@@ -271,11 +285,11 @@ function setupMixCanvas(canvasId, tone, hasGhost) {
 
 function redrawCanvas(ctx, canvas, points, tone, hasGhost, snapped) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (hasGhost) drawGhost(ctx, canvas, tone);
-    if (points.length < 2) return;
+    if(hasGhost) drawGhost(ctx, canvas, tone);
+    if(points.length < 2) return;
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
-    for (let p of points) ctx.lineTo(p.x, p.y);
+    for(let p of points) ctx.lineTo(p.x, p.y);
     ctx.strokeStyle = snapped ? '#10b981' : '#38bdf8';
     ctx.lineWidth = 4;
     ctx.stroke();
@@ -286,7 +300,7 @@ function redrawCanvas(ctx, canvas, points, tone, hasGhost, snapped) {
 function loadTrainCard() {
     updateHUD();
     const container = document.getElementById('card-content-train');
-    if (vocabs.length === 0) { container.innerHTML = "<p>Keine Vokabeln.</p>"; return; }
+    if (!vocabs || vocabs.length === 0) { container.innerHTML = "<p>Keine Vokabeln.</p>"; return; }
 
     currentTrainIndex = Math.floor(Math.random() * vocabs.length);
     const v = vocabs[currentTrainIndex];
@@ -320,51 +334,38 @@ function setupTrainCanvas() {
     trainCanvas.height = trainCanvas.parentElement.clientHeight;
     trainPoints = []; trainSnapped = false;
 
-    trainCanvas.onmousedown = (e) => startTrain(e);
-    trainCanvas.onmousemove = (e) => drawTrain(e);
-    trainCanvas.onmouseup = endTrain;
-    trainCanvas.ontouchstart = (e) => { startTrain(e.touches[0]); e.preventDefault(); };
-    trainCanvas.ontouchmove = (e) => { drawTrain(e.touches[0]); e.preventDefault(); };
-    trainCanvas.ontouchend = endTrain;
+    const getCoord = (e) => {
+        const rect = trainCanvas.getBoundingClientRect();
+        return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+    };
+
+    trainCanvas.onmousedown = (e) => { trainPoints = [getCoord(e)]; trainSnapped = false; redrawTrain(); };
+    trainCanvas.onmousemove = (e) => { if(trainPoints.length) { trainPoints.push(getCoord(e)); redrawTrain(); } };
+    trainCanvas.onmouseup = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone); trainSnapped = true; playAudio(vocabs[currentTrainIndex].thai); } };
+
+    trainCanvas.ontouchstart = (e) => { trainPoints = [getCoord(e.touches[0])]; trainSnapped = false; redrawTrain(); e.preventDefault(); };
+    trainCanvas.ontouchmove = (e) => { if(trainPoints.length) { trainPoints.push(getCoord(e.touches[0])); redrawTrain(); e.preventDefault(); } };
+    trainCanvas.ontouchend = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone); trainSnapped = true; playAudio(vocabs[currentTrainIndex].thai); } };
 
     drawGhost(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone);
 }
 
-function startTrain(e) {
-    trainPoints = [{ x: e.clientX - trainCanvas.getBoundingClientRect().left, y: e.clientY - trainCanvas.getBoundingClientRect().top }];
-    trainSnapped = false;
-    redrawTrain();
-}
-function drawTrain(e) {
-    if (!trainPoints.length) return;
-    trainPoints.push({ x: e.clientX - trainCanvas.getBoundingClientRect().left, y: e.clientY - trainCanvas.getBoundingClientRect().top });
-    redrawTrain();
-}
-function endTrain() {
-    if (trainPoints.length > 3) {
-        snapTrainCurve();
-    }
-}
 function clearTrainCanvas() {
     trainPoints = []; trainSnapped = false;
     redrawTrain();
 }
+
 function redrawTrain() {
     trainCtx.clearRect(0, 0, trainCanvas.width, trainCanvas.height);
     drawGhost(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone);
     if (trainPoints.length < 2) return;
     trainCtx.beginPath();
     trainCtx.moveTo(trainPoints[0].x, trainPoints[0].y);
-    for (let p of trainPoints) trainCtx.lineTo(p.x, p.y);
+    for(let p of trainPoints) trainCtx.lineTo(p.x, p.y);
     trainCtx.strokeStyle = trainSnapped ? '#10b981' : '#38bdf8';
     trainCtx.lineWidth = 4; trainCtx.stroke();
 }
-function snapTrainCurve() {
-    const tone = vocabs[currentTrainIndex].tone;
-    drawPerfectCurve(trainCtx, trainCanvas, tone);
-    trainSnapped = true;
-    playAudio(vocabs[currentTrainIndex].thai);
-}
+
 function checkTrainDrawing() {
     if (!trainSnapped && trainPoints.length < 3) { alert("Bitte Kurve einzeichnen!"); return; }
     xp += 10;
@@ -375,7 +376,7 @@ function checkTrainDrawing() {
 function loadExamCard() {
     updateHUD();
     const container = document.getElementById('card-content-exam');
-    if (vocabs.length === 0) { container.innerHTML = "<p>Keine Vokabeln.</p>"; return; }
+    if (!vocabs || vocabs.length === 0) { container.innerHTML = "<p>Keine Vokabeln.</p>"; return; }
 
     currentExamIndex = Math.floor(Math.random() * vocabs.length);
     const v = vocabs[currentExamIndex];
@@ -408,38 +409,36 @@ function setupExamCanvas() {
     examCanvas.height = examCanvas.parentElement.clientHeight;
     examPoints = [];
 
-    examCanvas.onmousedown = (e) => startExam(e);
-    examCanvas.onmousemove = (e) => drawExam(e);
-    examCanvas.ontouchstart = (e) => { startExam(e.touches[0]); e.preventDefault(); };
-    examCanvas.ontouchmove = (e) => { drawExam(e.touches[0]); e.preventDefault(); };
+    const getCoord = (e) => {
+        const rect = examCanvas.getBoundingClientRect();
+        return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+    };
+
+    examCanvas.onmousedown = (e) => { examPoints = [getCoord(e)]; redrawExam(); };
+    examCanvas.onmousemove = (e) => { if(examPoints.length) { examPoints.push(getCoord(e)); redrawExam(); } };
+
+    examCanvas.ontouchstart = (e) => { examPoints = [getCoord(e.touches[0])]; redrawExam(); e.preventDefault(); };
+    examCanvas.ontouchmove = (e) => { if(examPoints.length) { examPoints.push(getCoord(e.touches[0])); redrawExam(); e.preventDefault(); } };
 }
 
-function startExam(e) {
-    examPoints = [{ x: e.clientX - examCanvas.getBoundingClientRect().left, y: e.clientY - examCanvas.getBoundingClientRect().top }];
-    redrawExam();
-}
-function drawExam(e) {
-    if (!examPoints.length) return;
-    examPoints.push({ x: e.clientX - examCanvas.getBoundingClientRect().left, y: e.clientY - examCanvas.getBoundingClientRect().top });
-    redrawExam();
-}
 function clearExamCanvas() {
     examPoints = [];
     redrawExam();
 }
+
 function redrawExam() {
     examCtx.clearRect(0, 0, examCanvas.width, examCanvas.height);
     if (examPoints.length < 2) return;
     examCtx.beginPath();
     examCtx.moveTo(examPoints[0].x, examPoints[0].y);
-    for (let p of examPoints) examCtx.lineTo(p.x, p.y);
+    for(let p of examPoints) examCtx.lineTo(p.x, p.y);
     examCtx.strokeStyle = '#f8fafc';
     examCtx.lineWidth = 4; examCtx.stroke();
 }
 
 function checkExamDrawing() {
     if (examPoints.length < 5) { alert("Bitte zeichne die Kurve in das Feld!"); return; }
-
+    
     const correctTone = vocabs[currentExamIndex].tone;
     const startY = examPoints[0].y;
     const endY = examPoints[examPoints.length - 1].y;
@@ -484,11 +483,11 @@ function drawGhost(ctx, canvas, tone) {
     ctx.save(); ctx.beginPath();
     ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
     const w = canvas.width, h = canvas.height;
-    if (tone === 0) { ctx.moveTo(20, h / 2); ctx.lineTo(w - 20, h / 2); }
-    else if (tone === 1) { ctx.moveTo(20, h / 3); ctx.lineTo(w - 20, h * 0.8); }
-    else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w / 2, 10, w - 20, h * 0.85); }
-    else if (tone === 3) { ctx.moveTo(20, h / 4); ctx.lineTo(w - 20, h / 4); }
-    else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w / 2, h, w - 20, h / 4); }
+    if (tone === 0) { ctx.moveTo(20, h/2); ctx.lineTo(w - 20, h/2); }
+    else if (tone === 1) { ctx.moveTo(20, h/3); ctx.lineTo(w - 20, h * 0.8); }
+    else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w/2, 10, w - 20, h * 0.85); }
+    else if (tone === 3) { ctx.moveTo(20, h/4); ctx.lineTo(w - 20, h/4); }
+    else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w/2, h, w - 20, h/4); }
     ctx.stroke(); ctx.restore();
 }
 
@@ -497,11 +496,11 @@ function drawPerfectCurve(ctx, canvas, tone) {
     drawGhost(ctx, canvas, tone);
     ctx.beginPath(); ctx.strokeStyle = '#10b981'; ctx.lineWidth = 5; ctx.lineCap = 'round';
     const w = canvas.width, h = canvas.height;
-    if (tone === 0) { ctx.moveTo(20, h / 2); ctx.lineTo(w - 20, h / 2); }
-    else if (tone === 1) { ctx.moveTo(20, h / 3); ctx.lineTo(w - 20, h * 0.8); }
-    else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w / 2, 10, w - 20, h * 0.85); }
-    else if (tone === 3) { ctx.moveTo(20, h / 4); ctx.lineTo(w - 20, h / 4); }
-    else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w / 2, h, w - 20, h / 4); }
+    if (tone === 0) { ctx.moveTo(20, h/2); ctx.lineTo(w - 20, h/2); }
+    else if (tone === 1) { ctx.moveTo(20, h/3); ctx.lineTo(w - 20, h * 0.8); }
+    else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w/2, 10, w - 20, h * 0.85); }
+    else if (tone === 3) { ctx.moveTo(20, h/4); ctx.lineTo(w - 20, h/4); }
+    else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w/2, h, w - 20, h/4); }
     ctx.stroke();
 }
 
@@ -551,5 +550,5 @@ function addVocab(e) {
     switchTab('mix');
 }
 
-// Start mit dem neuen Mix-Quest Modus
+// Start beim Laden mit Mix-Quest
 switchTab('mix');

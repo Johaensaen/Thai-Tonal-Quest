@@ -1,117 +1,110 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thai Tonal Quest</title>
-
+    
     <meta name="theme-color" content="#0f172a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="icon" type="image/svg+xml" href="./icon.svg">
-    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-    <link rel="manifest" href="./manifest.webmanifest">
-
-    <!-- Externe Stylesheet-Einbindung -->
+    <link rel="manifest" id="pwa-manifest">
+    
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <div class="container">
-        <header>
-            <h1>🇹🇭 Thai Tonal Quest</h1>
-            <p id="mode-subtitle">Trainingsmodus (Mit magnetischer Anleitung)</p>
-        </header>
+<div class="container">
+    <header>
+        <h1>🇹🇭 Thai Tonal Quest</h1>
+        <p id="mode-subtitle">Trainingsmodus</p>
+    </header>
 
-        <div class="hud">
-            <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">0</span></div>
-            <div class="hud-item" style="color: var(--xp);">⚡ <span id="xp-count">0</span> XP</div>
-            <div class="hud-item" style="color: var(--accent);">🎯 Lvl <span id="level-num">1</span></div>
-        </div>
+    <div class="hud">
+        <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">1</span></div>
+        <div class="hud-item" style="color: var(--xp);">⚡ <span id="xp-count">0</span> XP</div>
+        <div class="hud-item" style="color: var(--accent);">🎯 Lvl <span id="level-num">1</span></div>
+    </div>
 
-        <div class="nav-tabs">
-            <button class="nav-btn active" onclick="switchTab('mix')">🎲 Mix-Quest</button>
-            <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
-            <button class="nav-btn" onclick="switchTab('exam')">🎓 Prüfung</button>
-            <button class="nav-btn" onclick="switchTab('lessons')">📦 Lektionen</button>
-            <button class="nav-btn" onclick="switchTab('add')">+ Wort</button>
-        </div>
+    <div class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('mix')">🎲 Mix-Quest</button>
+        <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
+        <button class="nav-btn" onclick="switchTab('exam')">🎓 Prüfung</button>
+        <button class="nav-btn" onclick="switchTab('lessons')">📦 Lektionen</button>
+        <button class="nav-btn" onclick="switchTab('add')">+ Wort</button>
+    </div>
 
-        <!-- TRAINING SECTION -->
-        <div id="section-train">
-            <div class="card" id="card-container-train">
-                <div id="card-content-train"></div>
-            </div>
-        </div>
-
-        <!-- EXAM SECTION -->
-        <div id="section-exam" class="hidden">
-            <div class="card" style="border-bottom-color: #ef4444;" id="card-container-exam">
-                <div id="card-content-exam"></div>
-            </div>
-        </div>
-
-        <!-- LESSONS SECTION -->
-        <div id="section-lessons" class="hidden">
-            <div class="card" style="text-align: left; max-height: 400px; overflow-y: auto;">
-                <h3 style="margin-top: 0; font-size: 1.1rem;">Lernpakete & Lektionen</h3>
-                <div id="lessons-container"></div>
-            </div>
-        </div>
-
-        <div id="section-mix">
-            <div class="card" id="card-container-mix">
-                <div id="card-content-mix"></div>
-            </div>
-        </div>
-
-        <!-- ADD SECTION -->
-        <div id="section-add" class="hidden">
-            <div class="card">
-                <h3 style="margin-top: 0; font-size: 1.2rem;">Neues Wort hinzufügen</h3>
-                <form id="add-form" onsubmit="addVocab(event)">
-                    <div>
-                        <label>Thai-Schrift:</label>
-                        <input type="text" id="input-thai" required placeholder="z.B. สวัสดี">
-                    </div>
-                    <div>
-                        <label>Umschrift:</label>
-                        <input type="text" id="input-translit" required placeholder="z.B. sà-wàt-dee">
-                    </div>
-                    <div>
-                        <label>Bedeutung:</label>
-                        <input type="text" id="input-meaning" required placeholder="z.B. Hallo">
-                    </div>
-                    <div>
-                        <label>Lektion:</label>
-                        <select id="input-lesson">
-                            <option value="1">Lektion 1: Grundlagen & Alltag</option>
-                            <option value="2">Lektion 2: Essen & Trinken</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Ton-Typ:</label>
-                        <select id="input-tone">
-                            <option value="0">➡️ Mittelton (Gleichbleibend)</option>
-                            <option value="1">↘️ Tiefton (Fällt ab)</option>
-                            <option value="2">📉 Fallender Ton (Bogen, dann steil runter)</option>
-                            <option value="3">📈 Hochton (Schwebt oben)</option>
-                            <option value="4">🚀 Steigender Ton (Zieht hoch)</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="action-btn btn-primary"
-                        style="margin-top: 5px; width: 100%;">Speichern</button>
-                </form>
-            </div>
+    <!-- MIX-QUEST SECTION -->
+    <div id="section-mix">
+        <div class="card" id="card-container-mix">
+            <div id="card-content-mix"></div>
         </div>
     </div>
 
-    <!-- Skripte einbinden -->
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <!-- TRAINING SECTION -->
+    <div id="section-train" class="hidden">
+        <div class="card" id="card-container-train">
+            <div id="card-content-train"></div>
+        </div>
+    </div>
+
+    <!-- EXAM SECTION -->
+    <div id="section-exam" class="hidden">
+        <div class="card" style="border-bottom-color: #ef4444;" id="card-container-exam">
+            <div id="card-content-exam"></div>
+        </div>
+    </div>
+
+    <!-- LESSONS SECTION -->
+    <div id="section-lessons" class="hidden">
+        <div class="card" style="text-align: left; max-height: 400px; overflow-y: auto;">
+            <h3 style="margin-top: 0; font-size: 1.1rem;">Lernpakete & Lektionen</h3>
+            <div id="lessons-container"></div>
+        </div>
+    </div>
+
+    <!-- ADD SECTION -->
+    <div id="section-add" class="hidden">
+        <div class="card">
+            <h3 style="margin-top: 0; font-size: 1.2rem;">Neues Wort hinzufügen</h3>
+            <form id="add-form" onsubmit="addVocab(event)">
+                <div>
+                    <label>Thai-Schrift:</label>
+                    <input type="text" id="input-thai" required placeholder="z.B. สวัสดี">
+                </div>
+                <div>
+                    <label>Umschrift:</label>
+                    <input type="text" id="input-translit" required placeholder="z.B. sà-wàt-dee">
+                </div>
+                <div>
+                    <label>Bedeutung:</label>
+                    <input type="text" id="input-meaning" required placeholder="z.B. Hallo">
+                </div>
+                <div>
+                    <label>Lektion:</label>
+                    <select id="input-lesson">
+                        <option value="1">Lektion 1: Grundlagen & Alltag</option>
+                        <option value="2">Lektion 2: Essen & Trinken</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Ton-Typ:</label>
+                    <select id="input-tone">
+                        <option value="0">➡️ Mittelton (Gleichbleibend)</option>
+                        <option value="1">↘️ Tiefton (Fällt ab)</option>
+                        <option value="2">📉 Fallender Ton (Bogen, dann steil runter)</option>
+                        <option value="3">📈 Hochton (Schwebt oben)</option>
+                        <option value="4">🚀 Steigender Ton (Zieht hoch)</option>
+                    </select>
+                </div>
+                <button type="submit" class="action-btn btn-primary" style="margin-top: 5px; width: 100%;">Speichern</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
 
 </body>
-
 </html>
