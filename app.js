@@ -140,8 +140,11 @@ function switchTab(tab) {
 // ==================== MIX-QUEST (ZUFÄLLIGE AUFGABEN) ====================
 function loadRandomMixMission() {
     updateHUD();
+    const container = document.getElementById('card-content-mix');
+    if (!container) return; // Verhindert Abstürze, falls das Element fehlt
+
     if (!vocabs || vocabs.length === 0) {
-        document.getElementById('card-content-mix').innerHTML = "<p>Keine Vokabeln vorhanden.</p>";
+        container.innerHTML = "<p style='padding:20px; text-align:center;'>Keine Vokabeln vorhanden. Bitte füge welche hinzu!</p>";
         return;
     }
 
@@ -150,6 +153,7 @@ function loadRandomMixMission() {
 
     currentMixIndex = Math.floor(Math.random() * vocabs.length);
     const v = vocabs[currentMixIndex];
+    if (!v) return;
 
     if (chosenType === 'train_canvas') {
         renderMixTrainCanvas(v);
