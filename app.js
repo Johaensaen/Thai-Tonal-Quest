@@ -481,4 +481,149 @@ function setupExamCanvas() {
         return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
     };
 
-    examCanvas.onmousedown = (e) => { examPoints = [getCoord(e)]; redrawExam
+    examCanvas.onmousedown = (e) => { examPoints = [getCoord(e)]; redrawExam(); };
+    examCanvas.onmousemove = (e) => { if(examPoints.length) { examPoints.push(getCoord(e)); redrawExam(); } };
+
+    examCanvas.ontouchstart = (e) => { examPoints = [getCoord(e.touches[0])]; redrawExam(); e.preventDefault(); };
+    examCanvas.ontouchmove = (e) => { if(examPoints.length) { examPoints.push(getCoord(e.touches[0])); redrawExam(); e.preventDefault(); } };
+}
+
+function clearExamCanvas() {
+    examPoints = [];
+    redrawExam();
+}
+
+function redrawExam() {
+    examCtx.clearRect(0, 0, examCanvas.width, examCanvas.height);
+    if (examPoints.length < 2) return;
+    examCtx.beginPath();
+    examCtx.moveTo(examPoints[0].x, examPoints[0].y);
+    for(let p of examPoints) examCtx.lineTo(p.x, p.y);
+    examCtx.strokeStyle = '#f8fafc';
+    examCtx.lineWidth = 4; examCtx.stroke();
+}
+
+function checkExamDrawing() {
+    if (examPoints.length < 5) { 
+        playSound('wrong');
+        alert("Bitte zeichne die Kurve in das Feld!"); 
+        return; 
+    }
+    
+    const correctTone = vocabs[currentExamIndex].tone;
+    const startY = examPoints[0].y;
+    const endY = examPoints[examPoints.length - 1].y;
+    let evaluatedTone = 0;
+    const h = examCanvas.height;
+
+    if (correctTone === 2) {
+        let minY = Math.min(...examPoints.map(p => p.y));
+        evaluatedTone = (minY < h * 0.4) ? 2 : 1;
+    } else if (correctTone === 4) {
+        evaluatedTone = (startY > endY + 10) ? 4 : 0;
+    } else if (correctTone === 1) {
+        evaluatedTone = (endY > startY) ? 1 : 0;
+    } else if (correctTone === 3) {
+        let avgY = examPoints.reduce((acc, p) => acc + p.y, 0) / examPoints.length;
+        evaluatedTone = (avgY < h * 0.5) ? 3 : 0;
+    }
+
+    const isCorrect = (evaluatedTone === correctTone);
+    const container = document.getElementById('card-content-exam');
+
+    if (isCorrect) {
+        xp += 25;
+        playSound('correct');
+        container.innerHTML = `
+            <div style="color: #10b981; font-size: 1.8rem; font-weight: bold;">Richtig aus dem Kopf! 🎉</div>
+            <p style="color: #38bdf8; font-weight: bold; margin: 10px 0;">Das war einwandfrei (${toneDetails[correctTone].name}).</p>
+            <p style="color: #eab308; font-weight: bold; margin-bottom: 1.5rem;">+25 XP erhalten!</p>
+            <button class="action-btn btn-primary" onclick="loadExamCard()" style="width: 100%;">Nächste Prüfungsfrage ➔</button>
+        `;
+    } else {
+        playSound('wrong');
+        container.innerHTML = `
+            <div style="color: #ef4444; font-size: 1.8rem; font-weight: bold;">Leider daneben! 💡</div>
+            <p style="color: #94a3b8; margin: 10px 0;">Gesucht war: <b style="color: #38bdf8;">${toneDetails[correctTone].name}</b></p>
+            <button class="action-btn btn-primary" onclick="loadExamCard()" style="width: 100%; background: #334155; margin-top: 1rem;">Weiter ➔</button>
+        `;
+    }
+    updateHUD();
+}
+
+// ==================== CANVAS HELPER ====================
+function drawGhost(ctx, canvas, tone) {
+    ctx.save(); ctx.beginPath();
+    ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+    const w = canvas.width, h = canvas.height;
+    if (tone === 0) { ctx.moveTo(20, h/2); ctx.lineTo(w - 20, h/2); }
+    else if (tone === 1) { ctx.moveTo(20, h/3); ctx.lineTo(w - 20, h * 0.8); }
+    else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w/2, 10, w - 20, h * 0.85); }
+    else if (tone === 3) { ctx.moveTo(20, h/4); ctx.lineTo(w - 20, h/4); }
+    else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w/2, h, w - 20, h/4); }
+    ctx.stroke(); ctx.restore();
+}
+
+function drawPerfectCurve(ctx, canvas, tone) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGhost(ctx, canvas, tone);
+    ctx.beginPath(); ctx.strokeStyle = '#10b981'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    const w = canvas.width, h = canvas.height;
+    if (tone === 0) { ctx.moveTo(20, h/2); ctx.lineTo(w - 20, h/2); }
+    else if (tone === 1) { ctx.moveTo(20, h/3); ctx.lineTo(w - 20, h * 0.8); }
+    else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w/2, 10, w - 20, h * 0.85); }
+    else if (tone === 3) { ctx.moveTo(20, h/4); ctx.lineTo(w - 20, h/4); }
+    else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w/2, h, w - 20, h/4); }
+    ctx.stroke();
+}
+
+// ==================== LEKTIONEN ====================
+function renderLessons() {
+    const container = document.getElementById('lessons-container');
+    let html = "";
+    for (let id in lessons) {
+        let l = lessons[id];
+        let count = vocabs.filter(v => v.lesson == id).length;
+        html += `
+            <div class="lesson-card">
+                <div class="lesson-info">
+                    <h4>${l.name}</h4>
+                    <p>${count} Vokabeln enthalten</p>
+                </div>
+                <div>
+                    <button class="action-btn btn-primary" onclick="completeLesson(${id})" style="padding: 6px 12px; font-size: 0.8rem;">Abschließen 🎉</button>
+                </div>
+            </div>`;
+    }
+    container.innerHTML = html;
+}
+
+function completeLesson(id) {
+    lessons[id].completed = true;
+    localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
+    xp += 50;
+    playSound('complete');
+    alert("Lektion abgeschlossen! +50 XP Bonus! 🚀");
+    updateHUD();
+    renderLessons();
+}
+
+function addVocab(e) {
+    e.preventDefault();
+    const thai = document.getElementById('input-thai').value;
+    const translit = document.getElementById('input-translit').value;
+    const meaning = document.getElementById('input-meaning').value;
+    const lesson = parseInt(document.getElementById('input-lesson').value);
+    const tone = parseInt(document.getElementById('input-tone').value);
+
+    vocabs.push({ thai, translit, meaning, tone, lesson });
+    localStorage.setItem('thai_quest_vocabs', JSON.stringify(vocabs));
+
+    document.getElementById('add-form').reset();
+    playSound('correct');
+    alert("Wort erfolgreich gespeichert! 🚀");
+    switchTab('mix');
+}
+
+// Start beim Laden mit Mix-Quest
+switchTab('mix');
