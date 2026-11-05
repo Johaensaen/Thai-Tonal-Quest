@@ -17,56 +17,66 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// --- Web Audio API Synthesizer (Soundeffekte) ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// --- Web Audio API Synthesizer (Sicherer Lazy-Init) ---
+let audioCtx = null;
 
-function playSound(type) {
-    if (!audioCtx) return;
+function getAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
+    return audioCtx;
+}
 
-    const now = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+function playSound(type) {
+    try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
 
-    if (type === 'correct') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.setValueAtTime(659.25, now + 0.08);
-        osc.frequency.setValueAtTime(783.99, now + 0.16);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-        osc.start(now);
-        osc.stop(now + 0.35);
-    } 
-    else if (type === 'wrong') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.linearRampToValueAtTime(120, now + 0.2);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-        osc.start(now);
-        osc.stop(now + 0.25);
-    } 
-    else if (type === 'complete') {
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        notes.forEach((freq, index) => {
-            const subOsc = audioCtx.createOscillator();
-            const subGain = audioCtx.createGain();
-            subOsc.connect(subGain);
-            subGain.connect(audioCtx.destination);
-            
-            subOsc.type = 'triangle';
-            subOsc.frequency.setValueAtTime(freq, now + index * 0.1);
-            subGain.gain.setValueAtTime(0.2, now + index * 0.1);
-            subGain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.4);
-            
-            subOsc.start(now + index * 0.1);
-            subOsc.stop(now + index * 0.1 + 0.4);
-        });
+        if (type === 'correct') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.08);
+            osc.frequency.setValueAtTime(783.99, now + 0.16);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } 
+        else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.linearRampToValueAtTime(120, now + 0.2);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } 
+        else if (type === 'complete') {
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, index) => {
+                const subOsc = ctx.createOscillator();
+                const subGain = ctx.createGain();
+                subOsc.connect(subGain);
+                subGain.connect(ctx.destination);
+                
+                subOsc.type = 'triangle';
+                subOsc.frequency.setValueAtTime(freq, now + index * 0.1);
+                subGain.gain.setValueAtTime(0.2, now + index * 0.1);
+                subGain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.4);
+                
+                subOsc.start(now + index * 0.1);
+                subOsc.stop(now + index * 0.1 + 0.4);
+            });
+        }
+    } catch(e) {
+        console.log("Audio Kontext Blockiert", e);
     }
 }
 
@@ -477,10 +487,4 @@ function setupExamCanvas() {
 
     const getCoord = (e) => {
         const rect = examCanvas.getBoundingClientRect();
-        return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
-    };
-
-    examCanvas.onmousedown = (e) => { examPoints = [getCoord(e)]; redrawExam(); };
-    examCanvas.onmousemove = (e) => { if(examPoints.length) { examPoints.push(getCoord(e)); redrawExam(); } };
-
-    examCanva
+     
