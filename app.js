@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// --- Web Audio API Synthesizer (Sicherer Lazy-Init) ---
+// --- Web Audio API Synthesizer ---
 let audioCtx = null;
 
 function getAudioContext() {
@@ -48,8 +48,7 @@ function playSound(type) {
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
             osc.start(now);
             osc.stop(now + 0.35);
-        } 
-        else if (type === 'wrong') {
+        } else if (type === 'wrong') {
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(180, now);
             osc.frequency.linearRampToValueAtTime(120, now + 0.2);
@@ -57,39 +56,53 @@ function playSound(type) {
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
             osc.start(now);
             osc.stop(now + 0.25);
-        } 
-        else if (type === 'complete') {
+        } else if (type === 'complete') {
             const notes = [523.25, 659.25, 783.99, 1046.50];
             notes.forEach((freq, index) => {
                 const subOsc = ctx.createOscillator();
                 const subGain = ctx.createGain();
                 subOsc.connect(subGain);
                 subGain.connect(ctx.destination);
-                
                 subOsc.type = 'triangle';
                 subOsc.frequency.setValueAtTime(freq, now + index * 0.1);
                 subGain.gain.setValueAtTime(0.2, now + index * 0.1);
                 subGain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.1 + 0.4);
-                
                 subOsc.start(now + index * 0.1);
                 subOsc.stop(now + index * 0.1 + 0.4);
             });
         }
     } catch(e) {
-        console.log("Audio Kontext Blockiert", e);
+        console.log("Audio blockiert", e);
     }
 }
 
+// --- Toast Benachrichtigung von unten ---
+function showToast(text, isCorrect = true) {
+    const banner = document.getElementById('toast-banner');
+    const icon = document.getElementById('toast-icon');
+    const msg = document.getElementById('toast-text');
+
+    banner.className = "toast-banner " + (isCorrect ? "" : "wrong");
+    icon.innerText = isCorrect ? "🎉" : "💡";
+    msg.innerText = text;
+
+    banner.classList.add('show');
+    setTimeout(() => {
+        banner.classList.remove('show');
+    }, 2000);
+}
+
+// --- Tageslektion & XP State ---
 let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
 let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
+let dailyCompleted = parseInt(localStorage.getItem('thai_quest_daily')) || 0;
+const dailyGoal = 5;
 
 let currentTrainIndex = null;
 let currentExamIndex = null;
 let currentMixIndex = null;
 let trainPoints = [], trainCanvas, trainCtx, trainSnapped = false;
 let examPoints = [], examCanvas, examCtx;
-
-const toneSymbols = { 0: "➡️", 1: "↘️", 2: "📉", 3: "📈", 4: "🚀" };
 
 function playAudio(text) {
     if (!('speechSynthesis' in window)) return;
@@ -104,8 +117,37 @@ function updateHUD() {
     document.getElementById('xp-count').innerText = xp;
     document.getElementById('streak-count').innerText = streak;
     document.getElementById('level-num').innerText = Math.floor(xp / 50) + 1;
+    
+    // Tageslektion Balken aktualisieren
+    const countEl = document.getElementById('daily-count');
+    const fillEl = document.getElementById('daily-progress-fill');
+    const statusEl = document.getElementById('daily-status');
+    if (countEl && fillEl) {
+        countEl.innerText = dailyCompleted;
+        let percent = Math.min(100, (dailyCompleted / dailyGoal) * 100);
+        fillEl.style.width = percent + "%";
+        if (dailyCompleted >= dailyGoal) {
+            statusEl.innerText = "Tagesziel erreicht! ✨ (Du kannst weiterlernen)";
+            statusEl.style.color = "var(--high)";
+        } else {
+            statusEl.innerText = `Noch ${dailyGoal - dailyCompleted} Aufgaben`;
+            statusEl.style.color = "var(--accent)";
+        }
+    }
+
     localStorage.setItem('thai_quest_xp', xp);
     localStorage.setItem('thai_quest_streak', streak);
+    localStorage.setItem('thai_quest_daily', dailyCompleted);
+}
+
+function registerDailyProgress() {
+    dailyCompleted++;
+    if (dailyCompleted === dailyGoal) {
+        playSound('complete');
+        showToast("Tagesziel erfolgreich geschafft! 🎉 +50 XP", true);
+        xp += 50;
+    }
+    updateHUD();
 }
 
 function switchTab(tab) {
@@ -119,17 +161,17 @@ function switchTab(tab) {
     if(tab === 'mix') {
         document.querySelector('[onclick="switchTab(\'mix\')"]').classList.add('active');
         document.getElementById('section-mix').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "🎲 Duolingo-Mix (Zufällige Aufgabentypen)";
+        document.getElementById('mode-subtitle').innerText = "Tageslektion & Mix-Quest";
         loadRandomMixMission();
     } else if(tab === 'train') {
         document.querySelector('[onclick="switchTab(\'train\')"]').classList.add('active');
         document.getElementById('section-train').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "🏋️ Trainingsmodus (Mit magnetischer Anleitung)";
+        document.getElementById('mode-subtitle').innerText = "Trainingsmodus (Mit Anleitung)";
         loadTrainCard();
     } else if(tab === 'exam') {
         document.querySelector('[onclick="switchTab(\'exam\')"]').classList.add('active');
         document.getElementById('section-exam').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "🎓 Prüfungsmodus (Keine Hilfslinie - Aus dem Kopf!)";
+        document.getElementById('mode-subtitle').innerText = "Prüfungsmodus (Aus dem Kopf)";
         loadExamCard();
     } else if(tab === 'lessons') {
         document.querySelector('[onclick="switchTab(\'lessons\')"]').classList.add('active');
@@ -143,7 +185,7 @@ function switchTab(tab) {
     }
 }
 
-// ==================== MIX-QUEST ====================
+// ==================== MIX-QUEST (MIT BILDERN & KURVEN-BUTTONS) ====================
 function loadRandomMixMission() {
     updateHUD();
     const container = document.getElementById('card-content-mix');
@@ -154,12 +196,16 @@ function loadRandomMixMission() {
         return;
     }
 
-    const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match'];
+    // 5 Aufgabentypen inklusive Bild-Zuordnung
+    const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match', 'image_match'];
     const chosenType = missionTypes[Math.floor(Math.random() * missionTypes.length)];
 
     currentMixIndex = Math.floor(Math.random() * vocabs.length);
     const v = vocabs[currentMixIndex];
     if (!v) return;
+
+    // Automatisches Vorlesen bei jeder neuen Aufgabe
+    setTimeout(() => playAudio(v.thai), 350);
 
     if (chosenType === 'train_canvas') {
         renderMixTrainCanvas(v);
@@ -169,14 +215,22 @@ function loadRandomMixMission() {
         renderMixAudioMC(v);
     } else if (chosenType === 'tone_match') {
         renderMixToneMatch(v);
+    } else if (chosenType === 'image_match') {
+        renderMixImageMatch(v);
     }
 }
 
+// SVG-Hilfsfunktion für Kurven auf Buttons
+function getToneCurveSvg(tone) {
+    const details = toneDetails[tone];
+    return `<svg width="50" height="30" viewBox="0 0 100 70" style="display:inline-block; vertical-align:middle;"><path d="${details.path}" stroke="#38bdf8" stroke-width="8" fill="none" stroke-linecap="round"/></svg>`;
+}
+
 function renderMixTrainCanvas(v) {
-    setTimeout(() => playAudio(v.thai), 300);
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase;">✨ Mix: Tonkurve nachzeichnen</div>
+        <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase;">✨ Tonkurve nachzeichnen</div>
+        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -196,10 +250,10 @@ function renderMixTrainCanvas(v) {
 }
 
 function renderMixExamCanvas(v) {
-    setTimeout(() => playAudio(v.thai), 300);
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase;">🧠 Mix: Freies Gedächtnis-Zeichnen</div>
+        <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase;">🧠 Freies Gedächtnis-Zeichnen</div>
+        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -219,8 +273,6 @@ function renderMixExamCanvas(v) {
 }
 
 function renderMixAudioMC(v) {
-    setTimeout(() => playAudio(v.thai), 400);
-    
     let options = [v.meaning];
     while(options.length < 4 && options.length < vocabs.length) {
         let randMeaning = vocabs[Math.floor(Math.random() * vocabs.length)].meaning;
@@ -236,12 +288,13 @@ function renderMixAudioMC(v) {
 
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--xp); text-transform: uppercase;">👂 Mix: Was bedeutet dieses Wort?</div>
-        <div class="word-row" style="margin: 20px 0;">
-            <button class="audio-btn" style="width:70px; height:70px; font-size:1.8rem;" onclick="playAudio('${v.thai}')">🔊</button>
+        <div style="font-size: 0.8rem; color: var(--xp); text-transform: uppercase;">👂 Was bedeutet dieses Wort?</div>
+        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
+        <div class="word-row" style="margin: 10px 0;">
+            <button class="audio-btn" style="width:60px; height:60px; font-size:1.5rem;" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div style="display:flex; flex-direction:column; margin-top:15px;">
+        <div style="display:flex; flex-direction:column; margin-top:10px;">
             ${htmlOptions}
         </div>
     `;
@@ -251,14 +304,16 @@ function checkAudioMC(isCorrect) {
     if(isCorrect) {
         xp += 10;
         playSound('correct');
-        alert("Richtig gehört! 🎉 +10 XP");
+        showToast("Richtig gehört! 🎉 +10 XP", true);
+        registerDailyProgress();
     } else {
         playSound('wrong');
-        alert("Leider falsch! 💡");
+        showToast("Leider falsch! 💡", false);
     }
     loadRandomMixMission();
 }
 
+// Ton-Kurven Matching mit echten SVG-Kurven auf den Buttons
 function renderMixToneMatch(v) {
     let options = [v.tone];
     while(options.length < 4) {
@@ -269,16 +324,17 @@ function renderMixToneMatch(v) {
 
     let htmlOptions = '';
     options.forEach(t => {
-        htmlOptions += `<button class="action-btn" style="background:#283548; font-size:1.2rem;" onclick="checkToneMatch(${t}, ${v.tone})">${toneSymbols[t]} ${toneDetails[t].name.split(' ')[0]}</button>`;
+        let curveSvg = getToneCurveSvg(t);
+        htmlOptions += `<button class="action-btn" style="background:#283548; display:flex; align-items:center; justify-content:center; gap:10px; font-size:0.9rem;" onclick="checkToneMatch(${t}, ${v.tone})">${curveSvg} <span>${toneDetails[t].name.split(' ')[0]}</span></button>`;
     });
 
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--streak); text-transform: uppercase;">🎯 Mix: Welcher Ton gehört dazu?</div>
-        <div class="thai-word" style="margin: 15px 0;">${v.thai}</div>
+        <div style="font-size: 0.8rem; color: var(--streak); text-transform: uppercase;">🎯 Welcher Ton gehört dazu?</div>
+        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
+        <div class="thai-word" style="margin: 10px 0;">${v.thai}</div>
         <div class="translit">${v.translit}</div>
-        <div class="meaning">${v.meaning}</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px;">
             ${htmlOptions}
         </div>
     `;
@@ -289,10 +345,54 @@ function checkToneMatch(selected, correct) {
         xp += 15;
         playSound('correct');
         playAudio(vocabs[currentMixIndex].thai);
-        alert("Perfekt zugeordnet! 🎉 +15 XP");
+        showToast("Perfekt zugeordnet! 🎉 +15 XP", true);
+        registerDailyProgress();
     } else {
         playSound('wrong');
-        alert(`Falsch! Richtig war: ${toneDetails[correct].name}`);
+        showToast(`Falsch! Richtig war: ${toneDetails[correct].name}`, false);
+    }
+    loadRandomMixMission();
+}
+
+// Bild-Auswahl Aufgabe (Stockfoto-Matching)
+function renderMixImageMatch(v) {
+    let options = [v];
+    while(options.length < 4 && options.length < vocabs.length) {
+        let randV = vocabs[Math.floor(Math.random() * vocabs.length)];
+        if(!options.includes(randV)) options.push(randV);
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    let htmlImages = '';
+    options.forEach(opt => {
+        let isCorrect = (opt.thai === v.thai) ? "true" : "false";
+        let imgUrl = opt.image || "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=300";
+        htmlImages += `<div onclick="checkImageMatch(${isCorrect})" style="cursor:pointer; border-radius:10px; overflow:hidden; border:2px solid #475569; background:#0f172a; transition: transform 0.1s;"><img src="${imgUrl}" style="width:100%; height:90px; object-fit:cover;"><div style="font-size:0.75rem; padding:4px; text-align:center; color:#f8fafc;">${opt.meaning}</div></div>`;
+    });
+
+    const container = document.getElementById('card-content-mix');
+    container.innerHTML = `
+        <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase;">🖼️ Welches Bild passt zum Wort?</div>
+        <div class="word-row" style="margin: 10px 0;">
+            <div class="thai-word" style="font-size: 2.2rem;">${v.thai}</div>
+            <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
+        </div>
+        <div class="translit">${v.translit}</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+            ${htmlImages}
+        </div>
+    `;
+}
+
+function checkImageMatch(isCorrect) {
+    if(isCorrect) {
+        xp += 15;
+        playSound('correct');
+        showToast("Richtiges Bild gewählt! 🎉 +15 XP", true);
+        registerDailyProgress();
+    } else {
+        playSound('wrong');
+        showToast("Leider das falsche Bild! 💡", false);
     }
     loadRandomMixMission();
 }
@@ -303,6 +403,8 @@ function resolveMixMission(rewardXP, playSnd) {
     }
     playSound('correct');
     xp += rewardXP;
+    showToast(`Super gemacht! +${rewardXP} XP`, true);
+    registerDailyProgress();
     loadRandomMixMission();
 }
 
@@ -380,6 +482,7 @@ function loadTrainCard() {
 
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px;">🏋️ Training (Mit Ghost-Linie)</div>
+        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -440,11 +543,13 @@ function redrawTrain() {
 function checkTrainDrawing() {
     if (!trainSnapped && trainPoints.length < 3) { 
         playSound('wrong');
-        alert("Bitte Kurve einzeichnen!"); 
+        showToast("Bitte Kurve einzeichnen!", false); 
         return; 
     }
     playSound('correct');
     xp += 10;
+    showToast("Super trainiert! +10 XP", true);
+    registerDailyProgress();
     loadTrainCard();
 }
 
@@ -460,6 +565,7 @@ function loadExamCard() {
 
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; letter-spacing: 1px;">🎓 Prüfung (Aus dem Gedächtnis!)</div>
+        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -515,7 +621,7 @@ function redrawExam() {
 function checkExamDrawing() {
     if (examPoints.length < 5) { 
         playSound('wrong');
-        alert("Bitte zeichne die Kurve in das Feld!"); 
+        showToast("Bitte zeichne die Kurve in das Feld!", false); 
         return; 
     }
     
@@ -543,6 +649,8 @@ function checkExamDrawing() {
     if (isCorrect) {
         xp += 25;
         playSound('correct');
+        showToast("Prüfung bestanden! 🎉 +25 XP", true);
+        registerDailyProgress();
         container.innerHTML = `
             <div style="color: #10b981; font-size: 1.8rem; font-weight: bold;">Richtig aus dem Kopf! 🎉</div>
             <p style="color: #38bdf8; font-weight: bold; margin: 10px 0;">Das war einwandfrei (${toneDetails[correctTone].name}).</p>
@@ -551,9 +659,10 @@ function checkExamDrawing() {
         `;
     } else {
         playSound('wrong');
+        showToast("Leider daneben! 💡", false);
         container.innerHTML = `
             <div style="color: #ef4444; font-size: 1.8rem; font-weight: bold;">Leider daneben! 💡</div>
-            <p style="color: #94a3b8; margin: 10px 0;">Gesucht was: <b style="color: #38bdf8;">${toneDetails[correctTone].name}</b></p>
+            <p style="color: #94a3b8; margin: 10px 0;">Gesucht war: <b style="color: #38bdf8;">${toneDetails[correctTone].name}</b></p>
             <button class="action-btn btn-primary" onclick="loadExamCard()" style="width: 100%; background: #334155; margin-top: 1rem;">Weiter ➔</button>
         `;
     }
@@ -613,7 +722,7 @@ function completeLesson(id) {
     localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
     xp += 50;
     playSound('complete');
-    alert("Lektion abgeschlossen! +50 XP Bonus! 🚀");
+    showToast("Lektion abgeschlossen! +50 XP", true);
     updateHUD();
     renderLessons();
 }
@@ -623,15 +732,16 @@ function addVocab(e) {
     const thai = document.getElementById('input-thai').value;
     const translit = document.getElementById('input-translit').value;
     const meaning = document.getElementById('input-meaning').value;
+    const image = document.getElementById('input-image').value;
     const lesson = parseInt(document.getElementById('input-lesson').value);
     const tone = parseInt(document.getElementById('input-tone').value);
 
-    vocabs.push({ thai, translit, meaning, tone, lesson });
+    vocabs.push({ thai, translit, meaning, tone, lesson, image });
     localStorage.setItem('thai_quest_vocabs', JSON.stringify(vocabs));
 
     document.getElementById('add-form').reset();
     playSound('correct');
-    alert("Wort erfolgreich gespeichert! 🚀");
+    showToast("Wort erfolgreich gespeichert! 🚀", true);
     switchTab('mix');
 }
 
