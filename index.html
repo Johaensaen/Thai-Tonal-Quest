@@ -17,8 +17,19 @@
 <div class="container">
     <header>
         <h1>🇹🇭 Thai Tonal Quest</h1>
-        <p id="mode-subtitle">Trainingsmodus</p>
+        <p id="mode-subtitle">Tageslektion</p>
     </header>
+
+    <!-- Tageslektion Fortschritt -->
+    <div class="daily-progress-container" id="daily-progress-bar-container">
+        <div class="daily-info">
+            <span>📅 Tagesziel: <b id="daily-count">0</b>/5 Aufgaben</span>
+            <span id="daily-status" style="color: var(--accent);">Fortschritt läuft</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="daily-progress-fill" style="width: 0%;"></div>
+        </div>
+    </div>
 
     <div class="hud">
         <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">1</span></div>
@@ -27,7 +38,7 @@
     </div>
 
     <div class="nav-tabs">
-        <button class="nav-btn active" onclick="switchTab('mix')">🎲 Mix-Quest</button>
+        <button class="nav-btn active" onclick="switchTab('mix')">🎲 Tages-Mix</button>
         <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
         <button class="nav-btn" onclick="switchTab('exam')">🎓 Prüfung</button>
         <button class="nav-btn" onclick="switchTab('lessons')">📦 Lektionen</button>
@@ -81,6 +92,10 @@
                     <input type="text" id="input-meaning" required placeholder="z.B. Hallo">
                 </div>
                 <div>
+                    <label>Bild-URL (Stockfoto/Unsplash optional):</label>
+                    <input type="text" id="input-image" placeholder="z.B. https://images.unsplash.com/...">
+                </div>
+                <div>
                     <label>Lektion:</label>
                     <select id="input-lesson">
                         <option value="1">Lektion 1: Grundlagen & Alltag</option>
@@ -101,6 +116,12 @@
             </form>
         </div>
     </div>
+</div>
+
+<!-- Toast Benachrichtigung von unten -->
+<div id="toast-banner" class="toast-banner hidden">
+    <div id="toast-icon">🎉</div>
+    <div id="toast-text">Richtig! +15 XP</div>
 </div>
 
 <script src="data.js"></script>
