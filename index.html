@@ -12,28 +12,14 @@
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body onclick="closeTooltipOutside(event)">
 
 <div class="container">
-    <header>
-        <h1>🇹🇭 Thai Tonal Quest</h1>
-        <p id="mode-subtitle">Dein Lernpfad</p>
-    </header>
-
     <!-- HUD (Streak, XP, Level) -->
     <div class="hud">
         <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">1</span></div>
         <div class="hud-item" style="color: var(--xp);">⚡ <span id="xp-count">0</span> XP</div>
         <div class="hud-item" style="color: var(--accent);">🎯 Lvl <span id="level-num">1</span></div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-        <button class="nav-btn active" onclick="switchTab('path')">🗺️ Pfad</button>
-        <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
-        <button class="nav-btn" onclick="switchTab('exam')">🎓 Prüfung</button>
-        <button class="nav-btn" onclick="switchTab('lessons')">📦 Lektionen</button>
-        <button class="nav-btn" onclick="switchTab('add')">+ Wort</button>
     </div>
 
     <!-- SECTION 1: LERNPFAD (Duolingo Style) -->
@@ -52,9 +38,8 @@
         </div>
     </div>
 
-    <!-- SECTION 2: SESSION SPIELFLÄCHE (Wird während des Tages-Mix angezeigt) -->
+    <!-- SECTION 2: SESSION SPIELFLÄCHE -->
     <div id="section-mix" class="hidden">
-        <!-- Fortschritt in der laufenden Session -->
         <div class="session-progress-bar">
             <div class="session-progress-fill" id="session-fill"></div>
         </div>
@@ -63,7 +48,7 @@
         </div>
     </div>
 
-    <!-- SECTION 3: ABSCHLUSS-SCREEN (Nach 5 Aufgaben) -->
+    <!-- SECTION 3: ABSCHLUSS-SCREEN -->
     <div id="section-complete" class="hidden">
         <div class="card" style="text-align: center; padding: 2rem 1.5rem;">
             <div style="font-size: 4rem; margin-bottom: 0.5rem;">🐘🎉</div>
@@ -125,8 +110,8 @@
                     <input type="text" id="input-meaning" required placeholder="z.B. Hallo">
                 </div>
                 <div>
-                    <label>Bild-URL (Stockfoto/Unsplash optional):</label>
-                    <input type="text" id="input-image" placeholder="z.B. https://images.unsplash.com/...">
+                    <label>Emoji-Symbol:</label>
+                    <input type="text" id="input-image" placeholder="z.B. 👋">
                 </div>
                 <div>
                     <label>Lektion:</label>
@@ -150,6 +135,15 @@
         </div>
     </div>
 </div>
+
+<!-- Feste untere Navigationsleiste (Bottom Bar) -->
+<nav class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab('path')">🗺️ Pfad</button>
+    <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
+    <button class="nav-btn" onclick="switchTab('exam')">🎓 Prüfung</button>
+    <button class="nav-btn" onclick="switchTab('lessons')">📦 Lektionen</button>
+    <button class="nav-btn" onclick="switchTab('add')">+ Wort</button>
+</nav>
 
 <!-- Toast Banner von unten -->
 <div id="toast-banner" class="toast-banner hidden">
