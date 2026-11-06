@@ -24,6 +24,42 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// --- Robustes SpeechSynthesis (Thai Voice Manager) ---
+let thaiVoice = null;
+
+function initVoices() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH')) || null;
+}
+
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = initVoices;
+    initVoices();
+}
+
+function playAudio(text) {
+    if (!('speechSynthesis' in window)) return;
+    
+    // Vorherige Wiedergabe abbrechen und neu auslösen
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'th-TH';
+    utterance.rate = 0.8;
+    
+    if (thaiVoice) {
+        utterance.voice = thaiVoice;
+    }
+
+    // Audio-Context entsperren falls blockiert
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
+    window.speechSynthesis.speak(utterance);
+}
+
 // --- Web Audio API Synthesizer ---
 let audioCtx = null;
 
@@ -83,7 +119,7 @@ function playSound(type) {
     }
 }
 
-// --- Toast Benachrichtigung von unten ---
+// --- Toast Benachrichtigung ---
 function showToast(text, isCorrect = true) {
     const banner = document.getElementById('toast-banner');
     const icon = document.getElementById('toast-icon');
@@ -136,15 +172,6 @@ let currentExamIndex = null;
 let currentMixIndex = null;
 let trainPoints = [], trainCanvas, trainCtx, trainSnapped = false;
 let examPoints = [], examCanvas, examCtx;
-
-function playAudio(text) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'th-TH';
-    utterance.rate = 0.85;
-    window.speechSynthesis.speak(utterance);
-}
 
 function updateHUD() {
     const xpEl = document.getElementById('xp-count');
@@ -301,7 +328,7 @@ function loadRandomMixMission() {
     const v = availableVocabs[currentMixIndex];
     if (!v) return;
 
-    setTimeout(() => playAudio(v.thai), 300);
+    setTimeout(() => playAudio(v.thai), 350);
 
     if (chosenType === 'train_canvas') {
         renderMixTrainCanvas(v);
@@ -453,6 +480,7 @@ function checkToneMatch(selected, correct) {
     }
 }
 
+// Emoji-Auswahl Aufgabe (mit sicherem Emoji-Fallback)
 function renderMixEmojiMatch(v, pool) {
     let options = [v];
     while(options.length < 4 && options.length < pool.length) {
@@ -464,7 +492,7 @@ function renderMixEmojiMatch(v, pool) {
     let htmlEmojis = '';
     options.forEach(opt => {
         let isCorrect = (opt.thai === v.thai) ? "true" : "false";
-        let emj = opt.emoji || "❓";
+        let emj = opt.emoji || (opt.lesson === 1 ? "✈️" : (opt.lesson === 2 ? "🍲" : "💬"));
         htmlEmojis += `<div onclick="checkEmojiMatch(${isCorrect})" style="cursor:pointer; border-radius:12px; padding:15px; text-align:center; border:2px solid #475569; background:#283548; transition: transform 0.1s;"><div style="font-size:2.5rem; margin-bottom:5px;">${emj}</div><div style="font-size:0.8rem; color:#f8fafc; font-weight:bold;">${opt.meaning}</div></div>`;
     });
 
