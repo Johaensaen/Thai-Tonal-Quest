@@ -24,37 +24,19 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// --- Robustes SpeechSynthesis (Thai Voice Manager) ---
-let thaiVoice = null;
-
-function initVoices() {
-    if (!('speechSynthesis' in window)) return;
-    const voices = window.speechSynthesis.getVoices();
-    thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH')) || null;
-}
-
-if ('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = initVoices;
-    initVoices();
-}
-
+// --- Robustes Web Speech API Audio ---
 function playAudio(text) {
     if (!('speechSynthesis' in window)) return;
-    
-    // Vorherige Wiedergabe abbrechen und neu auslösen
     window.speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'th-TH';
     utterance.rate = 0.8;
     
+    const voices = window.speechSynthesis.getVoices();
+    const thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH'));
     if (thaiVoice) {
         utterance.voice = thaiVoice;
-    }
-
-    // Audio-Context entsperren falls blockiert
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
     }
 
     window.speechSynthesis.speak(utterance);
@@ -136,26 +118,17 @@ function showToast(text, isCorrect = true) {
     }, 2000);
 }
 
-// --- Tooltip Logik ---
-function toggleTooltip(event, meaning) {
+// --- Übersetzung einblenden (Direkt per Button statt unsichtbarem Tooltip) ---
+function revealMeaning(event, meaning) {
     event.stopPropagation();
-    const parent = event.currentTarget.parentElement;
-    document.querySelectorAll('.tooltip-box').forEach(el => el.remove());
-    let existing = parent.querySelector('.tooltip-box');
-
-    if (!existing) {
-        const box = document.createElement('div');
-        box.className = 'tooltip-box';
-        box.innerText = meaning;
-        parent.style.position = 'relative';
-        parent.appendChild(box);
-    }
+    const btn = event.currentTarget;
+    btn.innerHTML = `🇩🇪 <b>${meaning}</b>`;
+    btn.style.background = "#334155";
+    btn.style.color = "var(--accent)";
 }
 
 function closeTooltipOutside(event) {
-    if (!event.target.classList.contains('thai-word')) {
-        document.querySelectorAll('.tooltip-box').forEach(el => el.remove());
-    }
+    // Klicks außerhalb abfangen falls nötig
 }
 
 // --- Session State & XP ---
@@ -354,13 +327,11 @@ function renderMixTrainCanvas(v) {
         <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom:5px;">✨ Tonkurve nachzeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="tooltip-container">
-                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
-            </div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div style="font-size:0.85rem; color:#64748b; margin-bottom:8px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
+        <button class="action-btn" onclick="revealMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div class="canvas-container">
             <div class="canvas-hint">Magnetische Vorlage ✍️</div>
             <canvas id="mixTrainCanvas"></canvas>
@@ -379,13 +350,11 @@ function renderMixExamCanvas(v) {
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🧠 Freies Gedächtnis-Zeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="tooltip-container">
-                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
-            </div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div style="font-size:0.85rem; color:#64748b; margin-bottom:8px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
+        <button class="action-btn" onclick="revealMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div class="canvas-container" style="border-color: #ef4444;">
             <div class="canvas-hint" style="color: #ef4444;">Aus dem Kopf zeichnen!</div>
             <canvas id="mixExamCanvas"></canvas>
@@ -456,12 +425,10 @@ function renderMixToneMatch(v) {
         <div style="font-size: 0.8rem; color: var(--streak); text-transform: uppercase; margin-bottom:5px;">🎯 Welcher Ton gehört dazu? (${sessionCurrent + 1}/${sessionTarget})</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row" style="margin: 5px 0;">
-            <div class="tooltip-container">
-                <div class="thai-word" style="font-size: 2.2rem;" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
-            </div>
+            <div class="thai-word" style="font-size: 2.2rem;">${v.thai}</div>
         </div>
         <div class="translit">${v.translit}</div>
-        <div style="font-size:0.8rem; color:#64748b; margin-bottom:5px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
+        <button class="action-btn" onclick="revealMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div style="display:flex; flex-direction:column; margin-top:5px;">
             ${htmlOptions}
         </div>
@@ -480,7 +447,6 @@ function checkToneMatch(selected, correct) {
     }
 }
 
-// Emoji-Auswahl Aufgabe (mit sicherem Emoji-Fallback)
 function renderMixEmojiMatch(v, pool) {
     let options = [v];
     while(options.length < 4 && options.length < pool.length) {
@@ -492,8 +458,8 @@ function renderMixEmojiMatch(v, pool) {
     let htmlEmojis = '';
     options.forEach(opt => {
         let isCorrect = (opt.thai === v.thai) ? "true" : "false";
-        let emj = opt.emoji || (opt.lesson === 1 ? "✈️" : (opt.lesson === 2 ? "🍲" : "💬"));
-        htmlEmojis += `<div onclick="checkEmojiMatch(${isCorrect})" style="cursor:pointer; border-radius:12px; padding:15px; text-align:center; border:2px solid #475569; background:#283548; transition: transform 0.1s;"><div style="font-size:2.5rem; margin-bottom:5px;">${emj}</div><div style="font-size:0.8rem; color:#f8fafc; font-weight:bold;">${opt.meaning}</div></div>`;
+        let emj = opt.emoji || "🇹🇭";
+        htmlEmojis += `<div onclick="checkEmojiMatch(${isCorrect})" style="cursor:pointer; border-radius:12px; padding:15px; text-align:center; border:2px solid #475569; background:#283548;"><div style="font-size:2.5rem; margin-bottom:5px;">${emj}</div><div style="font-size:0.8rem; color:#f8fafc; font-weight:bold;">${opt.meaning}</div></div>`;
     });
 
     const container = document.getElementById('card-content-mix');
@@ -597,13 +563,11 @@ function loadTrainCard() {
         <div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase; margin-bottom:5px;">🏋️ Training (Mit Ghost-Linie)</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="tooltip-container">
-                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
-            </div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div style="font-size:0.85rem; color:#64748b; margin-bottom:5px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
+        <button class="action-btn" onclick="revealMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div class="canvas-container">
             <div class="canvas-hint">Nachzeichnen (snapt ein) ✍️</div>
             <canvas id="trainCanvas"></canvas>
@@ -680,13 +644,11 @@ function loadExamCard() {
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🎓 Prüfung (Aus dem Gedächtnis!)</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="tooltip-container">
-                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
-            </div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div style="font-size:0.85rem; color:#64748b; margin-bottom:5px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
+        <button class="action-btn" onclick="revealMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div class="canvas-container" style="border-color: #ef4444;">
             <div class="canvas-hint" style="color: #ef4444;">Keine Hilfslinie – Zeichne frei! 🧠</div>
             <canvas id="examCanvas"></canvas>
@@ -848,5 +810,5 @@ function addVocab(e) {
     switchTab('path');
 }
 
-// Sofort beim Laden den Pfad rendern
+// Start mit der Pfad-Ansicht
 switchTab('path');
