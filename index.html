@@ -15,23 +15,21 @@
 <body onclick="closeTooltipOutside(event)">
 
 <div class="container">
-    <!-- HUD (Streak, XP, Level) -->
+    <!-- HUD -->
     <div class="hud">
         <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">1</span></div>
         <div class="hud-item" style="color: var(--xp);">⚡ <span id="xp-count">0</span> XP</div>
         <div class="hud-item" style="color: var(--accent);">🎯 Lvl <span id="level-num">1</span></div>
     </div>
 
-    <!-- SECTION 1: LERNPFAD (Duolingo Style mit Stationen) -->
+    <!-- SECTION 1: LERNPFAD -->
     <div id="section-path">
         <div class="card path-card">
             <div class="section-badge">ABSCHNITT 1: URLAUB & ALLTAG</div>
             <h3>Dein Thai-Lernpfad</h3>
-            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem;">Klicke auf eine Station, um zu lernen oder zu wiederholen:</p>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem;">Klicke auf eine Station, um zu lernen oder zu wiederholen:</p>
             
-            <div class="path-nodes" id="path-nodes-container">
-                <!-- Wird dynamisch generiert (inkl. Status: abgeschlossen, aktiv, gesperrt) -->
-            </div>
+            <div class="path-nodes" id="path-nodes-container"></div>
         </div>
     </div>
 
@@ -50,7 +48,7 @@
         <div class="card" style="text-align: center; padding: 2rem 1.5rem;">
             <div style="font-size: 4rem; margin-bottom: 0.5rem;">🐘🎉</div>
             <h2 style="color: var(--high); margin-top: 0;">Station gemeistert!</h2>
-            <p style="color: #94a3b8; margin-bottom: 1.5rem;" id="completion-subtitle">Du hast wichtige Grundlagen für den Urlaub gelernt.</p>
+            <p style="color: #94a3b8; margin-bottom: 1.5rem;">Großartige Arbeit! Dein Elefant ist stolz auf dich.</p>
             
             <div style="display: flex; justify-content: space-around; background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 1.5rem;">
                 <div>
