@@ -22,18 +22,15 @@
         <div class="hud-item" style="color: var(--accent);">🎯 Lvl <span id="level-num">1</span></div>
     </div>
 
-    <!-- SECTION 1: LERNPFAD (Duolingo Style) -->
+    <!-- SECTION 1: LERNPFAD (Duolingo Style mit Stationen) -->
     <div id="section-path">
         <div class="card path-card">
-            <div class="section-badge">STUFE 1, ABSCHNITT 1</div>
-            <h3>Grundlagen & Töne meistern</h3>
-            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem;">Wähle deinen nächsten Schritt auf dem Pfad:</p>
+            <div class="section-badge">ABSCHNITT 1: URLAUB & ALLTAG</div>
+            <h3>Dein Thai-Lernpfad</h3>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem;">Klicke auf eine Station, um zu lernen oder zu wiederholen:</p>
             
-            <div class="path-nodes">
-                <div class="path-node active" onclick="startDailySession()">
-                    <div class="node-icon">🐘</div>
-                    <div class="node-label">Tages-Mix (5 Aufgaben)</div>
-                </div>
+            <div class="path-nodes" id="path-nodes-container">
+                <!-- Wird dynamisch generiert (inkl. Status: abgeschlossen, aktiv, gesperrt) -->
             </div>
         </div>
     </div>
@@ -52,8 +49,8 @@
     <div id="section-complete" class="hidden">
         <div class="card" style="text-align: center; padding: 2rem 1.5rem;">
             <div style="font-size: 4rem; margin-bottom: 0.5rem;">🐘🎉</div>
-            <h2 style="color: var(--high); margin-top: 0;">Tageslektion geschafft!</h2>
-            <p style="color: #94a3b8; margin-bottom: 1.5rem;">Großartige Arbeit! Dein Elefant ist stolz auf dich.</p>
+            <h2 style="color: var(--high); margin-top: 0;">Station gemeistert!</h2>
+            <p style="color: #94a3b8; margin-bottom: 1.5rem;" id="completion-subtitle">Du hast wichtige Grundlagen für den Urlaub gelernt.</p>
             
             <div style="display: flex; justify-content: space-around; background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 1.5rem;">
                 <div>
@@ -61,12 +58,12 @@
                     <div style="font-size: 1.3rem; font-weight: bold; color: var(--xp);" id="summary-xp">+35</div>
                 </div>
                 <div>
-                    <div style="font-size: 0.8rem; color: #94a3b8;">AUFGABEN</div>
-                    <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent);">5 / 5</div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">STATUS</div>
+                    <div style="font-size: 1.1rem; font-weight: bold; color: var(--high);">✨ Freigeschaltet</div>
                 </div>
             </div>
 
-            <button class="action-btn btn-primary" onclick="switchTab('path')" style="width: 100%; font-size: 1.1rem; padding: 14px;">XP abholen & Weiter ➔</button>
+            <button class="action-btn btn-primary" onclick="switchTab('path')" style="width: 100%; font-size: 1.1rem; padding: 14px;">Zurück zum Pfad ➔</button>
         </div>
     </div>
 
@@ -87,7 +84,7 @@
     <!-- LESSONS SECTION -->
     <div id="section-lessons" class="hidden">
         <div class="card" style="text-align: left; max-height: 400px; overflow-y: auto;">
-            <h3 style="margin-top: 0; font-size: 1.1rem;">Lernpakete & Lektionen</h3>
+            <h3 style="margin-top: 0; font-size: 1.1rem;">Lernpakete & Themen</h3>
             <div id="lessons-container"></div>
         </div>
     </div>
@@ -114,10 +111,11 @@
                     <input type="text" id="input-image" placeholder="z.B. 👋">
                 </div>
                 <div>
-                    <label>Lektion:</label>
+                    <label>Themenbereich:</label>
                     <select id="input-lesson">
-                        <option value="1">Lektion 1: Grundlagen & Alltag</option>
-                        <option value="2">Lektion 2: Essen & Trinken</option>
+                        <option value="1">1. Urlaub & Begrüßung (Grundlagen)</option>
+                        <option value="2">2. Essen, Trinken & Restaurant</option>
+                        <option value="3">3. Familie, Freunde & Höflichkeit</option>
                     </select>
                 </div>
                 <div>
@@ -136,7 +134,7 @@
     </div>
 </div>
 
-<!-- Feste untere Navigationsleiste (Bottom Bar) -->
+<!-- Feste untere Navigationsleiste -->
 <nav class="bottom-nav">
     <button class="nav-btn active" onclick="switchTab('path')">🗺️ Pfad</button>
     <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
@@ -145,7 +143,7 @@
     <button class="nav-btn" onclick="switchTab('add')">+ Wort</button>
 </nav>
 
-<!-- Toast Banner von unten -->
+<!-- Toast Banner -->
 <div id="toast-banner" class="toast-banner hidden">
     <div id="toast-icon">🎉</div>
     <div id="toast-text">Richtig! +15 XP</div>
