@@ -1,4 +1,11 @@
-// --- PWA Setup ---
+// --- PWA Setup mit Elefanten-Icon ---
+const canvasIcon = document.createElement('canvas');
+canvasIcon.width = 192; canvasIcon.height = 192;
+const ctxIcon = canvasIcon.getContext('2d');
+ctxIcon.fillStyle = '#0f172a'; ctxIcon.fillRect(0,0,192,192);
+ctxIcon.font = '100px sans-serif'; ctxIcon.textAlign = 'center'; ctxIcon.textBaseline = 'middle';
+ctxIcon.fillText('🐘', 96, 96);
+
 const manifestData = {
     name: "Thai Tonal Quest",
     short_name: "ThaiQuest",
@@ -6,7 +13,7 @@ const manifestData = {
     display: "standalone",
     background_color: "#0f172a",
     theme_color: "#0f172a",
-    icons: [{ src: "https://via.placeholder.com/192.png?text=🇹🇭", sizes: "192x192", type: "image/png" }]
+    icons: [{ src: canvasIcon.toDataURL(), sizes: "192x192", type: "image/png" }]
 };
 document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], {type: 'application/json'}));
 
@@ -87,9 +94,31 @@ function showToast(text, isCorrect = true) {
     msg.innerText = text;
 
     banner.classList.add('show');
-    setTimeout(() => {
+    setTimeout => {
         banner.classList.remove('show');
     }, 2000);
+}
+
+// --- Tooltip Logik ---
+function toggleTooltip(event, meaning) {
+    event.stopPropagation();
+    const parent = event.currentTarget.parentElement;
+    document.querySelectorAll('.tooltip-box').forEach(el => el.remove());
+    let existing = parent.querySelector('.tooltip-box');
+
+    if (!existing) {
+        const box = document.createElement('div');
+        box.className = 'tooltip-box';
+        box.innerText = meaning;
+        parent.style.position = 'relative';
+        parent.appendChild(box);
+    }
+}
+
+function closeTooltipOutside(event) {
+    if (!event.target.classList.contains('thai-word')) {
+        document.querySelectorAll('.tooltip-box').forEach(el => el.remove());
+    }
 }
 
 // --- Session State & XP ---
@@ -97,8 +126,9 @@ let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
 let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
 
 let sessionCurrent = 0;
-const sessionTarget = 5; // Exakt 5 Aufgaben pro Tageslektion
+const sessionTarget = 5;
 let sessionGainedXP = 0;
+let activeLessonFilter = null; // null = Mix aus allen freigeschalteten
 
 let currentTrainIndex = null;
 let currentExamIndex = null;
@@ -123,10 +153,54 @@ function updateHUD() {
     localStorage.setItem('thai_quest_streak', streak);
 }
 
-// Startet eine neue Tageslektion (Session mit 5 Aufgaben)
-function startDailySession() {
+// Rendert den Duolingo-Pfad mit Stationen
+function renderPath() {
+    const container = document.getElementById('path-nodes-container');
+    if (!container) return;
+
+    let html = "";
+    let stationList = [
+        { id: 1, title: "Urlaub & Alltag", icon: "✈️", lessonId: 1 },
+        { id: 2, title: "Essen & Restaurant", icon: "🍲", lessonId: 2 },
+        { id: 3, title: "Freunde & Familie", icon: "💬", lessonId: 3 }
+    ];
+
+    stationList.forEach((station, index) => {
+        let isCompleted = lessons[station.lessonId] && lessons[station.lessonId].completed;
+        // Erste Station ist immer aktiv, folgende wenn die vorige fertig ist oder man schon XP hat
+        let isUnlocked = (index === 0) || lessons[stationList[index - 1].lessonId].completed || xp > (index * 30);
+        
+        let statusClass = "locked";
+        let iconSymbol = "🔒";
+
+        if (isCompleted) {
+            statusClass = "completed";
+            iconSymbol = "⭐"; // Abgeschlossen zeigt Stern/Gold
+        } else if (isUnlocked) {
+            statusClass = "active";
+            iconSymbol = station.icon;
+        }
+
+        html += `
+            <div class="path-node ${statusClass}" onclick="${isUnlocked ? `startSessionForLesson(${station.lessonId}, '${station.title}')` : `showLockedAlert()`}">
+                <div class="node-icon">${iconSymbol}</div>
+                <div class="node-title">${station.title}</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function showLockedAlert() {
+    showToast("Schließe erst die vorherige Station ab! 🔒", false);
+}
+
+function startSessionForLesson(lessonId, lessonTitle) {
+    activeLessonFilter = lessonId;
     sessionCurrent = 0;
     sessionGainedXP = 0;
+    document.getElementById('mode-subtitle') ? document.getElementById('mode-subtitle').innerText = lessonTitle : null;
     switchTab('mix');
 }
 
@@ -136,19 +210,21 @@ function advanceSession(earnedXP) {
     xp += earnedXP;
     updateHUD();
 
-    // Fortschrittsbalken aktualisieren
     const fill = document.getElementById('session-fill');
     if(fill) {
-        fill.style.width = ((sessionCurrent / sessionTarget) * 100) + "%";
+        let percent = (sessionCurrent / sessionTarget) * 100;
+        fill.style.width = percent + "%";
     }
 
     if (sessionCurrent >= sessionTarget) {
-        // Tageslektion beendet! Zum Abschluss-Screen wechseln
+        if (activeLessonFilter && lessons[activeLessonFilter]) {
+            lessons[activeLessonFilter].completed = true;
+            localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
+        }
         playSound('complete');
         document.getElementById('section-mix').classList.add('hidden');
         document.getElementById('section-complete').classList.remove('hidden');
         document.getElementById('summary-xp').innerText = "+" + sessionGainedXP;
-        document.getElementById('mode-subtitle').innerText = "Tageslektion abgeschlossen! 🎉";
     } else {
         loadRandomMixMission();
     }
@@ -164,57 +240,59 @@ function switchTab(tab) {
     document.getElementById('section-lessons').classList.add('hidden');
     document.getElementById('section-add').classList.add('hidden');
 
+    const navButtons = document.querySelectorAll('.bottom-nav .nav-btn');
+    navButtons.forEach(btn => {
+        if(btn.getAttribute('onclick').includes(tab)) {
+            btn.classList.add('active');
+        }
+    });
+
     if(tab === 'path') {
-        document.querySelector('[onclick="switchTab(\'path\')"]').classList.add('active');
         document.getElementById('section-path').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "Dein Lernpfad";
         updateHUD();
+        renderPath();
     } else if(tab === 'mix') {
-        document.querySelector('[onclick="switchTab(\'path\')"]').classList.add('active');
+        navButtons[0].classList.add('active');
         document.getElementById('section-mix').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = `Tageslektion (${sessionCurrent + 1}/${sessionTarget})`;
         loadRandomMixMission();
     } else if(tab === 'train') {
-        document.querySelector('[onclick="switchTab(\'train\')"]').classList.add('active');
         document.getElementById('section-train').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "Trainingsmodus (Mit Anleitung)";
         loadTrainCard();
     } else if(tab === 'exam') {
-        document.querySelector('[onclick="switchTab(\'exam\')"]').classList.add('active');
         document.getElementById('section-exam').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "Prüfungsmodus (Aus dem Kopf)";
         loadExamCard();
     } else if(tab === 'lessons') {
-        document.querySelector('[onclick="switchTab(\'lessons\')"]').classList.add('active');
         document.getElementById('section-lessons').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "Lernpakete & Lektionen";
         renderLessons();
     } else if(tab === 'add') {
-        document.querySelector('[onclick="switchTab(\'add\')"]').classList.add('active');
         document.getElementById('section-add').classList.remove('hidden');
-        document.getElementById('mode-subtitle').innerText = "Neues Wort hinzufügen";
     }
 }
 
-// ==================== MIX-QUEST (SESSION Gesteuert) ====================
+// ==================== MIX-QUEST ====================
 function loadRandomMixMission() {
     updateHUD();
     const container = document.getElementById('card-content-mix');
     if (!container) return;
 
-    if (!vocabs || vocabs.length === 0) {
-        container.innerHTML = "<p style='padding:20px; text-align:center;'>Keine Vokabeln vorhanden.</p>";
+    let availableVocabs = vocabs;
+    if (activeLessonFilter) {
+        availableVocabs = vocabs.filter(v => v.lesson == activeLessonFilter);
+        if (availableVocabs.length === 0) availableVocabs = vocabs; // Fallback
+    }
+
+    if (!availableVocabs || availableVocabs.length === 0) {
+        container.innerHTML = "<p style='padding:20px; text-align:center;'>Keine Vokabeln in dieser Station.</p>";
         return;
     }
 
-    const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match', 'image_match'];
+    const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match', 'emoji_match'];
     const chosenType = missionTypes[Math.floor(Math.random() * missionTypes.length)];
 
-    currentMixIndex = Math.floor(Math.random() * vocabs.length);
-    const v = vocabs[currentMixIndex];
+    currentMixIndex = Math.floor(Math.random() * availableVocabs.length);
+    const v = availableVocabs[currentMixIndex];
     if (!v) return;
 
-    // Automatisches Vorlesen beim Laden der Aufgabe
     setTimeout(() => playAudio(v.thai), 300);
 
     if (chosenType === 'train_canvas') {
@@ -222,11 +300,11 @@ function loadRandomMixMission() {
     } else if (chosenType === 'exam_canvas') {
         renderMixExamCanvas(v);
     } else if (chosenType === 'audio_mc') {
-        renderMixAudioMC(v);
+        renderMixAudioMC(v, availableVocabs);
     } else if (chosenType === 'tone_match') {
         renderMixToneMatch(v);
-    } else if (chosenType === 'image_match') {
-        renderMixImageMatch(v);
+    } else if (chosenType === 'emoji_match') {
+        renderMixEmojiMatch(v, availableVocabs);
     }
 }
 
@@ -238,14 +316,16 @@ function getToneCurveSvg(tone) {
 function renderMixTrainCanvas(v) {
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom:5px;">✨ Tonkurve nachzeichnen</div>
-        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
+        <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom:5px;">✨ Tonkurve nachzeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
+        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word">${v.thai}</div>
+            <div class="tooltip-container">
+                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
+            </div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div class="meaning">${v.meaning}</div>
+        <div style="font-size:0.85rem; color:#64748b; margin-bottom:8px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
         <div class="canvas-container">
             <div class="canvas-hint">Magnetische Vorlage ✍️</div>
             <canvas id="mixTrainCanvas"></canvas>
@@ -261,14 +341,16 @@ function renderMixTrainCanvas(v) {
 function renderMixExamCanvas(v) {
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🧠 Freies Gedächtnis-Zeichnen</div>
-        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
+        <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🧠 Freies Gedächtnis-Zeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
+        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word">${v.thai}</div>
+            <div class="tooltip-container">
+                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
+            </div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div class="meaning">${v.meaning}</div>
+        <div style="font-size:0.85rem; color:#64748b; margin-bottom:8px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
         <div class="canvas-container" style="border-color: #ef4444;">
             <div class="canvas-hint" style="color: #ef4444;">Aus dem Kopf zeichnen!</div>
             <canvas id="mixExamCanvas"></canvas>
@@ -281,10 +363,10 @@ function renderMixExamCanvas(v) {
     setupMixCanvas('mixExamCanvas', v.tone, false);
 }
 
-function renderMixAudioMC(v) {
+function renderMixAudioMC(v, pool) {
     let options = [v.meaning];
-    while(options.length < 4 && options.length < vocabs.length) {
-        let randMeaning = vocabs[Math.floor(Math.random() * vocabs.length)].meaning;
+    while(options.length < 4 && options.length < pool.length) {
+        let randMeaning = pool[Math.floor(Math.random() * pool.length)].meaning;
         if(!options.includes(randMeaning)) options.push(randMeaning);
     }
     options.sort(() => Math.random() - 0.5);
@@ -297,8 +379,8 @@ function renderMixAudioMC(v) {
 
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--xp); text-transform: uppercase; margin-bottom:5px;">👂 Was bedeutet dieses Wort?</div>
-        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
+        <div style="font-size: 0.8rem; color: var(--xp); text-transform: uppercase; margin-bottom:5px;">👂 Was bedeutet dieses Wort? (${sessionCurrent + 1}/${sessionTarget})</div>
+        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row" style="margin: 10px 0;">
             <button class="audio-btn" style="width:60px; height:60px; font-size:1.5rem;" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
@@ -336,11 +418,16 @@ function renderMixToneMatch(v) {
 
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--streak); text-transform: uppercase; margin-bottom:5px;">🎯 Welcher Ton gehört dazu?</div>
-        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
-        <div class="thai-word" style="margin: 10px 0;">${v.thai}</div>
+        <div style="font-size: 0.8rem; color: var(--streak); text-transform: uppercase; margin-bottom:5px;">🎯 Welcher Ton gehört dazu? (${sessionCurrent + 1}/${sessionTarget})</div>
+        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
+        <div class="word-row" style="margin: 5px 0;">
+            <div class="tooltip-container">
+                <div class="thai-word" style="font-size: 2.2rem;" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
+            </div>
+        </div>
         <div class="translit">${v.translit}</div>
-        <div style="display:flex; flex-direction:column; margin-top:10px;">
+        <div style="font-size:0.8rem; color:#64748b; margin-bottom:5px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
+        <div style="display:flex; flex-direction:column; margin-top:5px;">
             ${htmlOptions}
         </div>
     `;
@@ -358,43 +445,43 @@ function checkToneMatch(selected, correct) {
     }
 }
 
-function renderMixImageMatch(v) {
+function renderMixEmojiMatch(v, pool) {
     let options = [v];
-    while(options.length < 4 && options.length < vocabs.length) {
-        let randV = vocabs[Math.floor(Math.random() * vocabs.length)];
+    while(options.length < 4 && options.length < pool.length) {
+        let randV = pool[Math.floor(Math.random() * pool.length)];
         if(!options.includes(randV)) options.push(randV);
     }
     options.sort(() => Math.random() - 0.5);
 
-    let htmlImages = '';
+    let htmlEmojis = '';
     options.forEach(opt => {
         let isCorrect = (opt.thai === v.thai) ? "true" : "false";
-        let imgUrl = opt.image || "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=300";
-        htmlImages += `<div onclick="checkImageMatch(${isCorrect})" style="cursor:pointer; border-radius:12px; overflow:hidden; border:2px solid #475569; background:#0f172a;"><img src="${imgUrl}" style="width:100%; height:85px; object-fit:cover;"><div style="font-size:0.8rem; padding:6px; text-align:center; color:#f8fafc; font-weight:bold;">${opt.meaning}</div></div>`;
+        let emj = opt.emoji || "❓";
+        htmlEmojis += `<div onclick="checkEmojiMatch(${isCorrect})" style="cursor:pointer; border-radius:12px; padding:15px; text-align:center; border:2px solid #475569; background:#283548; transition: transform 0.1s;"><div style="font-size:2.5rem; margin-bottom:5px;">${emj}</div><div style="font-size:0.8rem; color:#f8fafc; font-weight:bold;">${opt.meaning}</div></div>`;
     });
 
     const container = document.getElementById('card-content-mix');
     container.innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom:5px;">🖼️ Welches Bild passt zum Wort?</div>
+        <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom:5px;">🖼️ Welches Symbol passt? (${sessionCurrent + 1}/${sessionTarget})</div>
         <div class="word-row" style="margin: 8px 0;">
-            <div class="thai-word" style="font-size: 2.2rem;">${v.thai}</div>
+            <div class="thai-word" style="font-size: 2.2rem;" onclick="playAudio('${v.thai}')">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px;">
-            ${htmlImages}
+            ${htmlEmojis}
         </div>
     `;
 }
 
-function checkImageMatch(isCorrect) {
+function checkEmojiMatch(isCorrect) {
     if(isCorrect) {
         playSound('correct');
-        showToast("Richtiges Bild gewählt! 🎉 +15 XP", true);
+        showToast("Richtiges Symbol gewählt! 🎉 +15 XP", true);
         advanceSession(15);
     } else {
         playSound('wrong');
-        showToast("Leider das falsche Bild! 💡", false);
+        showToast("Leider das falsche Symbol! 💡", false);
     }
 }
 
@@ -459,7 +546,7 @@ function redrawCanvas(ctx, canvas, points, tone, hasGhost, snapped) {
     ctx.stroke();
 }
 
-// ==================== TRAINING MODUS ====================
+// ==================== TRAINING & PRÜFUNG ====================
 function loadTrainCard() {
     updateHUD();
     const container = document.getElementById('card-content-train');
@@ -472,13 +559,15 @@ function loadTrainCard() {
 
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase; margin-bottom:5px;">🏋️ Training (Mit Ghost-Linie)</div>
-        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
+        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word">${v.thai}</div>
+            <div class="tooltip-container">
+                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
+            </div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div class="meaning">${v.meaning}</div>
+        <div style="font-size:0.85rem; color:#64748b; margin-bottom:5px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
         <div class="canvas-container">
             <div class="canvas-hint">Nachzeichnen (snapt ein) ✍️</div>
             <canvas id="trainCanvas"></canvas>
@@ -542,7 +631,6 @@ function checkTrainDrawing() {
     loadTrainCard();
 }
 
-// ==================== PRÜFUNGS MODUS ====================
 function loadExamCard() {
     updateHUD();
     const container = document.getElementById('card-content-exam');
@@ -554,13 +642,15 @@ function loadExamCard() {
 
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🎓 Prüfung (Aus dem Gedächtnis!)</div>
-        ${v.image ? `<img src="${v.image}" class="vocab-image" alt="Vocab">` : ''}
+        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word">${v.thai}</div>
+            <div class="tooltip-container">
+                <div class="thai-word" onclick="toggleTooltip(event, '${v.meaning}')">${v.thai}</div>
+            </div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <div class="meaning">${v.meaning}</div>
+        <div style="font-size:0.85rem; color:#64748b; margin-bottom:5px;">💡 Tippe auf das Thai-Wort für die Bedeutung</div>
         <div class="canvas-container" style="border-color: #ef4444;">
             <div class="canvas-hint" style="color: #ef4444;">Keine Hilfslinie – Zeichne frei! 🧠</div>
             <canvas id="examCanvas"></canvas>
@@ -657,7 +747,6 @@ function checkExamDrawing() {
     updateHUD();
 }
 
-// ==================== CANVAS HELPER ====================
 function drawGhost(ctx, canvas, tone) {
     ctx.save(); ctx.beginPath();
     ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
@@ -683,7 +772,6 @@ function drawPerfectCurve(ctx, canvas, tone) {
     ctx.stroke();
 }
 
-// ==================== LEKTIONEN ====================
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     if (!container) return;
@@ -691,28 +779,19 @@ function renderLessons() {
     for (let id in lessons) {
         let l = lessons[id];
         let count = vocabs.filter(v => v.lesson == id).length;
+        let isDone = l.completed;
         html += `
             <div class="lesson-card">
                 <div class="lesson-info">
-                    <h4>${l.name}</h4>
+                    <h4>${l.name} ${isDone ? '⭐' : ''}</h4>
                     <p>${count} Vokabeln enthalten</p>
                 </div>
                 <div>
-                    <button class="action-btn btn-primary" onclick="completeLesson(${id})" style="padding: 6px 12px; font-size: 0.8rem;">Abschließen 🎉</button>
+                    <button class="action-btn btn-primary" onclick="startSessionForLesson(${id}, '${l.name}')" style="padding: 6px 12px; font-size: 0.8rem;">${isDone ? 'Wiederholen 🔄' : 'Starten 🚀'}</button>
                 </div>
             </div>`;
     }
     container.innerHTML = html;
-}
-
-function completeLesson(id) {
-    lessons[id].completed = true;
-    localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
-    xp += 50;
-    playSound('complete');
-    showToast("Lektion abgeschlossen! +50 XP", true);
-    updateHUD();
-    renderLessons();
 }
 
 function addVocab(e) {
@@ -720,11 +799,11 @@ function addVocab(e) {
     const thai = document.getElementById('input-thai').value;
     const translit = document.getElementById('input-translit').value;
     const meaning = document.getElementById('input-meaning').value;
-    const image = document.getElementById('input-image').value;
+    const emoji = document.getElementById('input-image').value;
     const lesson = parseInt(document.getElementById('input-lesson').value);
     const tone = parseInt(document.getElementById('input-tone').value);
 
-    vocabs.push({ thai, translit, meaning, tone, lesson, image });
+    vocabs.push({ thai, translit, meaning, tone, lesson, emoji });
     localStorage.setItem('thai_quest_vocabs', JSON.stringify(vocabs));
 
     document.getElementById('add-form').reset();
