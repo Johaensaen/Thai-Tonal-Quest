@@ -33,7 +33,6 @@ body {
 header {
     text-align: center;
     margin-bottom: 0.8rem;
-    position: relative;
 }
 
 header h1 {
@@ -42,60 +41,33 @@ header h1 {
     font-size: 1.4rem;
 }
 
-/* Tageslektion Balken */
-.daily-progress-container {
-    background: var(--card-bg);
-    padding: 10px 15px;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
-}
-.daily-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.82rem;
-    margin-bottom: 6px;
-    color: #94a3b8;
-}
-.progress-bar-bg {
-    width: 100%;
-    height: 8px;
-    background: #0f172a;
-    border-radius: 4px;
-    overflow: hidden;
-}
-.progress-bar-fill {
-    height: 100%;
-    background: var(--high);
-    width: 0%;
-    transition: width 0.4s ease;
-}
-
+/* HUD */
 .hud {
     display: flex;
     justify-content: space-between;
     background: var(--card-bg);
-    padding: 8px 15px;
+    padding: 10px 16px;
     border-radius: 12px;
     margin-bottom: 1rem;
     font-weight: bold;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
 }
 
 .hud-item {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
+/* Navigation Tabs */
 .nav-tabs {
     display: flex;
-    gap: 5px;
+    gap: 6px;
     margin-bottom: 1rem;
     background: var(--card-bg);
-    padding: 4px;
-    border-radius: 10px;
+    padding: 6px;
+    border-radius: 12px;
 }
 
 .nav-btn {
@@ -103,11 +75,11 @@ header h1 {
     background: transparent;
     border: none;
     color: var(--text-color);
-    padding: 8px 2px;
+    padding: 10px 4px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     transition: background 0.2s;
 }
 
@@ -116,6 +88,78 @@ header h1 {
     color: var(--bg-color);
 }
 
+/* Duolingo Pfad */
+.path-card {
+    text-align: center;
+    padding: 2rem 1.5rem;
+}
+.section-badge {
+    background: #334155;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+}
+.path-nodes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 1rem;
+}
+.path-node {
+    width: 90px;
+    height: 90px;
+    background: #334155;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 4px solid #475569;
+    box-shadow: 0 8px 0 #1e293b;
+    transition: transform 0.1s, background 0.2s;
+}
+.path-node.active {
+    background: var(--accent);
+    border-color: #7dd3fc;
+    box-shadow: 0 8px 0 #0284c7;
+}
+.path-node:active {
+    transform: translateY(4px);
+    box-shadow: 0 4px 0 #0284c7;
+}
+.node-icon { font-size: 2rem; }
+.node-label {
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: var(--bg-color);
+    margin-top: 2px;
+    text-transform: uppercase;
+}
+
+/* Session Fortschrittsbalken */
+.session-progress-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--card-bg);
+    border-radius: 5px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+.session-progress-fill {
+    height: 100%;
+    background: var(--high);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Karten & Layout */
 .card {
     background: var(--card-bg);
     border-radius: 16px;
@@ -132,11 +176,11 @@ header h1 {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    margin: 0.3rem 0;
+    margin: 0.5rem 0;
 }
 
 .thai-word {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: bold;
     letter-spacing: 2px;
 }
@@ -145,44 +189,173 @@ header h1 {
     background: var(--card-bg);
     border: 2px solid var(--accent);
     color: var(--accent);
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     transition: all 0.2s;
 }
 .audio-btn:hover { background: var(--accent); color: var(--bg-color); }
 
 .translit {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #94a3b8;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
 }
 
 .meaning {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     margin-bottom: 1rem;
     font-weight: bold;
 }
 
-/* Bild-Karte für Vokabeln */
 .vocab-image {
     width: 100%;
-    height: 120px;
+    height: 140px;
     object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
     border: 1px solid #475569;
 }
 
 .canvas-container {
     position: relative;
     width: 100%;
-    height: 150px;
+    height: 160px;
     background: #0f172a;
     border: 2px dashed #475569;
-    border-radius: 1
+    border-radius: 12px;
+    margin-top: 1rem;
+    overflow: hidden;
+    touch-action: none;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+.canvas-hint {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 100%;
+    font-size: 0.75rem;
+    color: #64748b;
+    pointer-events: none;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 1.2rem;
+}
+
+/* Große, touch-freundliche Buttons mit perfektem Kontrast */
+button.action-btn {
+    flex: 1;
+    background: #334155;
+    color: #ffffff;
+    border: none;
+    padding: 14px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: transform 0.1s, background 0.2s;
+    border-bottom: 4px solid #1e293b;
+}
+button.action-btn:active { transform: scale(0.97); }
+.btn-primary { 
+    background: var(--accent); 
+    color: #0f172a; 
+    border-bottom-color: #0284c7; 
+}
+
+/* Antwort-Buttons (Multiple Choice / Ton Matching mit hohem Kontrast) */
+.choice-btn {
+    background: #283548 !important;
+    color: #ffffff !important;
+    border: 2px solid #475569 !important;
+    font-size: 1rem !important;
+    justify-content: flex-start;
+    padding: 12px 16px !important;
+    margin-bottom: 10px;
+    border-bottom-width: 4px !important;
+}
+.choice-btn:hover {
+    background: #334155 !important;
+    border-color: var(--accent) !important;
+}
+
+/* Toast Notification von unten */
+.toast-banner {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    border: 2px solid var(--high);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 35px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+}
+.toast-banner.show {
+    bottom: 30px;
+}
+.toast-banner.wrong {
+    border-color: var(--falling);
+}
+
+.lesson-card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lesson-info h4 { margin: 0 0 5px 0; color: var(--accent); }
+.lesson-info p { margin: 0; font-size: 0.85rem; color: #94a3b8; }
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+}
+
+label { font-size: 0.85rem; color: #94a3b8; }
+input, select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: white;
+    font-size: 1rem;
+    box-sizing: border-box;
+    margin-top: 4px;
+}
+
+.hidden { display: none !important; }
