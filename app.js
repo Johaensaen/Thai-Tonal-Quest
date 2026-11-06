@@ -88,13 +88,14 @@ function showToast(text, isCorrect = true) {
     const banner = document.getElementById('toast-banner');
     const icon = document.getElementById('toast-icon');
     const msg = document.getElementById('toast-text');
+    if(!banner) return;
 
     banner.className = "toast-banner " + (isCorrect ? "" : "wrong");
     icon.innerText = isCorrect ? "🎉" : "💡";
     msg.innerText = text;
 
     banner.classList.add('show');
-    setTimeout => {
+    setTimeout(() => {
         banner.classList.remove('show');
     }, 2000);
 }
@@ -128,7 +129,7 @@ let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
 let sessionCurrent = 0;
 const sessionTarget = 5;
 let sessionGainedXP = 0;
-let activeLessonFilter = null; // null = Mix aus allen freigeschalteten
+let activeLessonFilter = null; 
 
 let currentTrainIndex = null;
 let currentExamIndex = null;
@@ -146,9 +147,13 @@ function playAudio(text) {
 }
 
 function updateHUD() {
-    document.getElementById('xp-count').innerText = xp;
-    document.getElementById('streak-count').innerText = streak;
-    document.getElementById('level-num').innerText = Math.floor(xp / 50) + 1;
+    const xpEl = document.getElementById('xp-count');
+    const streakEl = document.getElementById('streak-count');
+    const lvlEl = document.getElementById('level-num');
+    if(xpEl) xpEl.innerText = xp;
+    if(streakEl) streakEl.innerText = streak;
+    if(lvlEl) lvlEl.innerText = Math.floor(xp / 50) + 1;
+    
     localStorage.setItem('thai_quest_xp', xp);
     localStorage.setItem('thai_quest_streak', streak);
 }
@@ -166,19 +171,18 @@ function renderPath() {
     ];
 
     stationList.forEach((station, index) => {
-        let isCompleted = lessons[station.lessonId] && lessons[station.lessonId].completed;
-        // Erste Station ist immer aktiv, folgende wenn die vorige fertig ist oder man schon XP hat
-        let isUnlocked = (index === 0) || lessons[stationList[index - 1].lessonId].completed || xp > (index * 30);
+        let isCompleted = lessons && lessons[station.lessonId] && lessons[station.lessonId].completed;
+        let isUnlocked = (index === 0) || (lessons && lessons[stationList[index - 1].lessonId] && lessons[stationList[index - 1].lessonId].completed) || xp > (index * 30);
         
-        let statusClass = "locked";
-        let iconSymbol = "🔒";
+        let statusClass = "active";
+        let iconSymbol = station.icon;
 
         if (isCompleted) {
             statusClass = "completed";
-            iconSymbol = "⭐"; // Abgeschlossen zeigt Stern/Gold
-        } else if (isUnlocked) {
-            statusClass = "active";
-            iconSymbol = station.icon;
+            iconSymbol = "⭐";
+        } else if (!isUnlocked) {
+            statusClass = "locked";
+            iconSymbol = "🔒";
         }
 
         html += `
@@ -200,7 +204,6 @@ function startSessionForLesson(lessonId, lessonTitle) {
     activeLessonFilter = lessonId;
     sessionCurrent = 0;
     sessionGainedXP = 0;
-    document.getElementById('mode-subtitle') ? document.getElementById('mode-subtitle').innerText = lessonTitle : null;
     switchTab('mix');
 }
 
@@ -224,7 +227,8 @@ function advanceSession(earnedXP) {
         playSound('complete');
         document.getElementById('section-mix').classList.add('hidden');
         document.getElementById('section-complete').classList.remove('hidden');
-        document.getElementById('summary-xp').innerText = "+" + sessionGainedXP;
+        const sumXpEl = document.getElementById('summary-xp');
+        if(sumXpEl) sumXpEl.innerText = "+" + sessionGainedXP;
     } else {
         loadRandomMixMission();
     }
@@ -232,40 +236,44 @@ function advanceSession(earnedXP) {
 
 function switchTab(tab) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('section-path').classList.add('hidden');
-    document.getElementById('section-mix').classList.add('hidden');
-    document.getElementById('section-complete').classList.add('hidden');
-    document.getElementById('section-train').classList.add('hidden');
-    document.getElementById('section-exam').classList.add('hidden');
-    document.getElementById('section-lessons').classList.add('hidden');
-    document.getElementById('section-add').classList.add('hidden');
+    
+    ['section-path', 'section-mix', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-add'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('hidden');
+    });
 
     const navButtons = document.querySelectorAll('.bottom-nav .nav-btn');
     navButtons.forEach(btn => {
-        if(btn.getAttribute('onclick').includes(tab)) {
+        if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tab)) {
             btn.classList.add('active');
         }
     });
 
     if(tab === 'path') {
-        document.getElementById('section-path').classList.remove('hidden');
+        const pathEl = document.getElementById('section-path');
+        if(pathEl) pathEl.classList.remove('hidden');
         updateHUD();
         renderPath();
     } else if(tab === 'mix') {
-        navButtons[0].classList.add('active');
-        document.getElementById('section-mix').classList.remove('hidden');
+        if(navButtons[0]) navButtons[0].classList.add('active');
+        const mixEl = document.getElementById('section-mix');
+        if(mixEl) mixEl.classList.remove('hidden');
         loadRandomMixMission();
     } else if(tab === 'train') {
-        document.getElementById('section-train').classList.remove('hidden');
+        const trainEl = document.getElementById('section-train');
+        if(trainEl) trainEl.classList.remove('hidden');
         loadTrainCard();
     } else if(tab === 'exam') {
-        document.getElementById('section-exam').classList.remove('hidden');
+        const examEl = document.getElementById('section-exam');
+        if(examEl) examEl.classList.remove('hidden');
         loadExamCard();
     } else if(tab === 'lessons') {
-        document.getElementById('section-lessons').classList.remove('hidden');
+        const lessonsEl = document.getElementById('section-lessons');
+        if(lessonsEl) lessonsEl.classList.remove('hidden');
         renderLessons();
     } else if(tab === 'add') {
-        document.getElementById('section-add').classList.remove('hidden');
+        const addEl = document.getElementById('section-add');
+        if(addEl) addEl.classList.remove('hidden');
     }
 }
 
@@ -278,7 +286,7 @@ function loadRandomMixMission() {
     let availableVocabs = vocabs;
     if (activeLessonFilter) {
         availableVocabs = vocabs.filter(v => v.lesson == activeLessonFilter);
-        if (availableVocabs.length === 0) availableVocabs = vocabs; // Fallback
+        if (!availableVocabs || availableVocabs.length === 0) availableVocabs = vocabs;
     }
 
     if (!availableVocabs || availableVocabs.length === 0) {
@@ -812,5 +820,5 @@ function addVocab(e) {
     switchTab('path');
 }
 
-// Start beim Laden mit der Pfad-Ansicht
+// Sofort beim Laden den Pfad rendern
 switchTab('path');
