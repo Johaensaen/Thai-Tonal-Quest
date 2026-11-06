@@ -17,38 +17,71 @@
 <div class="container">
     <header>
         <h1>🇹🇭 Thai Tonal Quest</h1>
-        <p id="mode-subtitle">Tageslektion</p>
+        <p id="mode-subtitle">Dein Lernpfad</p>
     </header>
 
-    <!-- Tageslektion Fortschritt -->
-    <div class="daily-progress-container" id="daily-progress-bar-container">
-        <div class="daily-info">
-            <span>📅 Tagesziel: <b id="daily-count">0</b>/5 Aufgaben</span>
-            <span id="daily-status" style="color: var(--accent);">Fortschritt läuft</span>
-        </div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="daily-progress-fill" style="width: 0%;"></div>
-        </div>
-    </div>
-
+    <!-- HUD (Streak, XP, Level) -->
     <div class="hud">
         <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">1</span></div>
         <div class="hud-item" style="color: var(--xp);">⚡ <span id="xp-count">0</span> XP</div>
         <div class="hud-item" style="color: var(--accent);">🎯 Lvl <span id="level-num">1</span></div>
     </div>
 
+    <!-- Navigation Tabs -->
     <div class="nav-tabs">
-        <button class="nav-btn active" onclick="switchTab('mix')">🎲 Tages-Mix</button>
+        <button class="nav-btn active" onclick="switchTab('path')">🗺️ Pfad</button>
         <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
         <button class="nav-btn" onclick="switchTab('exam')">🎓 Prüfung</button>
         <button class="nav-btn" onclick="switchTab('lessons')">📦 Lektionen</button>
         <button class="nav-btn" onclick="switchTab('add')">+ Wort</button>
     </div>
 
-    <!-- MIX-QUEST SECTION -->
-    <div id="section-mix">
+    <!-- SECTION 1: LERNPFAD (Duolingo Style) -->
+    <div id="section-path">
+        <div class="card path-card">
+            <div class="section-badge">STUFE 1, ABSCHNITT 1</div>
+            <h3>Grundlagen & Töne meistern</h3>
+            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem;">Wähle deinen nächsten Schritt auf dem Pfad:</p>
+            
+            <div class="path-nodes">
+                <div class="path-node active" onclick="startDailySession()">
+                    <div class="node-icon">🐘</div>
+                    <div class="node-label">Tages-Mix (5 Aufgaben)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: SESSION SPIELFLÄCHE (Wird während des Tages-Mix angezeigt) -->
+    <div id="section-mix" class="hidden">
+        <!-- Fortschritt in der laufenden Session -->
+        <div class="session-progress-bar">
+            <div class="session-progress-fill" id="session-fill"></div>
+        </div>
         <div class="card" id="card-container-mix">
             <div id="card-content-mix"></div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: ABSCHLUSS-SCREEN (Nach 5 Aufgaben) -->
+    <div id="section-complete" class="hidden">
+        <div class="card" style="text-align: center; padding: 2rem 1.5rem;">
+            <div style="font-size: 4rem; margin-bottom: 0.5rem;">🐘🎉</div>
+            <h2 style="color: var(--high); margin-top: 0;">Tageslektion geschafft!</h2>
+            <p style="color: #94a3b8; margin-bottom: 1.5rem;">Großartige Arbeit! Dein Elefant ist stolz auf dich.</p>
+            
+            <div style="display: flex; justify-content: space-around; background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 1.5rem;">
+                <div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">XP GESAMT</div>
+                    <div style="font-size: 1.3rem; font-weight: bold; color: var(--xp);" id="summary-xp">+35</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; color: #94a3b8;">AUFGABEN</div>
+                    <div style="font-size: 1.3rem; font-weight: bold; color: var(--accent);">5 / 5</div>
+                </div>
+            </div>
+
+            <button class="action-btn btn-primary" onclick="switchTab('path')" style="width: 100%; font-size: 1.1rem; padding: 14px;">XP abholen & Weiter ➔</button>
         </div>
     </div>
 
@@ -112,13 +145,13 @@
                         <option value="4">🚀 Steigender Ton (Zieht hoch)</option>
                     </select>
                 </div>
-                <button type="submit" class="action-btn btn-primary" style="margin-top: 5px; width: 100%;">Speichern</button>
+                <button type="submit" class="action-btn btn-primary" style="margin-top: 10px; width: 100%; padding: 12px;">Speichern</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Toast Benachrichtigung von unten -->
+<!-- Toast Banner von unten -->
 <div id="toast-banner" class="toast-banner hidden">
     <div id="toast-icon">🎉</div>
     <div id="toast-text">Richtig! +15 XP</div>
