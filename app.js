@@ -47,18 +47,14 @@ function playAudio(text) {
         return;
     }
 
-    // Sprachausgabe-Queue zurücksetzen
     synth.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'th-TH';
     utterance.rate = 0.8;
 
-    // Falls Stimmenliste noch nicht bereit war, erneut prüfen
     if (!thaiVoice) loadThaiVoices();
     if (thaiVoice) utterance.voice = thaiVoice;
 
-    // AudioContext entsperren falls blockiert
     if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
@@ -66,7 +62,6 @@ function playAudio(text) {
     synth.speak(utterance);
 }
 
-// Globales Touch-Warmup für mobile Audio-Policies
 window.addEventListener('touchstart', function unlockAudio() {
     if (synth && synth.paused) synth.resume();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -149,7 +144,7 @@ function showToast(text, isCorrect = true) {
     }, 2000);
 }
 
-// --- Deutsche Übersetzung (Verlässliches Toggle & Inline Display) ---
+// --- Deutsche Bedeutung einblenden ---
 function toggleMeaning(event, meaning) {
     if (event) event.stopPropagation();
     const box = document.getElementById('meaning-display-box');
@@ -199,21 +194,29 @@ function updateHUD() {
     localStorage.setItem('thai_quest_streak', streak);
 }
 
-// Rendert den Duolingo-Pfad mit Stationen
+// Rendert den Duolingo-Pfad mit Stationen & Dialogen
 function renderPath() {
     const container = document.getElementById('path-nodes-container');
     if (!container) return;
 
     let html = "";
     let stationList = [
-        { id: 1, title: "Urlaub & Alltag", icon: "✈️", lessonId: 1 },
-        { id: 2, title: "Essen & Restaurant", icon: "🍲", lessonId: 2 },
-        { id: 3, title: "Freunde & Familie", icon: "💬", lessonId: 3 }
+        { id: 1, title: "Urlaub & Alltag", icon: "✈️", type: "lesson", lessonId: 1 },
+        { id: 2, title: "Essen & Restaurant", icon: "🍲", type: "lesson", lessonId: 2 },
+        { id: 3, title: "Hör-Dialog 1", icon: "🎧", type: "dialog", dialogId: 0 },
+        { id: 4, title: "Freunde & Familie", icon: "💬", type: "lesson", lessonId: 3 }
     ];
 
     stationList.forEach((station, index) => {
-        let isCompleted = lessons && lessons[station.lessonId] && lessons[station.lessonId].completed;
-        let isUnlocked = (index === 0) || (lessons && lessons[stationList[index - 1].lessonId] && lessons[stationList[index - 1].lessonId].completed) || xp > (index * 30);
+        let isCompleted = false;
+        if (station.type === 'lesson') {
+            isCompleted = lessons && lessons[station.lessonId] && lessons[station.lessonId].completed;
+        } else if (station.type === 'dialog') {
+            let completedDialogs = JSON.parse(localStorage.getItem('thai_quest_dialogs')) || {};
+            isCompleted = completedDialogs[station.dialogId];
+        }
+
+        let isUnlocked = (index === 0) || xp > (index * 25);
         
         let statusClass = "active";
         let iconSymbol = station.icon;
@@ -226,8 +229,12 @@ function renderPath() {
             iconSymbol = "🔒";
         }
 
+        let clickAction = station.type === 'lesson' 
+            ? `startSessionForLesson(${station.lessonId}, '${station.title}')` 
+            : `startDialogSession(${station.dialogId})`;
+
         html += `
-            <div class="path-node ${statusClass}" onclick="${isUnlocked ? `startSessionForLesson(${station.lessonId}, '${station.title}')` : `showLockedAlert()`}">
+            <div class="path-node ${statusClass}" onclick="${isUnlocked ? clickAction : `showLockedAlert()`}">
                 <div class="node-icon">${iconSymbol}</div>
                 <div class="node-title">${station.title}</div>
             </div>
@@ -238,7 +245,7 @@ function renderPath() {
 }
 
 function showLockedAlert() {
-    showToast("Schließe erst die vorherige Station ab! 🔒", false);
+    showToast("Schließe erst vorherige Stationen ab! 🔒", false);
 }
 
 function startSessionForLesson(lessonId, lessonTitle) {
@@ -246,6 +253,70 @@ function startSessionForLesson(lessonId, lessonTitle) {
     sessionCurrent = 0;
     sessionGainedXP = 0;
     switchTab('mix');
+}
+
+// ==================== HÖRVERSTÄNDNIS / DIALOGE ====================
+function startDialogSession(dialogId) {
+    switchTab('dialog');
+    const container = document.getElementById('card-content-dialog');
+    const d = dialogues[dialogId] || dialogues[0];
+
+    let linesHtml = "";
+    d.lines.forEach((line, idx) => {
+        linesHtml += `
+            <div class="dialog-bubble">
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 2px;">${line.speaker}</div>
+                    <div style="font-size: 1.4rem; font-weight: bold; letter-spacing: 1px;">${line.thai}</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">${line.translit} • <span style="color:#f8fafc;">${line.meaning}</span></div>
+                </div>
+                <button class="audio-btn" onclick="playAudio('${line.thai}')">🔊</button>
+            </div>
+        `;
+    });
+
+    let optionsHtml = "";
+    d.options.forEach(opt => {
+        let isCorr = opt.correct ? "true" : "false";
+        optionsHtml += `<button class="action-btn choice-btn" onclick="checkDialogAnswer(${isCorr}, ${dialogId})">${opt.text}</button>`;
+    });
+
+    container.innerHTML = `
+        <div style="font-size: 0.8rem; color: var(--rising); text-transform: uppercase; margin-bottom:5px;">🎧 Hörverständnis & Gespräch</div>
+        <h3 style="margin-top: 5px; color: #f8fafc;">${d.title}</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">${d.context}</p>
+        
+        <div style="margin-bottom: 15px;">
+            ${linesHtml}
+        </div>
+
+        <div style="border-top: 1px solid #334155; padding-top: 15px; margin-top: 15px;">
+            <div style="font-weight: bold; margin-bottom: 10px; font-size: 0.95rem;">❓ ${d.question}</div>
+            <div style="display: flex; flex-direction: column;">
+                ${optionsHtml}
+            </div>
+        </div>
+    `;
+}
+
+function checkDialogAnswer(isCorrect, dialogId) {
+    if (isCorrect) {
+        playSound('correct');
+        showToast("Richtig verstanden! 🎉 +30 XP", true);
+        xp += 30;
+        updateHUD();
+
+        let completedDialogs = JSON.parse(localStorage.getItem('thai_quest_dialogs')) || {};
+        completedDialogs[dialogId] = true;
+        localStorage.setItem('thai_quest_dialogs', JSON.stringify(completedDialogs));
+
+        setTimeout(() => {
+            switchTab('path');
+        }, 1500);
+    } else {
+        playSound('wrong');
+        showToast("Das war leider nicht richtig. Hör nochmal rein! 💡", false);
+    }
 }
 
 function advanceSession(earnedXP) {
@@ -278,7 +349,7 @@ function advanceSession(earnedXP) {
 function switchTab(tab) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     
-    ['section-path', 'section-mix', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-add'].forEach(id => {
+    ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-add'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.classList.add('hidden');
     });
@@ -300,6 +371,10 @@ function switchTab(tab) {
         const mixEl = document.getElementById('section-mix');
         if(mixEl) mixEl.classList.remove('hidden');
         loadRandomMixMission();
+    } else if(tab === 'dialog') {
+        if(navButtons[0]) navButtons[0].classList.add('active');
+        const dialogEl = document.getElementById('section-dialog');
+        if(dialogEl) dialogEl.classList.remove('hidden');
     } else if(tab === 'train') {
         const trainEl = document.getElementById('section-train');
         if(trainEl) trainEl.classList.remove('hidden');
@@ -368,11 +443,11 @@ function renderMixTrainCanvas(v) {
         <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom:5px;">✨ Tonkurve nachzeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word" onclick="toggleMeaning(event, '${v.meaning}')">${v.thai}</div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <button class="action-btn meaning-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
+        <button class="action-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div id="meaning-display-box" style="display:none; padding: 8px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 10px;"></div>
         <div class="canvas-container">
             <div class="canvas-hint">Magnetische Vorlage ✍️</div>
@@ -392,11 +467,11 @@ function renderMixExamCanvas(v) {
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🧠 Freies Gedächtnis-Zeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word" onclick="toggleMeaning(event, '${v.meaning}')">${v.thai}</div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <button class="action-btn meaning-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
+        <button class="action-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div id="meaning-display-box" style="display:none; padding: 8px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 10px;"></div>
         <div class="canvas-container" style="border-color: #ef4444;">
             <div class="canvas-hint" style="color: #ef4444;">Aus dem Kopf zeichnen!</div>
@@ -468,10 +543,10 @@ function renderMixToneMatch(v) {
         <div style="font-size: 0.8rem; color: var(--streak); text-transform: uppercase; margin-bottom:5px;">🎯 Welcher Ton gehört dazu? (${sessionCurrent + 1}/${sessionTarget})</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row" style="margin: 5px 0;">
-            <div class="thai-word" style="font-size: 2.2rem;" onclick="toggleMeaning(event, '${v.meaning}')">${v.thai}</div>
+            <div class="thai-word" style="font-size: 2.2rem;">${v.thai}</div>
         </div>
         <div class="translit">${v.translit}</div>
-        <button class="action-btn meaning-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
+        <button class="action-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div id="meaning-display-box" style="display:none; padding: 8px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 10px;"></div>
         <div style="display:flex; flex-direction:column; margin-top:5px;">
             ${htmlOptions}
@@ -607,11 +682,11 @@ function loadTrainCard() {
         <div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase; margin-bottom:5px;">🏋️ Training (Mit Ghost-Linie)</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word" onclick="toggleMeaning(event, '${v.meaning}')">${v.thai}</div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <button class="action-btn meaning-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
+        <button class="action-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div id="meaning-display-box" style="display:none; padding: 8px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 10px;"></div>
         <div class="canvas-container">
             <div class="canvas-hint">Nachzeichnen (snapt ein) ✍️</div>
@@ -689,11 +764,11 @@ function loadExamCard() {
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🎓 Prüfung (Aus dem Gedächtnis!)</div>
         <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
         <div class="word-row">
-            <div class="thai-word" onclick="toggleMeaning(event, '${v.meaning}')">${v.thai}</div>
+            <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
         <div class="translit">${v.translit}</div>
-        <button class="action-btn meaning-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
+        <button class="action-btn" onclick="toggleMeaning(event, '${v.meaning}')" style="font-size: 0.85rem; padding: 6px 12px; margin: 5px 0 10px 0; background: #1e293b; border: 1px solid #475569; color: #94a3b8;">🔍 Bedeutung anzeigen</button>
         <div id="meaning-display-box" style="display:none; padding: 8px; border-radius: 8px; font-size: 0.95rem; margin-bottom: 10px;"></div>
         <div class="canvas-container" style="border-color: #ef4444;">
             <div class="canvas-hint" style="color: #ef4444;">Keine Hilfslinie – Zeichne frei! 🧠</div>
