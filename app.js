@@ -24,23 +24,21 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// --- Robustes Web Speech API Audio ---
+// --- Zuverlässige Thai-Aussprache (Direkt-Trigger für Mobile) ---
 function playAudio(text) {
     if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
     
+    // Sofort abbrechen, damit keine Queue blockiert
+    window.speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'th-TH';
-    utterance.rate = 0.8;
-    
-    const voices = window.speechSynthesis.getVoices();
-    const thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH'));
-    if (thaiVoice) {
-        utterance.voice = thaiVoice;
-    }
+    utterance.rate = 0.85;
 
+    // Direkt abfeuern
     window.speechSynthesis.speak(utterance);
 }
+
 
 // --- Web Audio API Synthesizer ---
 let audioCtx = null;
