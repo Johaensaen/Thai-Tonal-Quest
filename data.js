@@ -35,6 +35,38 @@ let lessons = JSON.parse(localStorage.getItem('thai_quest_lessons')) || {
     3: { name: "3. Familie & Freunde", completed: false }
 };
 
+// Vordefinierte Dialoge fürs Hörverständnis
+let dialogues = [
+    {
+        title: "Im Restaurant bestellen",
+        context: "Du sitzt im Restaurant und wirst gefragt, ob es scharf sein soll.",
+        lines: [
+            { speaker: "Kellner", thai: "กินเผ็ดไหม", translit: "gin phèt mǎai", meaning:isst du scharf? },
+            { speaker: "Du", thai: "ไม่เผ็ดครับ", translit: "mâi phèt kráp", meaning: "Nicht scharf, bitte." }
+        ],
+        question: "Worüber sprechen die beiden?",
+        options: [
+            { text: "Ob das Essen scharf sein soll", correct: true },
+            { text: "Wie viel das Wasser kostet", correct: false },
+            { text: "Wo die Toilette ist", correct: false }
+        ]
+    },
+    {
+        title: "Begrüßung unter Freunden",
+        context: "Du triffst einen alten Bekannten wieder.",
+        lines: [
+            { speaker: "Freund", thai: "สบายดีไหม", translit: "sà-baai-dee mǎai", meaning: "Wie geht es dir?" },
+            { speaker: "Du", thai: "สบายดี ขอบคุณครับ", translit: "sà-baai-dee kàwp-kun kráp", meaning: "Mir geht es gut, danke." }
+        ],
+        question: "Was bedeutet die Frage des Freundes?",
+        options: [
+            { text: "Wie geht es dir?", correct: true },
+            { text: "Bist du hungrig?", correct: false },
+            { text: "Schmeckt es dir?", correct: false }
+        ]
+    }
+];
+
 const toneDetails = {
     0: { name: "Mittelton (Mid)", path: "M 10 35 L 90 35" },
     1: { name: "Tiefton (Low)", path: "M 10 20 L 90 60" },
