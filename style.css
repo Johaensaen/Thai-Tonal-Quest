@@ -113,7 +113,6 @@ body {
     position: relative;
 }
 
-/* Pfad-Knoten Zustände */
 .path-node {
     width: 85px;
     height: 85px;
@@ -129,21 +128,18 @@ body {
     position: relative;
 }
 
-/* Status: Abgeschlossen (Gold) */
 .path-node.completed {
     background: var(--xp);
     border-color: #fef08a;
     box-shadow: 0 8px 0 #ca8a04;
     color: #0f172a;
 }
-/* Status: Aktiv/Bereit (Blau) */
 .path-node.active {
     background: var(--accent);
     border-color: #7dd3fc;
     box-shadow: 0 8px 0 #0284c7;
     color: #0f172a;
 }
-/* Status: Gesperrt (Grau) */
 .path-node.locked {
     background: #1e293b;
     border-color: #334155;
@@ -214,38 +210,6 @@ body {
 }
 .thai-word:hover { color: var(--accent); }
 
-/* Tooltip */
-.tooltip-container {
-    position: relative;
-    display: inline-block;
-}
-.tooltip-box {
-    position: absolute;
-    bottom: 115%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #0f172a;
-    color: var(--accent);
-    border: 2px solid var(--accent);
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    z-index: 10;
-}
-.tooltip-box::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -6px;
-    border-width: 6px;
-    border-style: solid;
-    border-color: var(--accent) transparent transparent transparent;
-}
-
 .audio-btn {
     background: var(--card-bg);
     border: 2px solid var(--accent);
@@ -266,12 +230,6 @@ body {
     font-size: 1.1rem;
     color: #94a3b8;
     margin-bottom: 0.4rem;
-}
-
-.meaning {
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
 }
 
 .vocab-emoji-card {
@@ -349,6 +307,19 @@ button.action-btn:active { transform: scale(0.97); }
 .choice-btn:hover {
     background: #334155 !important;
     border-color: var(--accent) !important;
+}
+
+/* Dialog Blasen */
+.dialog-bubble {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 /* Toast Notification */
