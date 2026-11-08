@@ -262,7 +262,7 @@ function startDialogSession(dialogId) {
     const d = dialogues[dialogId] || dialogues[0];
 
     let linesHtml = "";
-    d.lines.forEach((line, idx) => {
+    d.lines.forEach((line) => {
         linesHtml += `
             <div class="dialog-bubble">
                 <div>
