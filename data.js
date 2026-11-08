@@ -41,7 +41,7 @@ let dialogues = [
         title: "Im Restaurant bestellen",
         context: "Du sitzt im Restaurant und wirst gefragt, ob es scharf sein soll.",
         lines: [
-            { speaker: "Kellner", thai: "กินเผ็ดไหม", translit: "gin phèt mǎai", meaning:isst du scharf? },
+            { speaker: "Kellner", thai: "กินเผ็ดไหม", translit: "gin phèt mǎai", meaning: "Isst du scharf?" },
             { speaker: "Du", thai: "ไม่เผ็ดครับ", translit: "mâi phèt kráp", meaning: "Nicht scharf, bitte." }
         ],
         question: "Worüber sprechen die beiden?",
