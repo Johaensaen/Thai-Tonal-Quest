@@ -204,7 +204,8 @@ function renderPath() {
         { id: 1, title: "Urlaub & Alltag", icon: "✈️", type: "lesson", lessonId: 1 },
         { id: 2, title: "Essen & Restaurant", icon: "🍲", type: "lesson", lessonId: 2 },
         { id: 3, title: "Hör-Dialog 1", icon: "🎧", type: "dialog", dialogId: 0 },
-        { id: 4, title: "Freunde & Familie", icon: "💬", type: "lesson", lessonId: 3 }
+        { id: 4, title: "Freunde & Familie", icon: "💬", type: "lesson", lessonId: 3 },
+        { id: 5, title: "Hör-Dialog 2", icon: "🎧", type: "dialog", dialogId: 1 }
     ];
 
     stationList.forEach((station, index) => {
@@ -262,15 +263,21 @@ function startDialogSession(dialogId) {
     const d = dialogues[dialogId] || dialogues[0];
 
     let linesHtml = "";
-    d.lines.forEach((line) => {
+    d.lines.forEach((line, idx) => {
         linesHtml += `
-            <div class="dialog-bubble">
-                <div>
-                    <div style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 2px;">${line.speaker}</div>
-                    <div style="font-size: 1.4rem; font-weight: bold; letter-spacing: 1px;">${line.thai}</div>
-                    <div style="font-size: 0.85rem; color: #94a3b8;">${line.translit} • <span style="color:#f8fafc;">${line.meaning}</span></div>
+            <div class="dialog-bubble" style="flex-direction: column; align-items: stretch;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 0.75rem; color: var(--accent); font-weight: bold;">${line.speaker}</div>
+                    <button class="audio-btn" onclick="playAudio('${line.thai}')" style="width: 38px; height: 38px; font-size: 1rem;">🔊</button>
                 </div>
-                <button class="audio-btn" onclick="playAudio('${line.thai}')">🔊</button>
+                <div style="font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; margin: 6px 0 2px 0;">${line.thai}</div>
+                
+                <button class="action-btn" onclick="toggleDialogDetails(event, 'dialog-details-${dialogId}-${idx}')" id="dialog-btn-${dialogId}-${idx}" style="font-size: 0.75rem; padding: 4px 8px; margin-top: 6px; background: #1e293b; border: 1px solid #475569; color: #94a3b8; text-align: left;">👁️ Text & Übersetzung anzeigen</button>
+                
+                <div id="dialog-details-${dialogId}-${idx}" style="display: none; margin-top: 8px; padding-top: 6px; border-top: 1px solid #334155; font-size: 0.85rem; color: #94a3b8;">
+                    <div>🔤 Umschrift: <span style="color: #f8fafc;">${line.translit}</span></div>
+                    <div>🇩🇪 Bedeutung: <span style="color: #38bdf8;">${line.meaning}</span></div>
+                </div>
             </div>
         `;
     });
@@ -286,17 +293,33 @@ function startDialogSession(dialogId) {
         <h3 style="margin-top: 5px; color: #f8fafc;">${d.title}</h3>
         <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">${d.context}</p>
         
-        <div style="margin-bottom: 15px;">
+        <div style="margin-bottom: 15px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
             ${linesHtml}
         </div>
 
-        <div style="border-top: 1px solid #334155; padding-top: 15px; margin-top: 15px;">
-            <div style="font-weight: bold; margin-bottom: 10px; font-size: 0.95rem;">❓ ${d.question}</div>
+        <div style="border-top: 1px solid #334155; padding-top: 12px; margin-top: 10px;">
+            <div style="font-weight: bold; margin-bottom: 8px; font-size: 0.9rem;">❓ ${d.question}</div>
             <div style="display: flex; flex-direction: column;">
                 ${optionsHtml}
             </div>
         </div>
     `;
+}
+
+function toggleDialogDetails(event, detailsId) {
+    const detailsEl = document.getElementById(detailsId);
+    const btnEl = event.currentTarget;
+    if (detailsEl) {
+        if (detailsEl.style.display === 'none') {
+            detailsEl.style.display = 'block';
+            btnEl.innerText = '🙈 Details ausblenden';
+            btnEl.style.color = '#38bdf8';
+        } else {
+            detailsEl.style.display = 'none';
+            btnEl.innerText = '👁️ Text & Übersetzung anzeigen';
+            btnEl.style.color = '#94a3b8';
+        }
+    }
 }
 
 function checkDialogAnswer(isCorrect, dialogId) {
@@ -389,7 +412,7 @@ function switchTab(tab) {
         renderLessons();
     } else if(tab === 'add') {
         const addEl = document.getElementById('section-add');
-        if(addEl) addEl.classList.remove('hidden');
+        if(addEl) addEl.classList.add('hidden');
     }
 }
 
