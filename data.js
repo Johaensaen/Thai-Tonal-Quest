@@ -35,34 +35,38 @@ let lessons = JSON.parse(localStorage.getItem('thai_quest_lessons')) || {
     3: { name: "3. Familie & Freunde", completed: false }
 };
 
-// Vordefinierte Dialoge fürs Hörverständnis
+// Längere, praxisnahe Dialoge fürs Hörverständnis
 let dialogues = [
     {
         title: "Im Restaurant bestellen",
-        context: "Du sitzt im Restaurant und wirst gefragt, ob es scharf sein soll.",
+        context: "Du kommst in ein Restaurant, bestellst Wasser und besprichst die Schärfe.",
         lines: [
+            { speaker: "Kellner", thai: "สวัสดีครับ", translit: "sà-wàt-dee kráp", meaning: "Guten Tag!" },
+            { speaker: "Du", thai: "ขอ N น้ำครับ", translit: "kǎw náam kráp", meaning: "Ich hätte gerne Wasser, bitte." },
             { speaker: "Kellner", thai: "กินเผ็ดไหม", translit: "gin phèt mǎai", meaning: "Isst du scharf?" },
             { speaker: "Du", thai: "ไม่เผ็ดครับ", translit: "mâi phèt kráp", meaning: "Nicht scharf, bitte." }
         ],
-        question: "Worüber sprechen die beiden?",
+        question: "Was bestellt und verlangt der Gast?",
         options: [
-            { text: "Ob das Essen scharf sein soll", correct: true },
-            { text: "Wie viel das Wasser kostet", correct: false },
-            { text: "Wo die Toilette ist", correct: false }
+            { text: "Wasser und Essen ohne Schärfe", correct: true },
+            { text: "Sehr scharfe Suppe und Cola", correct: false },
+            { text: "Die Rechnung für die Toilette", correct: false }
         ]
     },
     {
-        title: "Begrüßung unter Freunden",
-        context: "Du triffst einen alten Bekannten wieder.",
+        title: "Wiedersehen unter Freunden",
+        context: "Du triffst einen alten Bekannten und wirst nach deinem Befinden gefragt.",
         lines: [
+            { speaker: "Freund", thai: "สวัสดีครับเพื่อน", translit: "sà-wàt-dee kráp phûan", meaning: "Hallo mein Freund!" },
             { speaker: "Freund", thai: "สบายดีไหม", translit: "sà-baai-dee mǎai", meaning: "Wie geht es dir?" },
-            { speaker: "Du", thai: "สบายดี ขอบคุณครับ", translit: "sà-baai-dee kàwp-kun kráp", meaning: "Mir geht es gut, danke." }
+            { speaker: "Du", thai: "สบายดี ขอบคุณครับ", translit: "sà-baai-dee kàwp-kun kráp", meaning: "Mir geht es gut, danke." },
+            { speaker: "Freund", thai: "ดีมากครับ", translit: "dee mâak kráp", meaning: "Sehr gut!" }
         ],
-        question: "Was bedeutet die Frage des Freundes?",
+        question: "Worüber unterhalten sich die beiden zu Beginn?",
         options: [
-            { text: "Wie geht es dir?", correct: true },
-            { text: "Bist du hungrig?", correct: false },
-            { text: "Schmeckt es dir?", correct: false }
+            { text: "Wie es dem anderen geht", correct: true },
+            { text: "Wo es das beste Restaurant gibt", correct: false },
+            { text: "Wie viel das Wasser kostet", correct: false }
         ]
     }
 ];
