@@ -35,7 +35,6 @@ let lessons = JSON.parse(localStorage.getItem('thai_quest_lessons')) || {
     3: { name: "3. Familie & Freunde", completed: false }
 };
 
-// Längere, praxisnahe Dialoge fürs Hörverständnis
 let dialogues = [
     {
         title: "Im Restaurant bestellen",
