@@ -24,6 +24,49 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// --- Tageswechsel & Streak-Prüfung mit Willkommens-Popup ---
+let streakExtendedToday = false;
+
+function checkDailyReset() {
+    const todayStr = new Date().toDateString();
+    const lastActiveDate = localStorage.getItem('thai_quest_last_date');
+
+    if (lastActiveDate !== todayStr) {
+        // Neuer Tag! Lektionen zurücksetzen zum frischen Üben
+        for (let id in lessons) {
+            lessons[id].completed = false;
+        }
+        localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
+        localStorage.setItem('thai_quest_dialogs', JSON.stringify({})); 
+        
+        // Streak-Logik prüfen
+        let currentStreak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
+
+        if (lastActiveDate) {
+            const lastDateObj = new Date(lastActiveDate);
+            const currentDateObj = new Date(todayStr);
+            const diffTime = Math.abs(currentDateObj - lastDateObj);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                // Genau am Folgetag gelernt -> Streak verlängert!
+                currentStreak++;
+                streakExtendedToday = true;
+                playSound('complete');
+            } else if (diffDays > 1) {
+                // Mehr als ein Tag verpasst -> Streak fängt neu bei 1 an
+                currentStreak = 1;
+            }
+        } else {
+            currentStreak = 1;
+        }
+
+        streak = currentStreak;
+        localStorage.setItem('thai_quest_streak', streak);
+        localStorage.setItem('thai_quest_last_date', todayStr);
+    }
+}
+
 // --- Zuverlässige Thai-Aussprache mit Voice Pre-Warmup ---
 let synth = window.speechSynthesis;
 let thaiVoice = null;
@@ -144,6 +187,41 @@ function showToast(text, isCorrect = true) {
     }, 2000);
 }
 
+// --- Streak-Erfolgsmodal beim Start anzeigen ---
+function showStreakModalIfNeeded() {
+    if (streakExtendedToday) {
+        // Modal-Overlay erstellen
+        const modal = document.createElement('div');
+        modal.id = 'streak-modal';
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center; z-index: 9999;
+            padding: 20px; box-sizing: border-box;
+        `;
+        modal.innerHTML = `
+            <div class="card" style="width: 100%; max-width: 380px; text-align: center; padding: 2rem 1.5rem; border-bottom: 4px solid var(--streak);">
+                <div style="font-size: 4.5rem; margin-bottom: 0.5rem; animation: bounce 1s infinite alternate;">🔥</div>
+                <h2 style="color: var(--streak); margin-top: 0; font-size: 1.6rem;">Streak verlängert!</h2>
+                <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem;">Großartig! Du bist heute wieder am Start und hältst deine Serie am Glühen.</p>
+                
+                <div style="background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 1.2rem; font-weight: bold; color: var(--streak);">
+                    🔥 ${streak} Tage in Folge!
+                </div>
+
+                <button class="action-btn btn-primary" onclick="closeStreakModal()" style="width: 100%; font-size: 1.1rem; padding: 14px; background: var(--streak); border-bottom-color: #c2410c; color: white;">Weiter lernen 🚀</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+}
+
+function closeStreakModal() {
+    const modal = document.getElementById('streak-modal');
+    if (modal) modal.remove();
+    streakExtendedToday = false; // Einmalig pro Tag anzeigen
+}
+
 // --- Deutsche Bedeutung einblenden ---
 function toggleMeaning(event, meaning) {
     if (event) event.stopPropagation();
@@ -171,6 +249,9 @@ function closeTooltipOutside(event) {
 let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
 let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
 
+// Tagesabgleich direkt beim Start ausführen
+checkDailyReset();
+
 let sessionCurrent = 0;
 const sessionTarget = 5;
 let sessionGainedXP = 0;
@@ -188,7 +269,8 @@ function updateHUD() {
     const lvlEl = document.getElementById('level-num');
     if(xpEl) xpEl.innerText = xp;
     if(streakEl) streakEl.innerText = streak;
-    if(lvlEl) lvlEl.innerText = Math.floor(xp / 50) + 1;
+    // Realistischeres Level-System: 200 XP pro Level
+    if(lvlEl) lvlEl.innerText = Math.floor(xp / 200) + 1;
     
     localStorage.setItem('thai_quest_xp', xp);
     localStorage.setItem('thai_quest_streak', streak);
@@ -217,7 +299,7 @@ function renderPath() {
             isCompleted = completedDialogs[station.dialogId];
         }
 
-        let isUnlocked = (index === 0) || xp > (index * 25);
+        let isUnlocked = (index === 0) || xp > (index * 15);
         
         let statusClass = "active";
         let iconSymbol = station.icon;
@@ -954,5 +1036,6 @@ function addVocab(e) {
     switchTab('path');
 }
 
-// Start mit der Pfad-Ansicht
+// Start mit der Pfad-Ansicht und Streak-Prüfung
 switchTab('path');
+showStreakModalIfNeeded();
