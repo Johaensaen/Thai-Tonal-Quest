@@ -77,3 +77,4 @@ const toneDetails = {
     3: { name: "Hochton (High)", path: "M 10 20 L 90 20" },
     4: { name: "Steigender Ton (Rising)", path: "M 10 55 Q 50 55 90 15" }
 };
+
