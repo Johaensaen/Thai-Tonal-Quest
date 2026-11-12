@@ -63,12 +63,11 @@ function checkDailyReset() {
     }
 }
 
-// --- Hilfsfunktion für sichere Emojis (verhindert Flaggen-Fallbacks) ---
+// --- Hilfsfunktion für sichere Emojis ---
 function getVocabEmoji(v) {
     if (v.emoji && v.emoji !== "🇹🇭" && v.emoji.trim() !== "") {
         return v.emoji;
     }
-    // Automatischer Fallback basierend auf Bedeutung
     const m = (v.meaning || "").toLowerCase();
     if (m.includes("hallo") || m.includes("tag")) return "👋";
     if (m.includes("danke")) return "🙏";
@@ -89,7 +88,7 @@ function getVocabEmoji(v) {
     return "💬";
 }
 
-// --- Zuverlässige Thai-Aussprache mit Voice Pre-Warmup ---
+// --- Audio & TTS ---
 let synth = window.speechSynthesis;
 let thaiVoice = null;
 
@@ -108,22 +107,16 @@ if (synth) {
 
 function playAudio(text) {
     if (!synth) {
-        showToast("Audio wird von deinem Browser nicht unterstützt", false);
+        showToast("Audio wird nicht unterstützt", false);
         return;
     }
-
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'th-TH';
     utterance.rate = 0.8;
-
     if (!thaiVoice) loadThaiVoices();
     if (thaiVoice) utterance.voice = thaiVoice;
-
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     synth.speak(utterance);
 }
 
@@ -133,16 +126,13 @@ window.addEventListener('touchstart', function unlockAudio() {
     window.removeEventListener('touchstart', unlockAudio);
 }, { once: true });
 
-// --- Web Audio API Synthesizer ---
 let audioCtx = null;
 
 function getAudioContext() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
 }
 
@@ -187,29 +177,21 @@ function playSound(type) {
                 subOsc.stop(now + index * 0.1 + 0.4);
             });
         }
-    } catch(e) {
-        console.log("Audio blockiert", e);
-    }
+    } catch(e) {}
 }
 
-// --- Toast Benachrichtigung ---
 function showToast(text, isCorrect = true) {
     const banner = document.getElementById('toast-banner');
     const icon = document.getElementById('toast-icon');
     const msg = document.getElementById('toast-text');
     if(!banner) return;
-
     banner.className = "toast-banner " + (isCorrect ? "" : "wrong");
     icon.innerText = isCorrect ? "🎉" : "💡";
     msg.innerText = text;
-
     banner.classList.add('show');
-    setTimeout(() => {
-        banner.classList.remove('show');
-    }, 2000);
+    setTimeout(() => { banner.classList.remove('show'); }, 2000);
 }
 
-// --- Streak-Erfolgsmodal beim Start anzeigen ---
 function showStreakModalIfNeeded() {
     if (streakExtendedToday) {
         const modal = document.createElement('div');
@@ -224,12 +206,10 @@ function showStreakModalIfNeeded() {
             <div class="card" style="width: 100%; max-width: 380px; text-align: center; padding: 2rem 1.5rem; border-bottom: 4px solid var(--streak);">
                 <div style="font-size: 4.5rem; margin-bottom: 0.5rem; animation: bounce 1s infinite alternate;">🔥</div>
                 <h2 style="color: var(--streak); margin-top: 0; font-size: 1.6rem;">Streak verlängert!</h2>
-                <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem;">Großartig! Du bist heute wieder am Start und hältst deine Serie am Glühen.</p>
-                
+                <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem;">Großartig! Du hältst deine Serie am Glühen.</p>
                 <div style="background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 1.2rem; font-weight: bold; color: var(--streak);">
                     🔥 ${streak} Tage in Folge!
                 </div>
-
                 <button class="action-btn btn-primary" onclick="closeStreakModal()" style="width: 100%; font-size: 1.1rem; padding: 14px; background: var(--streak); border-bottom-color: #c2410c; color: white;">Weiter lernen 🚀</button>
             </div>
         `;
@@ -243,7 +223,6 @@ function closeStreakModal() {
     streakExtendedToday = false;
 }
 
-// --- Deutsche Bedeutung einblenden ---
 function toggleMeaning(event, meaning) {
     if (event) event.stopPropagation();
     const box = document.getElementById('meaning-display-box');
@@ -259,14 +238,6 @@ function toggleMeaning(event, meaning) {
     }
 }
 
-function closeTooltipOutside(event) {
-    const box = document.getElementById('meaning-display-box');
-    if (box && !event.target.classList.contains('thai-word') && !event.target.classList.contains('meaning-btn')) {
-        box.style.display = 'none';
-    }
-}
-
-// --- Session State & XP ---
 let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
 let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
 
@@ -290,12 +261,11 @@ function updateHUD() {
     if(xpEl) xpEl.innerText = xp;
     if(streakEl) streakEl.innerText = streak;
     if(lvlEl) lvlEl.innerText = Math.floor(xp / 200) + 1;
-    
     localStorage.setItem('thai_quest_xp', xp);
     localStorage.setItem('thai_quest_streak', streak);
 }
 
-// --- Rendert den Pfad und prüft den korrekten Abschlussstatus ---
+// --- Pfad rendern ---
 function renderPath() {
     const container = document.getElementById('path-nodes-container');
     if (!container) return;
@@ -319,7 +289,6 @@ function renderPath() {
         }
 
         let isUnlocked = (index === 0) || xp > (index * 15);
-        
         let statusClass = "active";
         let iconSymbol = station.icon;
 
@@ -355,6 +324,38 @@ function startSessionForLesson(lessonId, lessonTitle) {
     sessionCurrent = 0;
     sessionGainedXP = 0;
     switchTab('mix');
+}
+
+// ==================== ALPHABET / BUCHSTABEN-LEHRE ====================
+function renderAlphabet() {
+    const container = document.getElementById('alphabet-container');
+    if (!container) return;
+
+    let html = `
+        <div style="margin-bottom: 15px; text-align: center;">
+            <h3 style="color: #38bdf8; margin-bottom: 5px;">🔤 Thailändisches Alphabet & Eselsbrücken</h3>
+            <p style="color: #94a3b8; font-size: 0.85rem;">Inspiriert von Chineasy: Lerne die Buchstaben durch visuelle Eselsbrücken.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+    `;
+
+    letters.forEach((item, idx) => {
+        let classColor = item.class === 'high' ? '#f43f5e' : (item.class === 'low' ? '#38bdf8' : '#eab308');
+        html += `
+            <div class="card" style="padding: 15px; text-align: center; border-bottom: 3px solid ${classColor}; background: #1e293b; border-radius: 12px;">
+                <div style="font-size: 3rem; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${item.char}</div>
+                <div style="font-size: 0.9rem; font-weight: bold; color: #38bdf8;">${item.name}</div>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin: 4px 0;">${item.meaning}</div>
+                <div style="background: #0f172a; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #cbd5e1; margin-top: 8px;">
+                    💡 ${item.mnem}
+                </div>
+                <button class="action-btn" onclick="playAudio('${item.char}')" style="margin-top: 8px; padding: 6px; font-size: 0.8rem; width: 100%;">🔊 Anhören</button>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
 }
 
 // ==================== HÖRVERSTÄNDNIS / DIALOGE ====================
@@ -393,11 +394,9 @@ function startDialogSession(dialogId) {
         <div style="font-size: 0.8rem; color: var(--rising); text-transform: uppercase; margin-bottom:5px;">🎧 Hörverständnis & Gespräch</div>
         <h3 style="margin-top: 5px; color: #f8fafc;">${d.title}</h3>
         <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">${d.context}</p>
-        
         <div style="margin-bottom: 15px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
             ${linesHtml}
         </div>
-
         <div style="border-top: 1px solid #334155; padding-top: 12px; margin-top: 10px;">
             <div style="font-weight: bold; margin-bottom: 8px; font-size: 0.9rem;">❓ ${d.question}</div>
             <div style="display: flex; flex-direction: column;">
@@ -429,14 +428,10 @@ function checkDialogAnswer(isCorrect, dialogId) {
         showToast("Richtig verstanden! 🎉 +30 XP", true);
         xp += 30;
         updateHUD();
-
         let completedDialogs = JSON.parse(localStorage.getItem('thai_quest_dialogs')) || {};
         completedDialogs[dialogId] = true;
         localStorage.setItem('thai_quest_dialogs', JSON.stringify(completedDialogs));
-
-        setTimeout(() => {
-            switchTab('path');
-        }, 1500);
+        setTimeout(() => { switchTab('path'); }, 1500);
     } else {
         playSound('wrong');
         showToast("Das war leider nicht richtig. Hör nochmal rein! 💡", false);
@@ -473,14 +468,14 @@ function advanceSession(earnedXP) {
 function switchTab(tab) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     
-    ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-add'].forEach(id => {
+    ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-alphabet', 'section-add'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.classList.add('hidden');
     });
 
     const navButtons = document.querySelectorAll('.bottom-nav .nav-btn');
     navButtons.forEach(btn => {
-        if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tab)) {
+        if(btn.getAttribute('onclick') && btn.getAttribute('onclick'].includes(tab)) {
             btn.classList.add('active');
         }
     });
@@ -511,13 +506,14 @@ function switchTab(tab) {
         const lessonsEl = document.getElementById('section-lessons');
         if(lessonsEl) lessonsEl.classList.remove('hidden');
         renderLessons();
-    } else if(tab === 'add') {
-        const addEl = document.getElementById('section-add');
-        if(addEl) addEl.classList.add('hidden');
+    } else if(tab === 'alphabet') {
+        const alphabetEl = document.getElementById('section-alphabet');
+        if(alphabetEl) alphabetEl.classList.remove('hidden');
+        renderAlphabet();
     }
 }
 
-// ==================== MIX-QUEST ====================
+// ==================== MIX-QUEST (inkl. Eselsbrücken-Fragen) ====================
 function loadRandomMixMission() {
     updateHUD();
     const container = document.getElementById('card-content-mix');
@@ -529,13 +525,14 @@ function loadRandomMixMission() {
         if (!availableVocabs || availableVocabs.length === 0) availableVocabs = vocabs;
     }
 
-    if (!availableVocabs || availableVocabs.length === 0) {
-        container.innerHTML = "<p style='padding:20px; text-align:center;'>Keine Vokabeln in dieser Station.</p>";
+    // Erweitere Missionen um 'mnem_match' (Chineasy Eselsbrücke)
+    const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match', 'emoji_match', 'mnem_match'];
+    const chosenType = missionTypes[Math.floor(Math.random() * missionTypes.length)];
+
+    if (chosenType === 'mnem_match' && letters.length > 0) {
+        renderMixMnemMatch();
         return;
     }
-
-    const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match', 'emoji_match'];
-    const chosenType = missionTypes[Math.floor(Math.random() * missionTypes.length)];
 
     currentMixIndex = Math.floor(Math.random() * availableVocabs.length);
     const v = availableVocabs[currentMixIndex];
@@ -553,6 +550,48 @@ function loadRandomMixMission() {
         renderMixToneMatch(v);
     } else if (chosenType === 'emoji_match') {
         renderMixEmojiMatch(v, availableVocabs);
+    }
+}
+
+function renderMixMnemMatch() {
+    const container = document.getElementById('card-content-mix');
+    const targetLetter = letters[Math.floor(Math.random() * letters.length)];
+    
+    let options = [targetLetter];
+    while(options.length < 4 && options.length < letters.length) {
+        let randL = letters[Math.floor(Math.random() * letters.length)];
+        if(!options.includes(randL)) options.push(randL);
+    }
+    options.sort(() => Math.random() - 0.5);
+
+    let htmlOptions = '';
+    options.forEach(opt => {
+        let isCorrect = (opt.char === targetLetter.char) ? "true" : "false";
+        htmlOptions += `<button class="action-btn choice-btn" onclick="checkMnemMatch(${isCorrect})" style="font-size: 1.5rem; padding: 15px;">${opt.char} <span style="font-size: 0.8rem; display:block; color:#94a3b8;">${opt.name}</span></button>`;
+    });
+
+    container.innerHTML = `
+        <div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase; margin-bottom:5px;">💡 Eselsbrücken-Trainings (${sessionCurrent + 1}/${sessionTarget})</div>
+        <div style="background: #1e293b; padding: 20px; border-radius: 14px; text-align: center; margin: 15px 0; border: 1px solid #475569;">
+            <div style="font-size: 3rem; margin-bottom: 5px;">${targetLetter.emoji}</div>
+            <div style="font-size: 1.1rem; color: #f8fafc; font-weight: bold; margin-bottom: 5px;">${targetLetter.meaning}</div>
+            <div style="font-size: 0.85rem; color: #38bdf8;">"${targetLetter.mnem}"</div>
+        </div>
+        <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px; text-align: center;">Welcher Buchstabe passt zu dieser Eselsbrücke?</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            ${htmlOptions}
+        </div>
+    `;
+}
+
+function checkMnemMatch(isCorrect) {
+    if(isCorrect) {
+        playSound('correct');
+        showToast("Richtig erkannt! 🎉 +15 XP", true);
+        advanceSession(15);
+    } else {
+        playSound('wrong');
+        showToast("Leider der falsche Buchstabe! 💡", false);
     }
 }
 
@@ -811,7 +850,6 @@ function setupMixCanvas(canvasId, tone, hasGhost) {
 
     let points = [];
     let isDrawing = false;
-
     if(hasGhost) drawGhost(ctx, canvas, tone);
 
     const getCoord = (e) => {
@@ -1131,6 +1169,6 @@ function addVocab(e) {
     switchTab('path');
 }
 
-// Start mit der Pfad-Ansicht und Streak-Prüfung
+// Start mit Pfad & Streak
 switchTab('path');
 showStreakModalIfNeeded();
