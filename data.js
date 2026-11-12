@@ -23,11 +23,23 @@ let defaultVocabs = [
     { thai: "รัก", translit: "rák", meaning: "Liebe / Lieben", tone: 4, lesson: 3, emoji: "❤️" }
 ];
 
+// --- Neue Thai-Buchstaben / Konsonanten mit Chineasy-Eselsbrücken ---
+let defaultLetters = [
+    { char: "ก", name: "Ko Kai", meaning: "Huhn (ก)", class: "middle", mnem: "Sieht aus wie ein Hühnerkopf mit Schnabel.", emoji: "🐔" },
+    { char: "ไข่", name: "Kho Khai", meaning: "Ei (ไข่)", class: "high", mnem: "Ein Ei mit einer kleinen Schleife oben.", emoji: "🥚" },
+    { char: "ช", name: "Cho Chang", meaning: "Elefant (ช)", class: "low", mnem: "Der geschwungene Rumpf eines Elefanten.", emoji: "🐘" },
+    { char: "ม", name: "Mo Ma", meaning: "Pferd (ม)", class: "low", mnem: "Steht stabil auf vier Hufen wie ein Pferd.", emoji: "🐴" },
+    { char: "ส", name: "So Sua", meaning: "Tiger (ส)", class: "high", mnem: "Die geschmeidige Raubkatzen-Kurve.", emoji: "🐅" },
+    { char: "น", name: "No Nu", meaning: "Maus (น)", class: "low", mnem: "Kleine Schleife wie eine winkende Maus.", emoji: "🐭" }
+];
+
 let vocabs = JSON.parse(localStorage.getItem('thai_quest_vocabs'));
 if (!vocabs || !Array.isArray(vocabs) || vocabs.length === 0) {
     vocabs = defaultVocabs;
     localStorage.setItem('thai_quest_vocabs', JSON.stringify(vocabs));
 }
+
+let letters = JSON.parse(localStorage.getItem('thai_quest_letters')) || defaultLetters;
 
 let lessons = JSON.parse(localStorage.getItem('thai_quest_lessons')) || {
     1: { name: "1. Urlaub & Begrüßung", completed: false },
@@ -77,4 +89,3 @@ const toneDetails = {
     3: { name: "Hochton (High)", path: "M 10 20 L 90 20" },
     4: { name: "Steigender Ton (Rising)", path: "M 10 55 Q 50 55 90 15" }
 };
-
