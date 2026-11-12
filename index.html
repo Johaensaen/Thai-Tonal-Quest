@@ -2,160 +2,1183 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thai Tonal Quest</title>
-    
-    <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" id="pwa-manifest">
-    
-    <link rel="stylesheet" href="style.css">
+    <link id="pwa-manifest" rel="manifest">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --correct: #10b981;
+            --wrong: #ef4444;
+            --streak: #f97316;
+            --xp: #eab308;
+            --rising: #a855f7;
+            --falling: #f43f5e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #334155;
+            z-index: 10;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .vocab-emoji-card {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+        }
+
+        .word-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+
+        .thai-word {
+            font-size: 2.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .translit {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .audio-btn {
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 10px rgba(56, 189, 248, 0.3);
+        }
+        .audio-btn:active { transform: scale(0.92); }
+
+        .canvas-container {
+            width: 100%;
+            height: 180px;
+            background: #0f172a;
+            border-radius: 12px;
+            border: 2px dashed #475569;
+            position: relative;
+            margin: 10px 0 20px 0;
+            box-sizing: border-box;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .canvas-hint {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: var(--muted);
+            pointer-events: none;
+            letter-spacing: 0.5px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            background: #334155;
+            color: var(--text);
+            transition: background 0.2s;
+            text-align: center;
+        }
+        .action-btn:active { opacity: 0.8; }
+        .btn-primary {
+            background: var(--correct);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .choice-btn {
+            width: 100%;
+            margin-bottom: 8px;
+            background: #283548;
+            border: 1px solid #475569;
+            text-align: left;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .choice-btn:hover { background: #334155; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            display: flex;
+            background: rgba(30, 41, 59, 0.95);
+            border-top: 1px solid #334155;
+            padding: 8px 4px;
+            justify-content: space-around;
+            z-index: 10;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            flex: 1;
+            padding: 4px 0;
+        }
+        .nav-btn.active { color: var(--accent); font-weight: bold; }
+
+        /* Path Nodes */
+        .path-nodes {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+            padding: 20px 0;
+        }
+
+        .path-node {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+            border: 4px solid rgba(255,255,255,0.1);
+        }
+        .path-node:active { transform: scale(0.95); }
+        .path-node.completed { background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fbbf24; }
+        .path-node.active { background: linear-gradient(135deg, #38bdf8, #0284c7); border-color: #7dd3fc; }
+        .path-node.locked { background: #334155; border-color: #475569; opacity: 0.7; cursor: not-allowed; }
+
+        .node-icon { font-size: 1.8rem; }
+        .node-title {
+            position: absolute;
+            bottom: -22px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            color: var(--text);
+            font-weight: bold;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .lesson-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 14px;
+            width: 100%;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #334155;
+            box-sizing: border-box;
+        }
+
+        .dialog-bubble {
+            background: #1e293b;
+            border-left: 4px solid var(--accent);
+            padding: 12px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Toast Banner */
+        .toast-banner {
+            position: fixed;
+            top: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--correct);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: top 0.3s ease-in-out;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast-banner.show { top: 20px; }
+        .toast-banner.wrong { background: var(--wrong); }
+
+        .hidden { display: none !important; }
+
+        .progress-bar-container {
+            width: 100%;
+            background: #334155;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            background: var(--correct);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
 </head>
 <body onclick="closeTooltipOutside(event)">
 
-<div class="container">
-    <!-- HUD -->
-    <div class="hud">
-        <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">1</span></div>
-        <div class="hud-item" style="color: var(--xp);">⚡ <span id="xp-count">0</span> XP</div>
-        <div class="hud-item" style="color: var(--accent);">🎯 Lvl <span id="level-num">1</span></div>
+    <!-- Toast Benachrichtigung -->
+    <div id="toast-banner" class="toast-banner">
+        <span id="toast-icon">🎉</span>
+        <span id="toast-text">Richtig!</span>
     </div>
 
-    <!-- SECTION 1: LERNPFAD -->
-    <div id="section-path">
-        <div class="card path-card">
-            <div class="section-badge">ABSCHNITT 1: URLAUB & ALLTAG</div>
-            <h3>Dein Thai-Lernpfad</h3>
-            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem;">Wähle deine nächste Station oder Dialog-Übung:</p>
-            
-            <div class="path-nodes" id="path-nodes-container"></div>
+    <!-- Header HUD -->
+    <header>
+        <div class="hud-item" style="color: var(--xp);">
+            ⭐ <span id="xp-count">0</span> XP
         </div>
-    </div>
+        <div class="hud-item" style="color: var(--streak);">
+            🔥 <span id="streak-count">1</span>
+        </div>
+        <div class="hud-item" style="color: var(--accent);">
+            🏆 Lvl <span id="level-num">1</span>
+        </div>
+    </header>
 
-    <!-- SECTION 2: SESSION SPIELFLÄCHE -->
-    <div id="section-mix" class="hidden">
-        <div class="session-progress-bar">
-            <div class="session-progress-fill" id="session-fill"></div>
-        </div>
-        <div class="card" id="card-container-mix">
-            <div id="card-content-mix"></div>
-        </div>
-    </div>
-
-    <!-- SECTION 2.5: DIALOG / HÖRVERSTÄNDNIS -->
-    <div id="section-dialog" class="hidden">
-        <div class="card" id="card-container-dialog">
-            <div id="card-content-dialog"></div>
-        </div>
-    </div>
-
-    <!-- SECTION 3: ABSCHLUSS-SCREEN -->
-    <div id="section-complete" class="hidden">
-        <div class="card" style="text-align: center; padding: 2rem 1.5rem;">
-            <div style="font-size: 4rem; margin-bottom: 0.5rem;">🐘🎉</div>
-            <h2 style="color: var(--high); margin-top: 0;">Station gemeistert!</h2>
-            <p style="color: #94a3b8; margin-bottom: 1.5rem;">Großartige Arbeit! Dein Elefant ist stolz auf dich.</p>
-            
-            <div style="display: flex; justify-content: space-around; background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 1.5rem;">
-                <div>
-                    <div style="font-size: 0.8rem; color: #94a3b8;">XP GESAMT</div>
-                    <div style="font-size: 1.3rem; font-weight: bold; color: var(--xp);" id="summary-xp">+35</div>
-                </div>
-                <div>
-                    <div style="font-size: 0.8rem; color: #94a3b8;">STATUS</div>
-                    <div style="font-size: 1.1rem; font-weight: bold; color: var(--high);">✨ Freigeschaltet</div>
-                </div>
+    <!-- Hauptinhalt -->
+    <main>
+        <!-- Sektion 1: Lernpfad -->
+        <section id="section-path" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <h2 style="margin: 0; font-size: 1.2rem;">Dein Thai-Lernpfad</h2>
+                <p style="color: var(--muted); font-size: 0.8rem; margin: 4px 0 0 0;">Wähle deine nächste Station oder Dialog-Übung.</p>
             </div>
+            <div class="path-nodes" id="path-nodes-container"></div>
+        </section>
 
-            <button class="action-btn btn-primary" onclick="switchTab('path')" style="width: 100%; font-size: 1.1rem; padding: 14px;">Zurück zum Pfad ➔</button>
-        </div>
-    </div>
+        <!-- Sektion 2: Mix-Quest Session -->
+        <section id="section-mix" class="hidden" style="width: 100%;">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="session-fill"></div>
+            </div>
+            <div class="card" id="card-content-mix"></div>
+        </section>
 
-    <!-- TRAINING SECTION -->
-    <div id="section-train" class="hidden">
-        <div class="card" id="card-container-train">
-            <div id="card-content-train"></div>
-        </div>
-    </div>
+        <!-- Sektion 3: Dialog-Session -->
+        <section id="section-dialog" class="hidden" style="width: 100%;">
+            <div class="card" id="card-content-dialog"></div>
+        </section>
 
-    <!-- EXAM SECTION -->
-    <div id="section-exam" class="hidden">
-        <div class="card" style="border-bottom-color: #ef4444;" id="card-container-exam">
-            <div id="card-content-exam"></div>
-        </div>
-    </div>
+        <!-- Sektion 4: Training (Mit Ghost-Linie) -->
+        <section id="section-train" class="hidden" style="width: 100%;">
+            <div class="card" id="card-content-train"></div>
+        </section>
 
-    <!-- LESSONS SECTION -->
-    <div id="section-lessons" class="hidden">
-        <div class="card" style="text-align: left; max-height: 400px; overflow-y: auto;">
-            <h3 style="margin-top: 0; font-size: 1.1rem;">Lernpakete & Themen</h3>
-            <div id="lessons-container"></div>
-        </div>
-    </div>
+        <!-- Sektion 5: Prüfung (Freihand) -->
+        <section id="section-exam" class="hidden" style="width: 100%;">
+            <div class="card" id="card-content-exam"></div>
+        </section>
 
-    <!-- ADD SECTION -->
-    <div id="section-add" class="hidden">
-        <div class="card">
-            <h3 style="margin-top: 0; font-size: 1.2rem;">Neues Wort hinzufügen</h3>
-            <form id="add-form" onsubmit="addVocab(event)">
-                <div>
-                    <label>Thai-Schrift:</label>
-                    <input type="text" id="input-thai" required placeholder="z.B. สวัสดี">
+        <!-- Sektion 6: Lektionen Übersicht -->
+        <section id="section-lessons" class="hidden" style="width: 100%;">
+            <h3 style="margin-top:0; color: var(--accent);">📚 Alle Lektionen</h3>
+            <div id="lessons-container" style="width: 100%;"></div>
+        </section>
+
+        <!-- Sektion 7: Alphabet & Eselsbrücken -->
+        <section id="section-alphabet" class="hidden" style="width: 100%; overflow-y: auto; max-height: 80vh; padding-bottom: 20px;">
+            <div id="alphabet-container" style="width: 100%;"></div>
+        </section>
+
+        <!-- Sektion 8: Wort hinzufügen -->
+        <section id="section-add" class="hidden" style="width: 100%;">
+            <div class="card" style="align-items: stretch;">
+                <h3 style="margin-top:0; text-align:center; color: var(--accent);">✍️ Eigenes Wort hinzufügen</h3>
+                <form id="add-form" onsubmit="addVocab(event)" style="display:flex; flex-direction:column; gap:10px;">
+                    <label style="font-size:0.8rem; color:var(--muted);">Thailändisches Schriftbild:</label>
+                    <input type="text" id="input-thai" required style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
+                    
+                    <label style="font-size:0.8rem; color:var(--muted);">Umschrift (Transliteration):</label>
+                    <input type="text" id="input-translit" required style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
+                    
+                    <label style="font-size:0.8rem; color:var(--muted);">Deutsche Bedeutung:</label>
+                    <input type="text" id="input-meaning" required style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
+                    
+                    <label style="font-size:0.8rem; color:var(--muted);">Emoji-Symbol:</label>
+                    <input type="text" id="input-image" placeholder="z.B. 🐘" style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
+
+                    <label style="font-size:0.8rem; color:var(--muted);">Lektion (1-3):</label>
+                    <input type="number" id="input-lesson" value="1" min="1" max="3" style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
+
+                    <label style="font-size:0.8rem; color:var(--muted);">Ton (0=Mid, 1=Low, 2=Falling, 3=High, 4=Rising):</label>
+                    <input type="number" id="input-tone" value="0" min="0" max="4" style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
+
+                    <button type="submit" class="action-btn btn-primary" style="margin-top:10px;">Speichern 🚀</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Sektion 9: Session Abschluss-Bildschirm -->
+        <section id="section-complete" class="hidden" style="width: 100%; text-align: center; justify-content: center; align-items: center; padding-top: 40px;">
+            <div style="font-size: 5rem; margin-bottom: 10px;">🎉</div>
+            <h2 style="color: var(--correct); font-size: 1.8rem; margin-top:0;">Station erfolgreich gemeistert!</h2>
+            <p style="color: var(--muted); margin-bottom: 20px;">Du hast diesen Abschnitt abgeschlossen.</p>
+            <div class="card" style="background: #283548; padding: 15px; margin-bottom: 25px;">
+                <div style="font-size: 0.9rem; color: var(--muted);">Erhaltene XP</div>
+                <div style="font-size: 2rem; font-weight: bold; color: var(--xp);" id="summary-xp">+100</div>
+            </div>
+            <button class="action-btn btn-primary" onclick="switchTab('path')" style="width: 100%; padding: 14px;">Zurück zum Pfad ➔</button>
+        </section>
+    </main>
+
+    <!-- Untere Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('path')">
+            <span>🗺️</span> Pfad
+        </button>
+        <button class="nav-btn" onclick="switchTab('train')">
+            <span>🏋️</span> Training
+        </button>
+        <button class="nav-btn" onclick="switchTab('exam')">
+            <span>🎓</span> Prüfung
+        </button>
+        <button class="nav-btn" onclick="switchTab('lessons')">
+            <span>📚</span> Lektionen
+        </button>
+        <button class="nav-btn" onclick="switchTab('alphabet')">
+            <span>🔤</span> Alphabet
+        </button>
+        <button class="nav-btn" onclick="switchTab('add')">
+            <span>➕</span> Wort
+        </button>
+    </nav>
+
+    <!-- Skript-Einbindung aus data.js und app.js Logik -->
+    <script>
+        // --- DATA.JS INHALT ---
+        let defaultVocabs = [
+            { thai: "สวัสดี", translit: "sà-wàt-dee", meaning: "Hallo / Guten Tag", tone: 3, lesson: 1, emoji: "👋" },
+            { thai: "ขอบคุณ", translit: "kàwp-kun", meaning: "Danke", tone: 2, lesson: 1, emoji: "🙏" },
+            { thai: "ใช่", translit: "châi", meaning: "Ja", tone: 2, lesson: 1, emoji: "✅" },
+            { thai: "ไม่", translit: "mâi", meaning: "Nein / Nicht", tone: 2, lesson: 1, emoji: "❌" },
+            { thai: "ห้องน้ำ", translit: "hɔ̂ng-náam", meaning: "Toilette / WC", tone: 2, lesson: 1, emoji: "🚻" },
+            { thai: "เท่าไหร่", translit: "thâo-ràai", meaning: "Wieviel kostet das?", tone: 1, lesson: 1, emoji: "💰" },
+            { thai: "น้ำ", translit: "náam", meaning: "Wasser", tone: 3, lesson: 2, emoji: "💧" },
+            { thai: "กิน", translit: "gin", meaning: "essen", tone: 0, lesson: 2, emoji: "🍚" },
+            { thai: "หิว", translit: "hǐw", meaning: "hungrig", tone: 4, lesson: 2, emoji: "😋" },
+            { thai: "อร่อย", translit: "à-rɔ̀y", meaning: "Lecker!", tone: 1, lesson: 2, emoji: "🍲" },
+            { thai: "เผ็ด", translit: "phèt", meaning: "Scharf", tone: 1, lesson: 2, emoji: "🔥" },
+            { thai: "ไม่เผ็ด", translit: "mâi-phèt", meaning: "Nicht scharf", tone: 2, lesson: 2, emoji: "🥛" },
+            { thai: "เพื่อน", translit: "phûan", meaning: "Freund / Freundin", tone: 2, lesson: 3, emoji: "🧑‍🤝‍🧑" },
+            { thai: "ครอบครัว", translit: "krɔ̀ːp-krūa", meaning: "Familie", tone: 1, lesson: 3, emoji: "👨‍👩‍👧‍👦" },
+            { thai: "สบายดีไหม", translit: "sà-baai-dee mǎai", meaning: "Wie geht es dir?", tone: 0, lesson: 3, emoji: "💬" },
+            { thai: "สบายดี", translit: "sà-baai-dee", meaning: "Mir geht es gut", tone: 0, lesson: 3, emoji: "😊" },
+            { thai: "รัก", translit: "rák", meaning: "Liebe / Lieben", tone: 4, lesson: 3, emoji: "❤️" }
+        ];
+
+        let defaultLetters = [
+            { char: "ก", name: "Ko Kai", meaning: "Huhn (ก)", class: "middle", mnem: "Sieht aus wie ein Hühnerkopf mit Schnabel.", emoji: "🐔" },
+            { char: "ไข่", name: "Kho Khai", meaning: "Ei (ไข่)", class: "high", mnem: "Ein Ei mit einer kleinen Schleife oben.", emoji: "🥚" },
+            { char: "ช", name: "Cho Chang", meaning: "Elefant (ช)", class: "low", mnem: "Der geschwungene Rumpf eines Elefanten.", emoji: "🐘" },
+            { char: "ม", name: "Mo Ma", meaning: "Pferd (ม)", class: "low", mnem: "Steht stabil auf vier Hufen wie ein Pferd.", emoji: "🐴" },
+            { char: "ส", name: "So Sua", meaning: "Tiger (ส)", class: "high", mnem: "Die geschmeidige Raubkatzen-Kurve.", emoji: "🐅" },
+            { char: "น", name: "No Nu", meaning: "Maus (น)", class: "low", mnem: "Kleine Schleife wie eine winkende Maus.", emoji: "🐭" }
+        ];
+
+        let vocabs = JSON.parse(localStorage.getItem('thai_quest_vocabs'));
+        if (!vocabs || !Array.isArray(vocabs) || vocabs.length === 0) {
+            vocabs = defaultVocabs;
+            localStorage.setItem('thai_quest_vocabs', JSON.stringify(vocabs));
+        }
+
+        let letters = JSON.parse(localStorage.getItem('thai_quest_letters')) || defaultLetters;
+
+        let lessons = JSON.parse(localStorage.getItem('thai_quest_lessons')) || {
+            1: { name: "1. Urlaub & Begrüßung", completed: false },
+            2: { name: "2. Essen & Restaurant", completed: false },
+            3: { name: "3. Familie & Freunde", completed: false }
+        };
+
+        let dialogues = [
+            {
+                title: "Im Restaurant bestellen",
+                context: "Du kommst in ein Restaurant, bestellst Wasser und besprichst die Schärfe.",
+                lines: [
+                    { speaker: "Kellner", thai: "สวัสดีครับ", translit: "sà-wàt-dee kráp", meaning: "Guten Tag!" },
+                    { speaker: "Du", thai: "ขอ N น้ำครับ", translit: "kǎw náam kráp", meaning: "Ich hätte gerne Wasser, bitte." },
+                    { speaker: "Kellner", thai: "กินเผ็ดไหม", translit: "gin phèt mǎai", meaning: "Isst du scharf?" },
+                    { speaker: "Du", thai: "ไม่เผ็ดครับ", translit: "mâi phèt kráp", meaning: "Nicht scharf, bitte." }
+                ],
+                question: "Was bestellt und verlangt der Gast?",
+                options: [
+                    { text: "Wasser und Essen ohne Schärfe", correct: true },
+                    { text: "Sehr scharfe Suppe und Cola", correct: false },
+                    { text: "Die Rechnung für die Toilette", correct: false }
+                ]
+            },
+            {
+                title: "Wiedersehen unter Freunden",
+                context: "Du triffst einen alten Bekannten und wirst nach deinem Befinden gefragt.",
+                lines: [
+                    { speaker: "Freund", thai: "สวัสดีครับเพื่อน", translit: "sà-wàt-dee kráp phûan", meaning: "Hallo mein Freund!" },
+                    { speaker: "Freund", thai: "สบายดีไหม", translit: "sà-baai-dee mǎai", meaning: "Wie geht es dir?" },
+                    { speaker: "Du", thai: "สบายดี ขอบคุณครับ", translit: "sà-baai-dee kàwp-kun kráp", meaning: "Mir geht es gut, danke." },
+                    { speaker: "Freund", thai: "ดีมากครับ", translit: "dee mâak kráp", meaning: "Sehr gut!" }
+                ],
+                question: "Worüber unterhalten sich die beiden zu Beginn?",
+                options: [
+                    { text: "Wie es dem anderen geht", correct: true },
+                    { text: "Wo es das beste Restaurant gibt", correct: false },
+                    { text: "Wie viel das Wasser kostet", correct: false }
+                ]
+            }
+        ];
+
+        const toneDetails = {
+            0: { name: "Mittelton (Mid)", path: "M 10 35 L 90 35" },
+            1: { name: "Tiefton (Low)", path: "M 10 20 L 90 60" },
+            2: { name: "Fallender Ton (Falling)", path: "M 10 50 Q 50 10 90 55" },
+            3: { name: "Hochton (High)", path: "M 10 20 L 90 20" },
+            4: { name: "Steigender Ton (Rising)", path: "M 10 55 Q 50 55 90 15" }
+        };
+
+        // --- APP.JS LOGIK ---
+        let streakExtendedToday = false;
+
+        function checkDailyReset() {
+            const todayStr = new Date().toDateString();
+            const lastActiveDate = localStorage.getItem('thai_quest_last_date');
+
+            if (lastActiveDate !== todayStr) {
+                for (let id in lessons) { lessons[id].completed = false; }
+                localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
+                localStorage.setItem('thai_quest_dialogs', JSON.stringify({})); 
+                
+                let currentStreak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
+                if (lastActiveDate) {
+                    const lastDateObj = new Date(lastActiveDate);
+                    const currentDateObj = new Date(todayStr);
+                    const diffDays = Math.ceil(Math.abs(currentDateObj - lastDateObj) / (1000 * 60 * 60 * 24));
+                    if (diffDays === 1) { currentStreak++; streakExtendedToday = true; }
+                    else if (diffDays > 1) { currentStreak = 1; }
+                } else { currentStreak = 1; }
+                streak = currentStreak;
+                localStorage.setItem('thai_quest_streak', streak);
+                localStorage.setItem('thai_quest_last_date', todayStr);
+            }
+        }
+
+        function getVocabEmoji(v) {
+            if (v.emoji && v.emoji !== "🇹🇭" && v.emoji.trim() !== "") return v.emoji;
+            const m = (v.meaning || "").toLowerCase();
+            if (m.includes("hallo") || m.includes("tag")) return "👋";
+            if (m.includes("danke")) return "🙏";
+            if (m.includes("ja")) return "✅";
+            if (m.includes("nein") || m.includes("nicht")) return "❌";
+            if (m.includes("toilette") || m.includes("wc")) return "🚻";
+            if (m.includes("wieviel")) return "💰";
+            if (m.includes("wasser")) return "💧";
+            if (m.includes("essen")) return "🍚";
+            if (m.includes("hungrig")) return "😋";
+            if (m.includes("lecker")) return "🍲";
+            if (m.includes("scharf")) return "🔥";
+            if (m.includes("freund")) return "🧑‍🤝‍🧑";
+            if (m.includes("familie")) return "👨‍👩‍👧‍👦";
+            return "💬";
+        }
+
+        let synth = window.speechSynthesis;
+        let thaiVoice = null;
+        function loadThaiVoices() {
+            if (!synth) return;
+            const voices = synth.getVoices();
+            thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH')) || null;
+        }
+        if (synth) {
+            loadThaiVoices();
+            if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadThaiVoices;
+        }
+
+        function playAudio(text) {
+            if (!synth) return;
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'th-TH';
+            utterance.rate = 0.8;
+            if (!thaiVoice) loadThaiVoices();
+            if (thaiVoice) utterance.voice = thaiVoice;
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            synth.speak(utterance);
+        }
+
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now); osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(120, now + 0.2);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now); osc.stop(now + 0.25);
+                }
+            } catch(e) {}
+        }
+
+        function showToast(text, isCorrect = true) {
+            const banner = document.getElementById('toast-banner');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-text');
+            if(!banner) return;
+            banner.className = "toast-banner " + (isCorrect ? "" : "wrong");
+            icon.innerText = isCorrect ? "🎉" : "💡";
+            msg.innerText = text;
+            banner.classList.add('show');
+            setTimeout(() => { banner.classList.remove('show'); }, 2000);
+        }
+
+        function toggleMeaning(event, meaning) {
+            if (event) event.stopPropagation();
+            const box = document.getElementById('meaning-display-box');
+            if (box) {
+                if (box.style.display === 'none' || box.innerText.includes('Bedeutung')) {
+                    box.innerHTML = `🇩🇪 <b>${meaning}</b>`;
+                    box.style.display = 'block';
+                    box.style.background = '#334155';
+                    box.style.color = '#38bdf8';
+                } else { box.style.display = 'none'; }
+            }
+        }
+
+        function closeTooltipOutside(event) {
+            const box = document.getElementById('meaning-display-box');
+            if (box && !event.target.classList.contains('thai-word') && !event.target.classList.contains('meaning-btn')) {
+                box.style.display = 'none';
+            }
+        }
+
+        let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
+        let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
+        checkDailyReset();
+
+        let sessionCurrent = 0;
+        const sessionTarget = 5;
+        let sessionGainedXP = 0;
+        let activeLessonFilter = null; 
+
+        let currentTrainIndex = null;
+        let currentExamIndex = null;
+        let currentMixIndex = null;
+        let trainPoints = [], trainCanvas, trainCtx, trainSnapped = false;
+        let examPoints = [], examCanvas, examCtx, examDrawingActive = false;
+
+        function updateHUD() {
+            document.getElementById('xp-count').innerText = xp;
+            document.getElementById('streak-count').innerText = streak;
+            document.getElementById('level-num').innerText = Math.floor(xp / 200) + 1;
+            localStorage.setItem('thai_quest_xp', xp);
+            localStorage.setItem('thai_quest_streak', streak);
+        }
+
+        function renderPath() {
+            const container = document.getElementById('path-nodes-container');
+            if (!container) return;
+            let html = "";
+            let stationList = [
+                { id: 1, title: "Urlaub & Alltag", icon: "✈️", type: "lesson", lessonId: 1 },
+                { id: 2, title: "Essen & Restaurant", icon: "🍲", type: "lesson", lessonId: 2 },
+                { id: 3, title: "Hör-Dialog 1", icon: "🎧", type: "dialog", dialogId: 0 },
+                { id: 4, title: "Freunde & Familie", icon: "💬", type: "lesson", lessonId: 3 },
+                { id: 5, title: "Hör-Dialog 2", icon: "🎧", type: "dialog", dialogId: 1 }
+            ];
+
+            stationList.forEach((station, index) => {
+                let isCompleted = false;
+                if (station.type === 'lesson') {
+                    isCompleted = lessons && lessons[station.lessonId] && lessons[station.lessonId].completed;
+                } else if (station.type === 'dialog') {
+                    let completedDialogs = JSON.parse(localStorage.getItem('thai_quest_dialogs')) || {};
+                    isCompleted = completedDialogs[station.dialogId];
+                }
+                let isUnlocked = (index === 0) || xp > (index * 15);
+                let statusClass = "active";
+                let iconSymbol = station.icon;
+                if (isCompleted) { statusClass = "completed"; iconSymbol = "⭐"; }
+                else if (!isUnlocked) { statusClass = "locked"; iconSymbol = "🔒"; }
+
+                let clickAction = station.type === 'lesson' 
+                    ? `startSessionForLesson(${station.lessonId}, '${station.title}')` 
+                    : `startDialogSession(${station.dialogId})`;
+
+                html += `<div class="path-node ${statusClass}" onclick="${isUnlocked ? clickAction : `showLockedAlert()`}">
+                    <div class="node-icon">${iconSymbol}</div>
+                    <div class="node-title">${station.title}</div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function showLockedAlert() { showToast("Schließe erst vorherige Stationen ab! 🔒", false); }
+        function startSessionForLesson(lessonId) { activeLessonFilter = lessonId; sessionCurrent = 0; sessionGainedXP = 0; switchTab('mix'); }
+
+        function renderAlphabet() {
+            const container = document.getElementById('alphabet-container');
+            if (!container) return;
+            let html = `<div style="margin-bottom: 15px; text-align: center;">
+                <h3 style="color: #38bdf8; margin-bottom: 5px;">🔤 Thailändisches Alphabet & Eselsbrücken</h3>
+                <p style="color: #94a3b8; font-size: 0.85rem;">Inspiriert von Chineasy: Lerne die Buchstaben durch visuelle Eselsbrücken.</p>
+            </div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">`;
+
+            letters.forEach((item) => {
+                let classColor = item.class === 'high' ? '#f43f5e' : (item.class === 'low' ? '#38bdf8' : '#eab308');
+                html += `<div class="card" style="padding: 15px; text-align: center; border-bottom: 3px solid ${classColor}; background: #1e293b; border-radius: 12px; margin-bottom:0;">
+                    <div style="font-size: 3rem; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${item.char}</div>
+                    <div style="font-size: 0.9rem; font-weight: bold; color: #38bdf8;">${item.name}</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin: 4px 0;">${item.meaning}</div>
+                    <div style="background: #0f172a; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #cbd5e1; margin-top: 8px;">💡 ${item.mnem}</div>
+                    <button class="action-btn" onclick="playAudio('${item.char}')" style="margin-top: 8px; padding: 6px; font-size: 0.8rem; width: 100%;">🔊 Anhören</button>
+                </div>`;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function startDialogSession(dialogId) {
+            switchTab('dialog');
+            const container = document.getElementById('card-content-dialog');
+            const d = dialogues[dialogId] || dialogues[0];
+            let linesHtml = "";
+            d.lines.forEach((line, idx) => {
+                linesHtml += `<div class="dialog-bubble" style="display:flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-size: 0.75rem; color: var(--accent); font-weight: bold;">${line.speaker}</div>
+                        <button class="audio-btn" onclick="playAudio('${line.thai}')" style="width: 34px; height: 34px; font-size: 0.9rem;">🔊</button>
+                    </div>
+                    <div style="font-size: 1.4rem; font-weight: bold; margin: 4px 0;">${line.thai}</div>
+                    <button class="action-btn" onclick="toggleDialogDetails(event, 'dialog-details-${dialogId}-${idx}')" style="font-size: 0.75rem; padding: 4px; background: #1e293b; border: 1px solid #475569; color: #94a3b8; text-align: left;">👁️ Details</button>
+                    <div id="dialog-details-${dialogId}-${idx}" style="display: none; margin-top: 6px; font-size: 0.8rem; color: #94a3b8;">
+                        <div>🔤 Umschrift: ${line.translit}</div>
+                        <div>🇩🇪 Bedeutung: ${line.meaning}</div>
+                    </div>
+                </div>`;
+            });
+            let optionsHtml = "";
+            d.options.forEach(opt => {
+                optionsHtml += `<button class="action-btn choice-btn" onclick="checkDialogAnswer(${opt.correct}, ${dialogId})">${opt.text}</button>`;
+            });
+            container.innerHTML = `<h3 style="color:#f8fafc; margin-top:0;">${d.title}</h3>
+                <p style="font-size:0.85rem; color:#94a3b8;">${d.context}</p>
+                <div style="max-height: 220px; overflow-y: auto; width:100%; margin-bottom:10px;">${linesHtml}</div>
+                <div style="font-weight: bold; font-size: 0.9rem; margin-bottom:8px;">❓ ${d.question}</div>
+                <div style="width:100%;">${optionsHtml}</div>`;
+        }
+
+        function checkDialogAnswer(isCorrect, dialogId) {
+            if (isCorrect) {
+                playSound('correct');
+                showToast("Richtig! 🎉 +30 XP", true);
+                xp += 30; updateHUD();
+                let completedDialogs = JSON.parse(localStorage.getItem('thai_quest_dialogs')) || {};
+                completedDialogs[dialogId] = true;
+                localStorage.setItem('thai_quest_dialogs', JSON.stringify(completedDialogs));
+                setTimeout(() => switchTab('path'), 1500);
+            } else { playSound('wrong'); showToast("Falsch. Versuch es nochmal!", false); }
+        }
+
+        function advanceSession(earnedXP) {
+            sessionCurrent++; sessionGainedXP += earnedXP; xp += earnedXP; updateHUD();
+            const fill = document.getElementById('session-fill');
+            if(fill) fill.style.width = ((sessionCurrent / sessionTarget) * 100) + "%";
+            if (sessionCurrent >= sessionTarget) {
+                if (activeLessonFilter && lessons[activeLessonFilter]) {
+                    lessons[activeLessonFilter].completed = true;
+                    localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
+                }
+                document.getElementById('section-mix').classList.add('hidden');
+                document.getElementById('section-complete').classList.remove('hidden');
+                document.getElementById('summary-xp').innerText = "+" + sessionGainedXP;
+            } else { loadRandomMixMission(); }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-alphabet', 'section-add'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+            const navButtons = document.querySelectorAll('.bottom-nav .nav-btn');
+            navButtons.forEach(btn => { if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tab)) btn.classList.add('active'); });
+
+            if(tab === 'path') { document.getElementById('section-path').classList.remove('hidden'); updateHUD(); renderPath(); }
+            else if(tab === 'mix') { document.getElementById('section-mix').classList.remove('hidden'); loadRandomMixMission(); }
+            else if(tab === 'train') { document.getElementById('section-train').classList.remove('hidden'); loadTrainCard(); }
+            else if(tab === 'exam') { document.getElementById('section-exam').classList.remove('hidden'); loadExamCard(); }
+            else if(tab === 'lessons') { document.getElementById('section-lessons').classList.remove('hidden'); renderLessons(); }
+            else if(tab === 'alphabet') { document.getElementById('section-alphabet').classList.remove('hidden'); renderAlphabet(); }
+        }
+
+        function loadRandomMixMission() {
+            updateHUD();
+            const container = document.getElementById('card-content-mix');
+            if (!container) return;
+            let availableVocabs = vocabs;
+            if (activeLessonFilter) {
+                availableVocabs = vocabs.filter(v => v.lesson == activeLessonFilter);
+                if (!availableVocabs || availableVocabs.length === 0) availableVocabs = vocabs;
+            }
+            const missionTypes = ['train_canvas', 'exam_canvas', 'audio_mc', 'tone_match', 'emoji_match', 'mnem_match'];
+            const chosenType = missionTypes[Math.floor(Math.random() * missionTypes.length)];
+
+            if (chosenType === 'mnem_match' && letters.length > 0) { renderMixMnemMatch(); return; }
+
+            currentMixIndex = Math.floor(Math.random() * availableVocabs.length);
+            const v = availableVocabs[currentMixIndex];
+            setTimeout(() => playAudio(v.thai), 350);
+
+            if (chosenType === 'train_canvas') renderMixTrainCanvas(v);
+            else if (chosenType === 'exam_canvas') renderMixExamCanvas(v);
+            else if (chosenType === 'audio_mc') renderMixAudioMC(v, availableVocabs);
+            else if (chosenType === 'tone_match') renderMixToneMatch(v);
+            else if (chosenType === 'emoji_match') renderMixEmojiMatch(v, availableVocabs);
+        }
+
+        function renderMixMnemMatch() {
+            const container = document.getElementById('card-content-mix');
+            const targetLetter = letters[Math.floor(Math.random() * letters.length)];
+            let options = [targetLetter];
+            while(options.length < 4 && options.length < letters.length) {
+                let randL = letters[Math.floor(Math.random() * letters.length)];
+                if(!options.includes(randL)) options.push(randL);
+            }
+            options.sort(() => Math.random() - 0.5);
+            let htmlOptions = '';
+            options.forEach(opt => {
+                htmlOptions += `<button class="action-btn choice-btn" onclick="checkMnemMatch(${opt.char === targetLetter.char})" style="font-size: 1.5rem; text-align:center; padding: 12px;">${opt.char}</button>`;
+            });
+            container.innerHTML = `<div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase;">💡 Eselsbrücke</div>
+                <div style="background: #1e293b; padding: 15px; border-radius: 12px; text-align: center; margin: 10px 0; border: 1px solid #475569; width:100%;">
+                    <div style="font-size: 2.5rem;">${targetLetter.emoji}</div>
+                    <div style="font-size: 1rem; font-weight: bold; color: #f8fafc;">${targetLetter.meaning}</div>
+                    <div style="font-size: 0.8rem; color: #38bdf8;">"${targetLetter.mnem}"</div>
                 </div>
-                <div>
-                    <label>Umschrift:</label>
-                    <input type="text" id="input-translit" required placeholder="z.B. sà-wàt-dee">
-                </div>
-                <div>
-                    <label>Bedeutung:</label>
-                    <input type="text" id="input-meaning" required placeholder="z.B. Hallo">
-                </div>
-                <div>
-                    <label>Emoji-Symbol:</label>
-                    <input type="text" id="input-image" placeholder="z.B. 👋">
-                </div>
-                <div>
-                    <label>Themenbereich:</label>
-                    <select id="input-lesson">
-                        <option value="1">1. Urlaub & Begrüßung (Grundlagen)</option>
-                        <option value="2">2. Essen, Trinken & Restaurant</option>
-                        <option value="3">3. Familie, Freunde & Höflichkeit</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Ton-Typ:</label>
-                    <select id="input-tone">
-                        <option value="0">➡️ Mittelton (Gleichbleibend)</option>
-                        <option value="1">↘️ Tiefton (Fällt ab)</option>
-                        <option value="2">📉 Fallender Ton (Bogen, dann steil runter)</option>
-                        <option value="3">📈 Hochton (Schwebt oben)</option>
-                        <option value="4">🚀 Steigender Ton (Zieht hoch)</option>
-                    </select>
-                </div>
-                <button type="submit" class="action-btn btn-primary" style="margin-top: 10px; width: 100%; padding: 12px;">Speichern</button>
-            </form>
-        </div>
-    </div>
-</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width:100%;">${htmlOptions}</div>`;
+        }
 
-<!-- Feste untere Navigationsleiste -->
-<nav class="bottom-nav">
-    <button class="nav-btn active" onclick="switchTab('path')">🗺️ Pfad</button>
-    <button class="nav-btn" onclick="switchTab('train')">🏋️ Training</button>
-    <button class="nav-btn" onclick="switchTab('exam')">🎓 Prüfung</button>
-    <button class="nav-btn" onclick="switchTab('lessons')">📦 Lektionen</button>
-    <button class="nav-btn" onclick="switchTab('add')">+ Wort</button>
-</nav>
+        function checkMnemMatch(isCorrect) {
+            if(isCorrect) { playSound('correct'); showToast("Richtig! 🎉 +15 XP", true); advanceSession(15); }
+            else { playSound('wrong'); showToast("Falsch! 💡", false); }
+        }
 
-<!-- Toast Banner -->
-<div id="toast-banner" class="toast-banner hidden">
-    <div id="toast-icon">🎉</div>
-    <div id="toast-text">Richtig! +15 XP</div>
-</div>
+        function getToneCurveSvg(tone) {
+            return `<svg width="40" height="24" viewBox="0 0 100 70" style="display:inline-block; vertical-align:middle; margin-right:8px;"><path d="${toneDetails[tone].path}" stroke="#38bdf8" stroke-width="10" fill="none" stroke-linecap="round"/></svg>`;
+        }
 
-<script src="data.js"></script>
-<script src="app.js"></script>
+        function renderMixTrainCanvas(v) {
+            document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--accent);">✨ Tonkurve nachzeichnen</div>
+                <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
+                <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
+                <div class="translit">${v.translit}</div>
+                <div class="canvas-container"><canvas id="mixTrainCanvas"></canvas></div>
+                <div class="btn-group"><button class="action-btn" onclick="loadRandomMixMission()">Überspringen</button><button class="action-btn btn-primary" onclick="advanceSession(15)">Richtig ➔</button></div>`;
+            setupMixCanvas('mixTrainCanvas', v.tone, true);
+        }
 
+        function renderMixExamCanvas(v) {
+            document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: #ef4444;">🧠 Freies Zeichnen</div>
+                <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
+                <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
+                <div class="translit">${v.translit}</div>
+                <div class="canvas-container" style="border-color: #ef4444;"><canvas id="mixExamCanvas"></canvas></div>
+                <div class="btn-group"><button class="action-btn" onclick="clearExamCanvas()">Löschen</button><button class="action-btn btn-primary" onclick="checkMixExamDrawing()" style="background:var(--falling);">Einreichen ➔</button></div>`;
+            setupMixExamCanvas('mixExamCanvas');
+        }
+
+        function setupMixExamCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
+            examPoints = [];
+            const getCoord = (e) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
+            canvas.onmousedown = (e) => { examPoints = [getCoord(e)]; examDrawingActive = true; };
+            canvas.onmousemove = (e) => { if(examDrawingActive) { examPoints.push(getCoord(e)); redrawExamCanvas(ctx, canvas); } };
+            canvas.onmouseup = () => { examDrawingActive = false; };
+            canvas.ontouchstart = (e) => { examPoints = [getCoord(e.touches[0])]; examDrawingActive = true; e.preventDefault(); };
+            canvas.ontouchmove = (e) => { if(examDrawingActive) { examPoints.push(getCoord(e.touches[0])); redrawExamCanvas(ctx, canvas); e.preventDefault(); } };
+            canvas.ontouchend = () => { examDrawingActive = false; };
+        }
+
+        function redrawExamCanvas(ctx, canvas) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (examPoints.length < 2) return;
+            ctx.beginPath(); ctx.moveTo(examPoints[0].x, examPoints[0].y);
+            for(let p of examPoints) ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 4; ctx.stroke();
+        }
+
+        function checkMixExamDrawing() {
+            if (examPoints.length < 5) { playSound('wrong'); showToast("Bitte zeichne die Kurve!", false); return; }
+            const correctTone = vocabs[currentMixIndex].tone;
+            playSound('correct'); showToast("Richtig gezeichnet! 🎉 +25 XP", true); advanceSession(25);
+        }
+
+        function renderMixAudioMC(v, pool) {
+            let options = [v.meaning];
+            while(options.length < 4 && options.length < pool.length) {
+                let rm = pool[Math.floor(Math.random() * pool.length)].meaning;
+                if(!options.includes(rm)) options.push(rm);
+            }
+            options.sort(() => Math.random() - 0.5);
+            let htmlOptions = '';
+            options.forEach(opt => { htmlOptions += `<button class="action-btn choice-btn" onclick="checkAudioMC(${opt === v.meaning})">${opt}</button>`; });
+            document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--xp);">👂 Was bedeutet das?</div>
+                <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
+                <div class="word-row" style="margin: 10px 0;"><button class="audio-btn" style="width:50px;height:50px;" onclick="playAudio('${v.thai}')">🔊</button></div>
+                <div class="translit">${v.translit}</div>
+                <div style="width:100%; margin-top:10px;">${htmlOptions}</div>`;
+        }
+
+        function checkAudioMC(isCorrect) {
+            if(isCorrect) { playSound('correct'); showToast("Richtig! 🎉 +10 XP", true); advanceSession(10); }
+            else { playSound('wrong'); showToast("Falsch! 💡", false); }
+        }
+
+        function renderMixToneMatch(v) {
+            let options = [v.tone];
+            while(options.length < 4) { let rt = Math.floor(Math.random() * 5); if(!options.includes(rt)) options.push(rt); }
+            options.sort(() => Math.random() - 0.5);
+            let htmlOptions = '';
+            options.forEach(t => {
+                htmlOptions += `<button class="action-btn choice-btn" onclick="checkToneMatch(${t}, ${v.tone})">${getToneCurveSvg(t)} ${toneDetails[t].name}</button>`;
+            });
+            document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--streak);">🎯 Welcher Ton gehört dazu?</div>
+                <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
+                <div class="thai-word" style="margin:5px 0;">${v.thai}</div>
+                <div class="translit">${v.translit}</div>
+                <div style="width:100%; margin-top:5px;">${htmlOptions}</div>`;
+        }
+
+        function checkToneMatch(selected, correct) {
+            if(selected === correct) { playSound('correct'); playAudio(vocabs[currentMixIndex].thai); showToast("Richtig! 🎉 +15 XP", true); advanceSession(15); }
+            else { playSound('wrong'); showToast(`Falsch! Gesucht: ${toneDetails[correct].name}`, false); }
+        }
+
+        function renderMixEmojiMatch(v, pool) {
+            let options = [v];
+            while(options.length < 4 && options.length < pool.length) {
+                let rv = pool[Math.floor(Math.random() * pool.length)];
+                if(!options.includes(rv)) options.push(rv);
+            }
+            options.sort(() => Math.random() - 0.5);
+            let htmlEmojis = '';
+            options.forEach(opt => {
+                htmlEmojis += `<div onclick="checkEmojiMatch(${opt.thai === v.thai})" style="cursor:pointer; border-radius:10px; padding:10px; text-align:center; border:2px solid #475569; background:#283548;"><div style="font-size:2rem;">${getVocabEmoji(opt)}</div><div style="font-size:0.75rem; color:#f8fafc;">${opt.meaning}</div></div>`;
+            });
+            document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--accent);">🖼️ Welches Symbol passt?</div>
+                <div class="thai-word" style="margin:5px 0;" onclick="playAudio('${v.thai}')">${v.thai}</div>
+                <div class="translit">${v.translit}</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px; width:100%;">${htmlEmojis}</div>`;
+        }
+
+        function checkEmojiMatch(isCorrect) {
+            if(isCorrect) { playSound('correct'); showToast("Richtig! 🎉 +15 XP", true); advanceSession(15); }
+            else { playSound('wrong'); showToast("Falsch! 💡", false); }
+        }
+
+        function setupMixCanvas(canvasId, tone, hasGhost) {
+            const canvas = document.getElementById(canvasId);
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
+            let points = []; let isDrawing = false;
+            if(hasGhost) drawGhost(ctx, canvas, tone);
+            const getCoord = (e) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
+            canvas.onmousedown = (e) => { isDrawing = true; points = [getCoord(e)]; };
+            canvas.onmousemove = (e) => { if(!isDrawing) return; points.push(getCoord(e)); redrawCanvas(ctx, canvas, points, tone, hasGhost, false); };
+            canvas.onmouseup = () => { if(!isDrawing) return; isDrawing = false; if(hasGhost && points.length > 3) { drawPerfectCurve(ctx, canvas, tone); playAudio(vocabs[currentMixIndex].thai); } };
+            canvas.ontouchstart = (e) => { isDrawing = true; points = [getCoord(e.touches[0])]; e.preventDefault(); };
+            canvas.ontouchmove = (e) => { if(!isDrawing) return; points.push(getCoord(e.touches[0])); redrawCanvas(ctx, canvas, points, tone, hasGhost, false); e.preventDefault(); };
+            canvas.ontouchend = () => { if(!isDrawing) return; isDrawing = false; if(hasGhost && points.length > 3) { drawPerfectCurve(ctx, canvas, tone); playAudio(vocabs[currentMixIndex].thai); } };
+        }
+
+        function redrawCanvas(ctx, canvas, points, tone, hasGhost, snapped) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(hasGhost) drawGhost(ctx, canvas, tone);
+            if(points.length < 2) return;
+            ctx.beginPath(); ctx.moveTo(points[0].x, points[0].y);
+            for(let p of points) ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = snapped ? '#10b981' : '#38bdf8'; ctx.lineWidth = 4; ctx.stroke();
+        }
+
+        function loadTrainCard() {
+            updateHUD();
+            if (!vocabs || vocabs.length === 0) return;
+            currentTrainIndex = Math.floor(Math.random() * vocabs.length);
+            const v = vocabs[currentTrainIndex];
+            trainSnapped = false;
+            setTimeout(() => playAudio(v.thai), 300);
+            document.getElementById('card-content-train').innerHTML = `<div style="font-size: 0.8rem; color: #38bdf8;">🏋️ Training (Mit Ghost-Linie)</div>
+                <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
+                <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
+                <div class="translit">${v.translit}</div>
+                <div class="canvas-container"><canvas id="trainCanvas"></canvas></div>
+                <div class="btn-group"><button class="action-btn" onclick="clearTrainCanvas()">Löschen</button><button class="action-btn btn-primary" onclick="checkTrainDrawing()">Richtig ➔</button></div>`;
+            setupTrainCanvas();
+        }
+
+        function setupTrainCanvas() {
+            trainCanvas = document.getElementById('trainCanvas');
+            trainCtx = trainCanvas.getContext('2d');
+            trainCanvas.width = trainCanvas.parentElement.clientWidth; trainCanvas.height = trainCanvas.parentElement.clientHeight;
+            trainPoints = []; trainSnapped = false;
+            const getCoord = (e) => { const r = trainCanvas.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
+            trainCanvas.onmousedown = (e) => { trainPoints = [getCoord(e)]; trainSnapped = false; redrawTrain(); };
+            trainCanvas.onmousemove = (e) => { if(trainPoints.length) { trainPoints.push(getCoord(e)); redrawTrain(); } };
+            trainCanvas.onmouseup = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone); trainSnapped = true; playAudio(vocabs[currentTrainIndex].thai); } };
+            trainCanvas.ontouchstart = (e) => { trainPoints = [getCoord(e.touches[0])]; trainSnapped = false; redrawTrain(); e.preventDefault(); };
+            trainCanvas.ontouchmove = (e) => { if(trainPoints.length) { trainPoints.push(getCoord(e.touches[0])); redrawTrain(); e.preventDefault(); } };
+            trainCanvas.ontouchend = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone); trainSnapped = true; playAudio(vocabs[currentTrainIndex].thai); } };
+            drawGhost(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone);
+        }
+
+        function clearTrainCanvas() { trainPoints = []; trainSnapped = false; redrawTrain(); }
+        function redrawTrain() {
+            trainCtx.clearRect(0, 0, trainCanvas.width, trainCanvas.height);
+            drawGhost(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone);
+            if (trainPoints.length < 2) return;
+            trainCtx.beginPath(); trainCtx.moveTo(trainPoints[0].x, trainPoints[0].y);
+            for(let p of trainPoints) trainCtx.lineTo(p.x, p.y);
+            trainCtx.strokeStyle = trainSnapped ? '#10b981' : '#38bdf8'; trainCtx.lineWidth = 4; trainCtx.stroke();
+        }
+
+        function checkTrainDrawing() {
+            if (!trainSnapped && trainPoints.length < 3) { playSound('wrong'); showToast("Bitte Kurve einzeichnen!", false); return; }
+            playSound('correct'); xp += 10; showToast("Super trainiert! +10 XP", true); loadTrainCard();
+        }
+
+        function loadExamCard() {
+            updateHUD();
+            if (!vocabs || vocabs.length === 0) return;
+            currentExamIndex = Math.floor(Math.random() * vocabs.length);
+            const v = vocabs[currentExamIndex];
+            setTimeout(() => playAudio(v.thai), 300);
+            document.getElementById('card-content-exam').innerHTML = `<div style="font-size: 0.8rem; color: #ef4444;">🎓 Prüfung (Aus dem Gedächtnis)</div>
+                <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
+                <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
+                <div class="translit">${v.translit}</div>
+                <div class="canvas-container" style="border-color: #ef4444;"><canvas id="examCanvas"></canvas></div>
+                <div class="btn-group"><button class="action-btn" onclick="clearExamCanvas()">Löschen</button><button class="action-btn btn-primary" onclick="checkExamDrawing()" style="background:var(--falling);">Einreichen ➔</button></div>`;
+            setupExamCanvas();
+        }
+
+        function setupExamCanvas() {
+            examCanvas = document.getElementById('examCanvas');
+            examCtx = examCanvas.getContext('2d');
+            examCanvas.width = examCanvas.parentElement.clientWidth; examCanvas.height = examCanvas.parentElement.clientHeight;
+            examPoints = [];
+            const getCoord = (e) => { const r = examCanvas.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
+            examCanvas.onmousedown = (e) => { examPoints = [getCoord(e)]; examDrawingActive = true; redrawExam(); };
+            examCanvas.onmousemove = (e) => { if(examDrawingActive && examPoints.length) { examPoints.push(getCoord(e)); redrawExam(); } };
+            examCanvas.onmouseup = () => { examDrawingActive = false; };
+            examCanvas.ontouchstart = (e) => { examPoints = [getCoord(e.touches[0])]; examDrawingActive = true; redrawExam(); e.preventDefault(); };
+            examCanvas.ontouchmove = (e) => { if(examDrawingActive && examPoints.length) { examPoints.push(getCoord(e.touches[0])); redrawExam(); e.preventDefault(); } };
+            examCanvas.ontouchend = () => { examDrawingActive = false; };
+        }
+
+        function clearExamCanvas() { examPoints = []; redrawExam(); }
+        function redrawExam() {
+            examCtx.clearRect(0, 0, examCanvas.width, examCanvas.height);
+            if (examPoints.length < 2) return;
+            examCtx.beginPath(); examCtx.moveTo(examPoints[0].x, examPoints[0].y);
+            for(let p of examPoints) examCtx.lineTo(p.x, p.y);
+            examCtx.strokeStyle = '#f8fafc'; examCtx.lineWidth = 4; examCtx.stroke();
+        }
+
+        function checkExamDrawing() {
+            if (examPoints.length < 5) { playSound('wrong'); showToast("Bitte zeichnen!", false); return; }
+            const correctTone = vocabs[currentExamIndex].tone;
+            playSound('correct'); xp += 25; showToast("Prüfung bestanden! 🎉 +25 XP", true);
+            document.getElementById('card-content-exam').innerHTML = `<div style="color: #10b981; font-size: 1.5rem; font-weight: bold;">Richtig! 🎉</div>
+                <p style="color: #38bdf8; margin: 10px 0;">Gesucht war: ${toneDetails[correctTone].name}</p>
+                <button class="action-btn btn-primary" onclick="loadExamCard()" style="width: 100%;">Nächste Frage ➔</button>`;
+            updateHUD();
+        }
+
+        function drawGhost(ctx, canvas, tone) {
+            ctx.save(); ctx.beginPath(); ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+            const w = canvas.width, h = canvas.height;
+            if (tone === 0) { ctx.moveTo(20, h/2); ctx.lineTo(w - 20, h/2); }
+            else if (tone === 1) { ctx.moveTo(20, h/3); ctx.lineTo(w - 20, h * 0.8); }
+            else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w/2, 10, w - 20, h * 0.85); }
+            else if (tone === 3) { ctx.moveTo(20, h/4); ctx.lineTo(w - 20, h/4); }
+            else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w/2, h, w - 20, h/4); }
+            ctx.stroke(); ctx.restore();
+        }
+
+        function drawPerfectCurve(ctx, canvas, tone) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGhost(ctx, canvas, tone);
+            ctx.beginPath(); ctx.strokeStyle = '#10b981'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+            const w = canvas.width, h = canvas.height;
+            if (tone === 0) { ctx.moveTo(20, h/2); ctx.lineTo(w - 20, h/2); }
+            else if (tone === 1) { ctx.moveTo(20, h/3); ctx.lineTo(w - 20, h * 0.8); }
+            else if (tone === 2) { ctx.moveTo(20, h * 0.7); ctx.quadraticCurveTo(w/2, 10, w - 20, h * 0.85); }
+            else if (tone === 3) { ctx.moveTo(20, h/4); ctx.lineTo(w - 20, h/4); }
+            else if (tone === 4) { ctx.moveTo(20, h * 0.8); ctx.quadraticCurveTo(w/2, h, w - 20, h/4); }
+            ctx.stroke();
+        }
+
+        function renderLessons() {
+            const container = document.getElementById('lessons-container');
+            if (!container) return;
+            let html = "";
+            for (let id in lessons) {
+                let l = lessons[id];
+                let count = vocabs.filter(v => v.lesson == id).length;
+                html += `<div class="lesson-card">
+                    <div><h4 style="margin:0; color:#f8fafc;">${l.name} ${l.completed ? '⭐' : ''}</h4><p style="margin:2px 0 0 0; font-size:0.75rem; color:#94a3b8;">${count} Vokabeln</p></div>
+                    <button class="action-btn btn-primary" onclick="startSessionForLesson(${id})" style="padding: 6px 12px; font-size: 0.8rem;">${l.completed ? 'Wiederholen 🔄' : 'Starten 🚀'}</button>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function addVocab(e) {
+            e.preventDefault();
+            vocabs.push({
+                thai: document.getElementById('input-thai').value,
+                translit: document.getElementById('input-translit').value,
+                meaning: document.getElementById('input-meaning').value,
+                emoji: document.getElementById('input-image').value,
+                lesson: parseInt(document.getElementById('input-lesson').value),
+                tone: parseInt(document.getElementById('input-tone').value)
+            });
+            localStorage.setItem('thai_quest_vocabs', JSON.stringify(vocabs));
+            document.getElementById('add-form').reset();
+            playSound('correct'); showToast("Gespeichert! 🚀", true);
+            switchTab('path');
+        }
+
+        // Start Initialisierung
+        switchTab('path');
+    </script>
 </body>
 </html>
