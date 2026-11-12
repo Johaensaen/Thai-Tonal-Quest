@@ -135,17 +135,6 @@
             touch-action: none;
         }
 
-        .canvas-hint {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: var(--muted);
-            pointer-events: none;
-            letter-spacing: 0.5px;
-        }
-
         canvas {
             width: 100%;
             height: 100%;
@@ -283,7 +272,6 @@
             box-sizing: border-box;
         }
 
-        /* Sauberer Chineasy-Stil (Zeichen im Vordergrund) */
         .chineasy-graphic {
             width: 90px;
             height: 90px;
@@ -297,7 +285,6 @@
             border: 2px dashed rgba(56, 189, 248, 0.3);
         }
 
-        /* Toast Banner */
         .toast-banner {
             position: fixed;
             top: -70px;
@@ -335,16 +322,36 @@
             transition: width 0.3s;
         }
     </style>
+    <!-- Dynamisch generiertes Web App Manifest mit solidem Hintergrund für das Icon -->
+    <script>
+        const manifestData = {
+            "name": "Thai Tonal Quest",
+            "short_name": "Thai Quest",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#0f172a",
+            "theme_color": "#0f172a",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='112' fill='%230f172a'/><text x='50%தய' y='55%' font-size='220' text-anchor='middle' dominant-baseline='central'>🐘</text></svg>",
+                    "sizes": "192x192 512x512",
+                    "type": "image/svg+xml",
+                    "purpose": "any maskable"
+                }
+            ]
+        };
+        const stringManifest = JSON.stringify(manifestData);
+        const blob = new Blob([stringManifest], {type: 'application/json'});
+        document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(blob));
+    </script>
 </head>
 <body onclick="closeTooltipOutside(event)">
 
-    <!-- Toast Benachrichtigung -->
     <div id="toast-banner" class="toast-banner">
         <span id="toast-icon">🎉</span>
         <span id="toast-text">Richtig!</span>
     </div>
 
-    <!-- Header HUD -->
     <header>
         <div class="hud-item" style="color: var(--xp);">
             ⭐ <span id="xp-count">0</span> XP
@@ -357,9 +364,7 @@
         </div>
     </header>
 
-    <!-- Hauptinhalt -->
     <main>
-        <!-- Sektion 1: Lernpfad -->
         <section id="section-path" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div style="text-align: center; margin-bottom: 10px;">
                 <h2 style="margin: 0; font-size: 1.2rem;">Dein Thai-Lernpfad</h2>
@@ -368,7 +373,6 @@
             <div class="path-nodes" id="path-nodes-container"></div>
         </section>
 
-        <!-- Sektion 2: Mix-Quest Session -->
         <section id="section-mix" class="hidden" style="width: 100%;">
             <div class="progress-bar-container">
                 <div class="progress-bar-fill" id="session-fill"></div>
@@ -376,33 +380,27 @@
             <div class="card" id="card-content-mix"></div>
         </section>
 
-        <!-- Sektion 3: Dialog-Session -->
         <section id="section-dialog" class="hidden" style="width: 100%;">
             <div class="card" id="card-content-dialog"></div>
         </section>
 
-        <!-- Sektion 4: Training (Mit Ghost-Linie) -->
         <section id="section-train" class="hidden" style="width: 100%;">
             <div class="card" id="card-content-train"></div>
         </section>
 
-        <!-- Sektion 5: Prüfung (Freihand) -->
         <section id="section-exam" class="hidden" style="width: 100%;">
             <div class="card" id="card-content-exam"></div>
         </section>
 
-        <!-- Sektion 6: Lektionen Übersicht -->
         <section id="section-lessons" class="hidden" style="width: 100%;">
             <h3 style="margin-top:0; color: var(--accent);">📚 Alle Lektionen</h3>
             <div id="lessons-container" style="width: 100%;"></div>
         </section>
 
-        <!-- Sektion 7: Alphabet & Eselsbrücken -->
         <section id="section-alphabet" class="hidden" style="width: 100%; overflow-y: auto; max-height: 80vh; padding-bottom: 20px;">
             <div id="alphabet-container" style="width: 100%;"></div>
         </section>
 
-        <!-- Sektion 8: Wort hinzufügen -->
         <section id="section-add" class="hidden" style="width: 100%;">
             <div class="card" style="align-items: stretch;">
                 <h3 style="margin-top:0; text-align:center; color: var(--accent);">✍️ Eigenes Wort hinzufügen</h3>
@@ -430,7 +428,6 @@
             </div>
         </section>
 
-        <!-- Sektion 9: Session Abschluss-Bildschirm -->
         <section id="section-complete" class="hidden" style="width: 100%; text-align: center; justify-content: center; align-items: center; padding-top: 40px;">
             <div style="font-size: 5rem; margin-bottom: 10px;">🎉</div>
             <h2 style="color: var(--correct); font-size: 1.8rem; margin-top:0;">Station erfolgreich gemeistert!</h2>
@@ -443,7 +440,6 @@
         </section>
     </main>
 
-    <!-- Untere Navigation -->
     <nav class="bottom-nav">
         <button class="nav-btn active" onclick="switchTab('path')">
             <span>🗺️</span> Pfad
@@ -465,7 +461,6 @@
         </button>
     </nav>
 
-    <!-- Skript-Logik -->
     <script>
         let defaultVocabs = [
             { thai: "สวัสดี", translit: "sà-wàt-dee", meaning: "Hallo / Guten Tag", tone: 3, lesson: 1, emoji: "👋" },
@@ -665,26 +660,6 @@
             msg.innerText = text;
             banner.classList.add('show');
             setTimeout(() => { banner.classList.remove('show'); }, 2000);
-        }
-
-        function toggleMeaning(event, meaning) {
-            if (event) event.stopPropagation();
-            const box = document.getElementById('meaning-display-box');
-            if (box) {
-                if (box.style.display === 'none' || box.innerText.includes('Bedeutung')) {
-                    box.innerHTML = `🇩🇪 <b>${meaning}</b>`;
-                    box.style.display = 'block';
-                    box.style.background = '#334155';
-                    box.style.color = '#38bdf8';
-                } else { box.style.display = 'none'; }
-            }
-        }
-
-        function closeTooltipOutside(event) {
-            const box = document.getElementById('meaning-display-box');
-            if (box && !event.target.classList.contains('thai-word') && !event.target.classList.contains('meaning-btn')) {
-                box.style.display = 'none';
-            }
         }
 
         let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
@@ -1123,7 +1098,7 @@
             examCtx.clearRect(0, 0, examCanvas.width, examCanvas.height);
             if (examPoints.length < 2) return;
             examCtx.beginPath(); examCtx.moveTo(examPoints[0].x, examPoints[0].y);
-            for(let p of examPoints) ctx.lineTo(p.x, p.y);
+            for(let p of examPoints) examCtx.lineTo(p.x, p.y);
             examCtx.strokeStyle = '#f8fafc'; examCtx.lineWidth = 4; examCtx.stroke();
         }
 
