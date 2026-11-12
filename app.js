@@ -32,14 +32,12 @@ function checkDailyReset() {
     const lastActiveDate = localStorage.getItem('thai_quest_last_date');
 
     if (lastActiveDate !== todayStr) {
-        // Neuer Tag! Lektionen zurücksetzen zum frischen Üben
         for (let id in lessons) {
             lessons[id].completed = false;
         }
         localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
         localStorage.setItem('thai_quest_dialogs', JSON.stringify({})); 
         
-        // Streak-Logik prüfen
         let currentStreak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
 
         if (lastActiveDate) {
@@ -49,12 +47,10 @@ function checkDailyReset() {
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
-                // Genau am Folgetag gelernt -> Streak verlängert!
                 currentStreak++;
                 streakExtendedToday = true;
                 playSound('complete');
             } else if (diffDays > 1) {
-                // Mehr als ein Tag verpasst -> Streak fängt neu bei 1 an
                 currentStreak = 1;
             }
         } else {
@@ -65,6 +61,32 @@ function checkDailyReset() {
         localStorage.setItem('thai_quest_streak', streak);
         localStorage.setItem('thai_quest_last_date', todayStr);
     }
+}
+
+// --- Hilfsfunktion für sichere Emojis (verhindert Flaggen-Fallbacks) ---
+function getVocabEmoji(v) {
+    if (v.emoji && v.emoji !== "🇹🇭" && v.emoji.trim() !== "") {
+        return v.emoji;
+    }
+    // Automatischer Fallback basierend auf Bedeutung
+    const m = (v.meaning || "").toLowerCase();
+    if (m.includes("hallo") || m.includes("tag")) return "👋";
+    if (m.includes("danke")) return "🙏";
+    if (m.includes("ja")) return "✅";
+    if (m.includes("nein") || m.includes("nicht")) return "❌";
+    if (m.includes("toilette") || m.includes("wc")) return "🚻";
+    if (m.includes("wieviel") || m.includes("geld")) return "💰";
+    if (m.includes("wasser")) return "💧";
+    if (m.includes("essen")) return "🍚";
+    if (m.includes("hungrig")) return "😋";
+    if (m.includes("lecker")) return "🍲";
+    if (m.includes("scharf")) return "🔥";
+    if (m.includes("freund")) return "🧑‍🤝‍🧑";
+    if (m.includes("familie")) return "👨‍👩‍👧‍👦";
+    if (m.includes("wie geht")) return "💬";
+    if (m.includes("gut")) return "😊";
+    if (m.includes("liebe")) return "❤️";
+    return "💬";
 }
 
 // --- Zuverlässige Thai-Aussprache mit Voice Pre-Warmup ---
@@ -190,7 +212,6 @@ function showToast(text, isCorrect = true) {
 // --- Streak-Erfolgsmodal beim Start anzeigen ---
 function showStreakModalIfNeeded() {
     if (streakExtendedToday) {
-        // Modal-Overlay erstellen
         const modal = document.createElement('div');
         modal.id = 'streak-modal';
         modal.style.cssText = `
@@ -219,7 +240,7 @@ function showStreakModalIfNeeded() {
 function closeStreakModal() {
     const modal = document.getElementById('streak-modal');
     if (modal) modal.remove();
-    streakExtendedToday = false; // Einmalig pro Tag anzeigen
+    streakExtendedToday = false;
 }
 
 // --- Deutsche Bedeutung einblenden ---
@@ -249,7 +270,6 @@ function closeTooltipOutside(event) {
 let xp = parseInt(localStorage.getItem('thai_quest_xp')) || 0;
 let streak = parseInt(localStorage.getItem('thai_quest_streak')) || 1;
 
-// Tagesabgleich direkt beim Start ausführen
 checkDailyReset();
 
 let sessionCurrent = 0;
@@ -261,7 +281,7 @@ let currentTrainIndex = null;
 let currentExamIndex = null;
 let currentMixIndex = null;
 let trainPoints = [], trainCanvas, trainCtx, trainSnapped = false;
-let examPoints = [], examCanvas, examCtx;
+let examPoints = [], examCanvas, examCtx, examDrawingActive = false;
 
 function updateHUD() {
     const xpEl = document.getElementById('xp-count');
@@ -269,14 +289,13 @@ function updateHUD() {
     const lvlEl = document.getElementById('level-num');
     if(xpEl) xpEl.innerText = xp;
     if(streakEl) streakEl.innerText = streak;
-    // Realistischeres Level-System: 200 XP pro Level
     if(lvlEl) lvlEl.innerText = Math.floor(xp / 200) + 1;
     
     localStorage.setItem('thai_quest_xp', xp);
     localStorage.setItem('thai_quest_streak', streak);
 }
 
-// Rendert den Duolingo-Pfad mit Stationen & Dialogen
+// --- Rendert den Pfad und prüft den korrekten Abschlussstatus ---
 function renderPath() {
     const container = document.getElementById('path-nodes-container');
     if (!container) return;
@@ -544,9 +563,10 @@ function getToneCurveSvg(tone) {
 
 function renderMixTrainCanvas(v) {
     const container = document.getElementById('card-content-mix');
+    const safeEmoji = getVocabEmoji(v);
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase; margin-bottom:5px;">✨ Tonkurve nachzeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
-        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
+        <div class="vocab-emoji-card">${safeEmoji}</div>
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -568,9 +588,10 @@ function renderMixTrainCanvas(v) {
 
 function renderMixExamCanvas(v) {
     const container = document.getElementById('card-content-mix');
+    const safeEmoji = getVocabEmoji(v);
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🧠 Freies Gedächtnis-Zeichnen (${sessionCurrent + 1}/${sessionTarget})</div>
-        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
+        <div class="vocab-emoji-card">${safeEmoji}</div>
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -583,11 +604,79 @@ function renderMixExamCanvas(v) {
             <canvas id="mixExamCanvas"></canvas>
         </div>
         <div class="btn-group">
-            <button class="action-btn" onclick="loadRandomMixMission()">Überspringen</button>
-            <button class="action-btn btn-primary" onclick="advanceSession(25)" style="background: var(--falling); color: #fff;">Einreichen ➔</button>
+            <button class="action-btn" onclick="clearExamCanvas()">Löschen</button>
+            <button class="action-btn btn-primary" onclick="checkMixExamDrawing()" style="background: var(--falling); color: #fff;">Einreichen ➔</button>
         </div>
     `;
-    setupMixCanvas('mixExamCanvas', v.tone, false);
+    setupMixExamCanvas('mixExamCanvas');
+}
+
+function setupMixExamCanvas(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+    examPoints = [];
+
+    const getCoord = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+    };
+
+    canvas.onmousedown = (e) => { examPoints = [getCoord(e)]; examDrawingActive = true; redrawExamCanvas(ctx, canvas); };
+    canvas.onmousemove = (e) => { if(examDrawingActive && examPoints.length) { examPoints.push(getCoord(e)); redrawExamCanvas(ctx, canvas); } };
+    canvas.onmouseup = () => { examDrawingActive = false; };
+
+    canvas.ontouchstart = (e) => { examPoints = [getCoord(e.touches[0])]; examDrawingActive = true; redrawExamCanvas(ctx, canvas); e.preventDefault(); };
+    canvas.ontouchmove = (e) => { if(examDrawingActive && examPoints.length) { examPoints.push(getCoord(e.touches[0])); redrawExamCanvas(ctx, canvas); e.preventDefault(); } };
+    canvas.ontouchend = () => { examDrawingActive = false; };
+}
+
+function redrawExamCanvas(ctx, canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (examPoints.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(examPoints[0].x, examPoints[0].y);
+    for(let p of examPoints) ctx.lineTo(p.x, p.y);
+    ctx.strokeStyle = '#f8fafc';
+    ctx.lineWidth = 4; ctx.stroke();
+}
+
+function checkMixExamDrawing() {
+    if (examPoints.length < 5) { 
+        playSound('wrong');
+        showToast("Bitte zeichne die Kurve in das Feld!", false); 
+        return; 
+    }
+    
+    const correctTone = vocabs[currentMixIndex].tone;
+    const startY = examPoints[0].y;
+    const endY = examPoints[examPoints.length - 1].y;
+    let evaluatedTone = 0;
+    const h = 180;
+
+    if (correctTone === 2) {
+        let minY = Math.min(...examPoints.map(p => p.y));
+        evaluatedTone = (minY < h * 0.4) ? 2 : 1;
+    } else if (correctTone === 4) {
+        evaluatedTone = (startY > endY + 10) ? 4 : 0;
+    } else if (correctTone === 1) {
+        evaluatedTone = (endY > startY) ? 1 : 0;
+    } else if (correctTone === 3) {
+        let avgY = examPoints.reduce((acc, p) => acc + p.y, 0) / examPoints.length;
+        evaluatedTone = (avgY < h * 0.5) ? 3 : 0;
+    }
+
+    const isCorrect = (evaluatedTone === correctTone);
+    if (isCorrect) {
+        playSound('correct');
+        showToast("Richtig gezeichnet! 🎉 +25 XP", true);
+        advanceSession(25);
+    } else {
+        playSound('wrong');
+        showToast(`Falsch! Gesucht war: ${toneDetails[correctTone].name}`, false);
+    }
 }
 
 function renderMixAudioMC(v, pool) {
@@ -605,9 +694,10 @@ function renderMixAudioMC(v, pool) {
     });
 
     const container = document.getElementById('card-content-mix');
+    const safeEmoji = getVocabEmoji(v);
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: var(--xp); text-transform: uppercase; margin-bottom:5px;">👂 Was bedeutet dieses Wort? (${sessionCurrent + 1}/${sessionTarget})</div>
-        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
+        <div class="vocab-emoji-card">${safeEmoji}</div>
         <div class="word-row" style="margin: 10px 0;">
             <button class="audio-btn" style="width:60px; height:60px; font-size:1.5rem;" onclick="playAudio('${v.thai}')">🔊</button>
         </div>
@@ -644,9 +734,10 @@ function renderMixToneMatch(v) {
     });
 
     const container = document.getElementById('card-content-mix');
+    const safeEmoji = getVocabEmoji(v);
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: var(--streak); text-transform: uppercase; margin-bottom:5px;">🎯 Welcher Ton gehört dazu? (${sessionCurrent + 1}/${sessionTarget})</div>
-        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
+        <div class="vocab-emoji-card">${safeEmoji}</div>
         <div class="word-row" style="margin: 5px 0;">
             <div class="thai-word" style="font-size: 2.2rem;">${v.thai}</div>
         </div>
@@ -682,7 +773,7 @@ function renderMixEmojiMatch(v, pool) {
     let htmlEmojis = '';
     options.forEach(opt => {
         let isCorrect = (opt.thai === v.thai) ? "true" : "false";
-        let emj = opt.emoji || "🇹🇭";
+        let emj = getVocabEmoji(opt);
         htmlEmojis += `<div onclick="checkEmojiMatch(${isCorrect})" style="cursor:pointer; border-radius:12px; padding:15px; text-align:center; border:2px solid #475569; background:#283548;"><div style="font-size:2.5rem; margin-bottom:5px;">${emj}</div><div style="font-size:0.8rem; color:#f8fafc; font-weight:bold;">${opt.meaning}</div></div>`;
     });
 
@@ -783,9 +874,10 @@ function loadTrainCard() {
     trainSnapped = false;
     setTimeout(() => playAudio(v.thai), 300);
 
+    const safeEmoji = getVocabEmoji(v);
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase; margin-bottom:5px;">🏋️ Training (Mit Ghost-Linie)</div>
-        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
+        <div class="vocab-emoji-card">${safeEmoji}</div>
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -865,9 +957,10 @@ function loadExamCard() {
     const v = vocabs[currentExamIndex];
     setTimeout(() => playAudio(v.thai), 300);
 
+    const safeEmoji = getVocabEmoji(v);
     container.innerHTML = `
         <div style="font-size: 0.8rem; color: #ef4444; text-transform: uppercase; margin-bottom:5px;">🎓 Prüfung (Aus dem Gedächtnis!)</div>
-        <div class="vocab-emoji-card">${v.emoji || '🇹🇭'}</div>
+        <div class="vocab-emoji-card">${safeEmoji}</div>
         <div class="word-row">
             <div class="thai-word">${v.thai}</div>
             <button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button>
@@ -899,11 +992,13 @@ function setupExamCanvas() {
         return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
     };
 
-    examCanvas.onmousedown = (e) => { examPoints = [getCoord(e)]; redrawExam(); };
-    examCanvas.onmousemove = (e) => { if(examPoints.length) { examPoints.push(getCoord(e)); redrawExam(); } };
+    examCanvas.onmousedown = (e) => { examPoints = [getCoord(e)]; examDrawingActive = true; redrawExam(); };
+    examCanvas.onmousemove = (e) => { if(examDrawingActive && examPoints.length) { examPoints.push(getCoord(e)); redrawExam(); } };
+    examCanvas.onmouseup = () => { examDrawingActive = false; };
 
-    examCanvas.ontouchstart = (e) => { examPoints = [getCoord(e.touches[0])]; redrawExam(); e.preventDefault(); };
-    examCanvas.ontouchmove = (e) => { if(examPoints.length) { examPoints.push(getCoord(e.touches[0])); redrawExam(); e.preventDefault(); } };
+    examCanvas.ontouchstart = (e) => { examPoints = [getCoord(e.touches[0])]; examDrawingActive = true; redrawExam(); e.preventDefault(); };
+    examCanvas.ontouchmove = (e) => { if(examDrawingActive && examPoints.length) { examPoints.push(getCoord(e.touches[0])); redrawExam(); e.preventDefault(); } };
+    examCanvas.ontouchend = () => { examDrawingActive = false; };
 }
 
 function clearExamCanvas() {
