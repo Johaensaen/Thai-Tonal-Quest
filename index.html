@@ -283,17 +283,17 @@
             box-sizing: border-box;
         }
 
-        /* Chineasy Card Stil */
+        /* Sauberer Chineasy-Stil (Zeichen im Vordergrund) */
         .chineasy-graphic {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             background: rgba(56, 189, 248, 0.08);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            margin: 0 auto 10px auto;
+            margin: 0 auto 8px auto;
             border: 2px dashed rgba(56, 189, 248, 0.3);
         }
 
@@ -488,12 +488,12 @@
         ];
 
         let defaultLetters = [
-            { char: "ก", name: "Ko Kai", meaning: "Huhn (ก)", class: "middle", mnem: "Sieht aus wie ein Hühnerkopf mit Schnabel.", emoji: "🐔", graphic: "🐔" },
-            { char: "ไข่", name: "Kho Khai", meaning: "Ei (ไข่)", class: "high", mnem: "Ein Ei mit einer kleinen Schleife oben.", emoji: "🥚", graphic: "🥚" },
-            { char: "ช", name: "Cho Chang", meaning: "Elefant (ช)", class: "low", mnem: "Der geschwungene Rumpf eines Elefanten.", emoji: "🐘", graphic: "🐘" },
-            { char: "ม", name: "Mo Ma", meaning: "Pferd (ม)", class: "low", mnem: "Steht stabil auf vier Hufen wie ein Pferd.", emoji: "🐴", graphic: "🐴" },
-            { char: "ส", name: "So Sua", meaning: "Tiger (ส)", class: "high", mnem: "Die geschmeidige Raubkatzen-Kurve.", emoji: "🐅", graphic: "🐅" },
-            { char: "น", name: "No Nu", meaning: "Maus (น)", class: "low", mnem: "Kleine Schleife wie eine winkende Maus.", emoji: "🐭", graphic: "🐭" }
+            { char: "ก", name: "Ko Kai", meaning: "Huhn (ก)", class: "middle", mnem: "Hühnerkopf mit Schnabel.", graphic: "🐔" },
+            { char: "ไข่", name: "Kho Khai", meaning: "Ei (ไข่)", class: "high", mnem: "Ein Ei mit Schleife oben.", graphic: "🥚" },
+            { char: "ช", name: "Cho Chang", meaning: "Elefant (ช)", class: "low", mnem: "Geschwungener Elefantenrüssel.", graphic: "🐘" },
+            { char: "ม", name: "Mo Ma", meaning: "Pferd (ม)", class: "low", mnem: "Steht auf vier Hufen wie ein Pferd.", graphic: "🐴" },
+            { char: "ส", name: "So Sua", meaning: "Tiger (ส)", class: "high", mnem: "Die Raubkatzen-Kurve.", graphic: "🐅" },
+            { char: "น", name: "No Nu", meaning: "Maus (น)", class: "low", mnem: "Winkende Maus.", graphic: "🐭" }
         ];
 
         let vocabs = JSON.parse(localStorage.getItem('thai_quest_vocabs'));
@@ -763,12 +763,11 @@
                 let classColor = item.class === 'high' ? '#f43f5e' : (item.class === 'low' ? '#38bdf8' : '#eab308');
                 html += `<div class="card" style="padding: 15px; text-align: center; border-bottom: 3px solid ${classColor}; background: #1e293b; border-radius: 12px; margin-bottom:0;">
                     <div class="chineasy-graphic">
-                        <span style="font-size: 2.5rem; position: absolute; opacity: 0.3;">${item.char}</span>
-                        <span style="font-size: 2rem; position: relative; z-index: 2;">${item.graphic}</span>
+                        <span style="font-size: 2.2rem; position: absolute; z-index: 2; color: #f8fafc; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">${item.char}</span>
+                        <span style="font-size: 3rem; position: absolute; z-index: 1; opacity: 0.4;">${item.graphic}</span>
                     </div>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #f8fafc; margin-bottom: 2px;">${item.char}</div>
-                    <div style="font-size: 0.85rem; font-weight: bold; color: #38bdf8;">${item.name}</div>
-                    <div style="font-size: 0.75rem; color: #94a3b8; margin: 4px 0;">${item.meaning}</div>
+                    <div style="font-size: 0.9rem; font-weight: bold; color: #38bdf8; margin-top: 5px;">${item.name}</div>
+                    <div style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0;">${item.meaning}</div>
                     <div style="background: #0f172a; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #cbd5e1; margin-top: 6px;">💡 ${item.mnem}</div>
                     <button class="action-btn" onclick="playAudio('${item.char}')" style="margin-top: 8px; padding: 6px; font-size: 0.8rem; width: 100%;">🔊 Anhören</button>
                 </div>`;
@@ -1124,7 +1123,7 @@
             examCtx.clearRect(0, 0, examCanvas.width, examCanvas.height);
             if (examPoints.length < 2) return;
             examCtx.beginPath(); examCtx.moveTo(examPoints[0].x, examPoints[0].y);
-            for(let p of examPoints) examCtx.lineTo(p.x, p.y);
+            for(let p of examPoints) ctx.lineTo(p.x, p.y);
             examCtx.strokeStyle = '#f8fafc'; examCtx.lineWidth = 4; examCtx.stroke();
         }
 
