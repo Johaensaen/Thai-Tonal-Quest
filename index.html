@@ -283,6 +283,20 @@
             box-sizing: border-box;
         }
 
+        /* Chineasy Card Stil */
+        .chineasy-graphic {
+            width: 100px;
+            height: 100px;
+            background: rgba(56, 189, 248, 0.08);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 0 auto 10px auto;
+            border: 2px dashed rgba(56, 189, 248, 0.3);
+        }
+
         /* Toast Banner */
         .toast-banner {
             position: fixed;
@@ -451,9 +465,8 @@
         </button>
     </nav>
 
-    <!-- Skript-Einbindung aus data.js und app.js Logik -->
+    <!-- Skript-Logik -->
     <script>
-        // --- DATA.JS INHALT ---
         let defaultVocabs = [
             { thai: "สวัสดี", translit: "sà-wàt-dee", meaning: "Hallo / Guten Tag", tone: 3, lesson: 1, emoji: "👋" },
             { thai: "ขอบคุณ", translit: "kàwp-kun", meaning: "Danke", tone: 2, lesson: 1, emoji: "🙏" },
@@ -475,12 +488,12 @@
         ];
 
         let defaultLetters = [
-            { char: "ก", name: "Ko Kai", meaning: "Huhn (ก)", class: "middle", mnem: "Sieht aus wie ein Hühnerkopf mit Schnabel.", emoji: "🐔" },
-            { char: "ไข่", name: "Kho Khai", meaning: "Ei (ไข่)", class: "high", mnem: "Ein Ei mit einer kleinen Schleife oben.", emoji: "🥚" },
-            { char: "ช", name: "Cho Chang", meaning: "Elefant (ช)", class: "low", mnem: "Der geschwungene Rumpf eines Elefanten.", emoji: "🐘" },
-            { char: "ม", name: "Mo Ma", meaning: "Pferd (ม)", class: "low", mnem: "Steht stabil auf vier Hufen wie ein Pferd.", emoji: "🐴" },
-            { char: "ส", name: "So Sua", meaning: "Tiger (ส)", class: "high", mnem: "Die geschmeidige Raubkatzen-Kurve.", emoji: "🐅" },
-            { char: "น", name: "No Nu", meaning: "Maus (น)", class: "low", mnem: "Kleine Schleife wie eine winkende Maus.", emoji: "🐭" }
+            { char: "ก", name: "Ko Kai", meaning: "Huhn (ก)", class: "middle", mnem: "Sieht aus wie ein Hühnerkopf mit Schnabel.", emoji: "🐔", graphic: "🐔" },
+            { char: "ไข่", name: "Kho Khai", meaning: "Ei (ไข่)", class: "high", mnem: "Ein Ei mit einer kleinen Schleife oben.", emoji: "🥚", graphic: "🥚" },
+            { char: "ช", name: "Cho Chang", meaning: "Elefant (ช)", class: "low", mnem: "Der geschwungene Rumpf eines Elefanten.", emoji: "🐘", graphic: "🐘" },
+            { char: "ม", name: "Mo Ma", meaning: "Pferd (ม)", class: "low", mnem: "Steht stabil auf vier Hufen wie ein Pferd.", emoji: "🐴", graphic: "🐴" },
+            { char: "ส", name: "So Sua", meaning: "Tiger (ส)", class: "high", mnem: "Die geschmeidige Raubkatzen-Kurve.", emoji: "🐅", graphic: "🐅" },
+            { char: "น", name: "No Nu", meaning: "Maus (น)", class: "low", mnem: "Kleine Schleife wie eine winkende Maus.", emoji: "🐭", graphic: "🐭" }
         ];
 
         let vocabs = JSON.parse(localStorage.getItem('thai_quest_vocabs'));
@@ -540,7 +553,6 @@
             4: { name: "Steigender Ton (Rising)", path: "M 10 55 Q 50 55 90 15" }
         };
 
-        // --- APP.JS LOGIK ---
         let streakExtendedToday = false;
 
         function checkDailyReset() {
@@ -744,16 +756,20 @@
             if (!container) return;
             let html = `<div style="margin-bottom: 15px; text-align: center;">
                 <h3 style="color: #38bdf8; margin-bottom: 5px;">🔤 Thailändisches Alphabet & Eselsbrücken</h3>
-                <p style="color: #94a3b8; font-size: 0.85rem;">Inspiriert von Chineasy: Lerne die Buchstaben durch visuelle Eselsbrücken.</p>
+                <p style="color: #94a3b8; font-size: 0.85rem;">Chineasy-Stil: Visuelle Eselsbrücken zum Einprägen.</p>
             </div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">`;
 
             letters.forEach((item) => {
                 let classColor = item.class === 'high' ? '#f43f5e' : (item.class === 'low' ? '#38bdf8' : '#eab308');
                 html += `<div class="card" style="padding: 15px; text-align: center; border-bottom: 3px solid ${classColor}; background: #1e293b; border-radius: 12px; margin-bottom:0;">
-                    <div style="font-size: 3rem; font-weight: bold; color: #f8fafc; margin-bottom: 5px;">${item.char}</div>
-                    <div style="font-size: 0.9rem; font-weight: bold; color: #38bdf8;">${item.name}</div>
+                    <div class="chineasy-graphic">
+                        <span style="font-size: 2.5rem; position: absolute; opacity: 0.3;">${item.char}</span>
+                        <span style="font-size: 2rem; position: relative; z-index: 2;">${item.graphic}</span>
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #f8fafc; margin-bottom: 2px;">${item.char}</div>
+                    <div style="font-size: 0.85rem; font-weight: bold; color: #38bdf8;">${item.name}</div>
                     <div style="font-size: 0.75rem; color: #94a3b8; margin: 4px 0;">${item.meaning}</div>
-                    <div style="background: #0f172a; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #cbd5e1; margin-top: 8px;">💡 ${item.mnem}</div>
+                    <div style="background: #0f172a; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #cbd5e1; margin-top: 6px;">💡 ${item.mnem}</div>
                     <button class="action-btn" onclick="playAudio('${item.char}')" style="margin-top: 8px; padding: 6px; font-size: 0.8rem; width: 100%;">🔊 Anhören</button>
                 </div>`;
             });
@@ -873,12 +889,13 @@
             options.forEach(opt => {
                 htmlOptions += `<button class="action-btn choice-btn" onclick="checkMnemMatch(${opt.char === targetLetter.char})" style="font-size: 1.5rem; text-align:center; padding: 12px;">${opt.char}</button>`;
             });
-            container.innerHTML = `<div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase;">💡 Eselsbrücke</div>
+            container.innerHTML = `<div style="font-size: 0.8rem; color: #38bdf8; text-transform: uppercase;">💡 Chineasy Eselsbrücke</div>
                 <div style="background: #1e293b; padding: 15px; border-radius: 12px; text-align: center; margin: 10px 0; border: 1px solid #475569; width:100%;">
-                    <div style="font-size: 2.5rem;">${targetLetter.emoji}</div>
+                    <div style="font-size: 3rem; margin-bottom:5px;">${targetLetter.graphic}</div>
                     <div style="font-size: 1rem; font-weight: bold; color: #f8fafc;">${targetLetter.meaning}</div>
-                    <div style="font-size: 0.8rem; color: #38bdf8;">"${targetLetter.mnem}"</div>
+                    <div style="font-size: 0.8rem; color: #38bdf8; margin-top:4px;">"${targetLetter.mnem}"</div>
                 </div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom:8px;">Welcher Buchstabe gehört dazu?</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width:100%;">${htmlOptions}</div>`;
         }
 
@@ -936,7 +953,6 @@
 
         function checkMixExamDrawing() {
             if (examPoints.length < 5) { playSound('wrong'); showToast("Bitte zeichne die Kurve!", false); return; }
-            const correctTone = vocabs[currentMixIndex].tone;
             playSound('correct'); showToast("Richtig gezeichnet! 🎉 +25 XP", true); advanceSession(25);
         }
 
@@ -1177,7 +1193,6 @@
             switchTab('path');
         }
 
-        // Start Initialisierung
         switchTab('path');
     </script>
 </body>
