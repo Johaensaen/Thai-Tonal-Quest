@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thai Tonal Quest</title>
-    <!-- Verknüpfung zum echten Web App Manifest -->
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <style>
@@ -450,7 +449,7 @@
     </nav>
 
     <script>
-        // Service Worker Registrierung für echte App-Installation
+        // Service Worker Registrierung für App-Installation
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
@@ -884,7 +883,8 @@
                 <div class="translit">${v.translit}</div>
                 <div class="canvas-container"><canvas id="mixTrainCanvas"></canvas></div>
                 <div class="btn-group"><button class="action-btn" onclick="loadRandomMixMission()">Überspringen</button><button class="action-btn btn-primary" onclick="advanceSession(15)">Richtig ➔</button></div>`;
-            setupMixCanvas('mixTrainCanvas', v.tone, true);
+            // Übergabe des konkreten Objekts v, damit der Sound immer zum exakten Wort passt!
+            setupMixCanvas('mixTrainCanvas', v.tone, true, v);
         }
 
         function renderMixExamCanvas(v) {
@@ -988,7 +988,7 @@
             else { playSound('wrong'); showToast("Falsch! 💡", false); }
         }
 
-        function setupMixCanvas(canvasId, tone, hasGhost) {
+        function setupMixCanvas(canvasId, tone, hasGhost, vocabObj) {
             const canvas = document.getElementById(canvasId);
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -998,10 +998,10 @@
             const getCoord = (e) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
             canvas.onmousedown = (e) => { isDrawing = true; points = [getCoord(e)]; };
             canvas.onmousemove = (e) => { if(!isDrawing) return; points.push(getCoord(e)); redrawCanvas(ctx, canvas, points, tone, hasGhost, false); };
-            canvas.onmouseup = () => { if(!isDrawing) return; isDrawing = false; if(hasGhost && points.length > 3) { drawPerfectCurve(ctx, canvas, tone); playAudio(vocabs[currentMixIndex].thai); } };
+            canvas.onmouseup = () => { if(!isDrawing) return; isDrawing = false; if(hasGhost && points.length > 3) { drawPerfectCurve(ctx, canvas, tone); playAudio(vocabObj ? vocabObj.thai : vocabs[currentMixIndex].thai); } };
             canvas.ontouchstart = (e) => { isDrawing = true; points = [getCoord(e.touches[0])]; e.preventDefault(); };
             canvas.ontouchmove = (e) => { if(!isDrawing) return; points.push(getCoord(e.touches[0])); redrawCanvas(ctx, canvas, points, tone, hasGhost, false); e.preventDefault(); };
-            canvas.ontouchend = () => { if(!isDrawing) return; isDrawing = false; if(hasGhost && points.length > 3) { drawPerfectCurve(ctx, canvas, tone); playAudio(vocabs[currentMixIndex].thai); } };
+            canvas.ontouchend = () => { if(!isDrawing) return; isDrawing = false; if(hasGhost && points.length > 3) { drawPerfectCurve(ctx, canvas, tone); playAudio(vocabObj ? vocabObj.thai : vocabs[currentMixIndex].thai); } };
         }
 
         function redrawCanvas(ctx, canvas, points, tone, hasGhost, snapped) {
@@ -1034,14 +1034,15 @@
             trainCtx = trainCanvas.getContext('2d');
             trainCanvas.width = trainCanvas.parentElement.clientWidth; trainCanvas.height = trainCanvas.parentElement.clientHeight;
             trainPoints = []; trainSnapped = false;
+            const currentVocab = vocabs[currentTrainIndex];
             const getCoord = (e) => { const r = trainCanvas.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
             trainCanvas.onmousedown = (e) => { trainPoints = [getCoord(e)]; trainSnapped = false; redrawTrain(); };
             trainCanvas.onmousemove = (e) => { if(trainPoints.length) { trainPoints.push(getCoord(e)); redrawTrain(); } };
-            trainCanvas.onmouseup = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone); trainSnapped = true; playAudio(vocabs[currentTrainIndex].thai); } };
+            trainCanvas.onmouseup = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, currentVocab.tone); trainSnapped = true; playAudio(currentVocab.thai); } };
             trainCanvas.ontouchstart = (e) => { trainPoints = [getCoord(e.touches[0])]; trainSnapped = false; redrawTrain(); e.preventDefault(); };
             trainCanvas.ontouchmove = (e) => { if(trainPoints.length) { trainPoints.push(getCoord(e.touches[0])); redrawTrain(); e.preventDefault(); } };
-            trainCanvas.ontouchend = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone); trainSnapped = true; playAudio(vocabs[currentTrainIndex].thai); } };
-            drawGhost(trainCtx, trainCanvas, vocabs[currentTrainIndex].tone);
+            trainCanvas.ontouchend = () => { if(trainPoints.length > 3) { drawPerfectCurve(trainCtx, trainCanvas, currentVocab.tone); trainSnapped = true; playAudio(currentVocab.thai); } };
+            drawGhost(trainCtx, trainCanvas, currentVocab.tone);
         }
 
         function clearTrainCanvas() { trainPoints = []; trainSnapped = false; redrawTrain(); }
