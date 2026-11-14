@@ -332,7 +332,7 @@
         }
     </style>
 </head>
-<body onclick="closeTooltipOutside(event)">
+<body>
 
     <div id="toast-banner" class="toast-banner">
         <span id="toast-icon">🎉</span>
@@ -449,7 +449,7 @@
     </nav>
 
     <script>
-        // Service Worker Registrierung für App-Installation
+        // Service Worker Registrierung
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
@@ -706,7 +706,7 @@
                 else if (!isUnlocked) { statusClass = "locked"; iconSymbol = "🔒"; }
 
                 let clickAction = station.type === 'lesson' 
-                    ? `startSessionForLesson(${station.lessonId}, '${station.title}')` 
+                    ? `startSessionForLesson(${station.lessonId})` 
                     : `startDialogSession(${station.dialogId})`;
 
                 html += `<div class="path-node ${statusClass}" onclick="${isUnlocked ? clickAction : `showLockedAlert()`}">
@@ -745,6 +745,13 @@
             container.innerHTML = html;
         }
 
+        function toggleDialogDetails(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.style.display = el.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
         function startDialogSession(dialogId) {
             switchTab('dialog');
             const container = document.getElementById('card-content-dialog');
@@ -757,7 +764,7 @@
                         <button class="audio-btn" onclick="playAudio('${line.thai}')" style="width: 34px; height: 34px; font-size: 0.9rem;">🔊</button>
                     </div>
                     <div style="font-size: 1.4rem; font-weight: bold; margin: 4px 0;">${line.thai}</div>
-                    <button class="action-btn" onclick="toggleDialogDetails(event, 'dialog-details-${dialogId}-${idx}')" style="font-size: 0.75rem; padding: 4px; background: #1e293b; border: 1px solid #475569; color: #94a3b8; text-align: left;">👁️ Details</button>
+                    <button class="action-btn" onclick="toggleDialogDetails('dialog-details-${dialogId}-${idx}')" style="font-size: 0.75rem; padding: 4px; background: #1e293b; border: 1px solid #475569; color: #94a3b8; text-align: left;">👁️ Details</button>
                     <div id="dialog-details-${dialogId}-${idx}" style="display: none; margin-top: 6px; font-size: 0.8rem; color: #94a3b8;">
                         <div>🔤 Umschrift: ${line.translit}</div>
                         <div>🇩🇪 Bedeutung: ${line.meaning}</div>
@@ -883,7 +890,6 @@
                 <div class="translit">${v.translit}</div>
                 <div class="canvas-container"><canvas id="mixTrainCanvas"></canvas></div>
                 <div class="btn-group"><button class="action-btn" onclick="loadRandomMixMission()">Überspringen</button><button class="action-btn btn-primary" onclick="advanceSession(15)">Richtig ➔</button></div>`;
-            // Übergabe des konkreten Objekts v, damit der Sound immer zum exakten Wort passt!
             setupMixCanvas('mixTrainCanvas', v.tone, true, v);
         }
 
@@ -1152,7 +1158,7 @@
             vocabs.push({
                 thai: document.getElementById('input-thai').value,
                 translit: document.getElementById('input-translit').value,
-                meaning: document.getElementById('input-meaning').value,
+                meaning: document.getElementById('input-meaning5').value || document.getElementById('input-meaning').value,
                 emoji: document.getElementById('input-image').value,
                 lesson: parseInt(document.getElementById('input-lesson').value),
                 tone: parseInt(document.getElementById('input-tone').value)
