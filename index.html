@@ -4,8 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thai Tonal Quest</title>
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="./icon-192.png">
+    <!-- Eingebettetes Manifest für den Homescreen (Öffnet im eigenen Fenster) -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+      %22name%22: %22Thai Tonal Quest%22,
+      %22short_name%22: %22Thai Quest%22,
+      %22start_url%22: %22./index.html%22,
+      %22display%22: %22standalone%22,
+      %22background_color%22: %22%230f172a%22,
+      %22theme_color%22: %22%230f172a%22,
+      %22icons%22: [
+        {
+          %22src%22: %22https://img.icons8.com/color/192/elephant.png%22,
+          %22sizes%22: %22192x192%22,
+          %22type%22: %22image/png%22
+        }
+      ]
+    }">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/elephant.png">
     <style>
         :root {
             --bg: #0f172a;
@@ -449,13 +464,6 @@
     </nav>
 
     <script>
-        // Service Worker Registrierung
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
-            });
-        }
-
         let defaultVocabs = [
             { thai: "สวัสดี", translit: "sà-wàt-dee", meaning: "Hallo / Guten Tag", tone: 3, lesson: 1, emoji: "👋" },
             { thai: "ขอบคุณ", translit: "kàwp-kun", meaning: "Danke", tone: 2, lesson: 1, emoji: "🙏" },
@@ -601,7 +609,7 @@
         function playAudio(text) {
             if (!synth) return;
             synth.cancel();
-            const cleanText = text.replace(/[^ก-๙a-zA-Z\s]/g, ''); // Sonderzeichen für Sprachsynthese bereinigen
+            const cleanText = text.replace(/[^ก-๙a-zA-Z\s]/g, '');
             const utterance = new SpeechSynthesisUtterance(cleanText || text);
             utterance.lang = 'th-TH';
             utterance.rate = 0.8;
