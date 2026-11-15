@@ -505,7 +505,7 @@
                 context: "Du kommst in ein Restaurant, bestellst Wasser und besprichst die Schärfe.",
                 lines: [
                     { speaker: "Kellner", thai: "สวัสดีครับ", translit: "sà-wàt-dee kráp", meaning: "Guten Tag!" },
-                    { speaker: "Du", thai: "ขอ N น้ำครับ", translit: "kǎw náam kráp", meaning: "Ich hätte gerne Wasser, bitte." },
+                    { speaker: "Du", thai: "ขอน้ำครับ", translit: "kǎw náam kráp", meaning: "Ich hätte gerne Wasser, bitte." },
                     { speaker: "Kellner", thai: "กินเผ็ดไหม", translit: "gin phèt mǎai", meaning: "Isst du scharf?" },
                     { speaker: "Du", thai: "ไม่เผ็ดครับ", translit: "mâi phèt kráp", meaning: "Nicht scharf, bitte." }
                 ],
@@ -591,7 +591,7 @@
         function loadThaiVoices() {
             if (!synth) return;
             const voices = synth.getVoices();
-            thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH')) || null;
+            thaiVoice = voices.find(v => v.lang.includes('th') || v.lang.includes('TH') || v.lang.includes('tha')) || null;
         }
         if (synth) {
             loadThaiVoices();
@@ -601,7 +601,8 @@
         function playAudio(text) {
             if (!synth) return;
             synth.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
+            const cleanText = text.replace(/[^ก-๙a-zA-Z\s]/g, ''); // Sonderzeichen für Sprachsynthese bereinigen
+            const utterance = new SpeechSynthesisUtterance(cleanText || text);
             utterance.lang = 'th-TH';
             utterance.rate = 0.8;
             if (!thaiVoice) loadThaiVoices();
@@ -1158,7 +1159,7 @@
             vocabs.push({
                 thai: document.getElementById('input-thai').value,
                 translit: document.getElementById('input-translit').value,
-                meaning: document.getElementById('input-meaning5').value || document.getElementById('input-meaning').value,
+                meaning: document.getElementById('input-meaning').value,
                 emoji: document.getElementById('input-image').value,
                 lesson: parseInt(document.getElementById('input-lesson').value),
                 tone: parseInt(document.getElementById('input-tone').value)
