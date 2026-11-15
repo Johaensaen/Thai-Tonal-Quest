@@ -86,6 +86,45 @@
             position: relative;
         }
 
+        .sub-header-bar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            box-sizing: border-box;
+        }
+
+        .back-nav-btn {
+            background: #334155;
+            border: none;
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .back-nav-btn:active { background: #475569; }
+
+        .sub-header-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 230px;
+        }
+
         .card {
             background: var(--card-bg);
             border-radius: 16px;
@@ -376,6 +415,10 @@
         </section>
 
         <section id="section-mix" class="hidden" style="width: 100%;">
+            <div class="sub-header-bar">
+                <button class="back-nav-btn" onclick="switchTab('path')">← Zurück</button>
+                <div class="sub-header-title" id="mix-sub-title">Station</div>
+            </div>
             <div class="progress-bar-container">
                 <div class="progress-bar-fill" id="session-fill"></div>
             </div>
@@ -383,6 +426,10 @@
         </section>
 
         <section id="section-dialog" class="hidden" style="width: 100%;">
+            <div class="sub-header-bar">
+                <button class="back-nav-btn" onclick="switchTab('path')">← Zurück</button>
+                <div class="sub-header-title" id="dialog-sub-title">Hör-Dialog</div>
+            </div>
             <div class="card" id="card-content-dialog"></div>
         </section>
 
@@ -443,22 +490,22 @@
     </main>
 
     <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="switchTab('path')">
+        <button class="nav-btn active" id="nav-btn-path" onclick="switchTab('path')">
             <span>🗺️</span> Pfad
         </button>
-        <button class="nav-btn" onclick="switchTab('train')">
+        <button class="nav-btn" id="nav-btn-train" onclick="switchTab('train')">
             <span>🏋️</span> Training
         </button>
-        <button class="nav-btn" onclick="switchTab('exam')">
+        <button class="nav-btn" id="nav-btn-exam" onclick="switchTab('exam')">
             <span>🎓</span> Prüfung
         </button>
-        <button class="nav-btn" onclick="switchTab('lessons')">
+        <button class="nav-btn" id="nav-btn-lessons" onclick="switchTab('lessons')">
             <span>📚</span> Lektionen
         </button>
-        <button class="nav-btn" onclick="switchTab('alphabet')">
+        <button class="nav-btn" id="nav-btn-alphabet" onclick="switchTab('alphabet')">
             <span>🔤</span> Alphabet
         </button>
-        <button class="nav-btn" onclick="switchTab('add')">
+        <button class="nav-btn" id="nav-btn-add" onclick="switchTab('add')">
             <span>➕</span> Wort
         </button>
     </nav>
@@ -727,7 +774,15 @@
         }
 
         function showLockedAlert() { showToast("Schließe erst vorherige Stationen ab! 🔒", false); }
-        function startSessionForLesson(lessonId) { activeLessonFilter = lessonId; sessionCurrent = 0; sessionGainedXP = 0; switchTab('mix'); }
+        
+        function startSessionForLesson(lessonId) { 
+            activeLessonFilter = lessonId; 
+            sessionCurrent = 0; 
+            sessionGainedXP = 0; 
+            const lName = lessons[lessonId] ? lessons[lessonId].name : `Lektion ${lessonId}`;
+            document.getElementById('mix-sub-title').innerText = lName;
+            switchTab('mix', true); // true signalisiert: Aktiv im Pfad-Modus bleiben
+        }
 
         function renderAlphabet() {
             const container = document.getElementById('alphabet-container');
@@ -762,9 +817,11 @@
         }
 
         function startDialogSession(dialogId) {
-            switchTab('dialog');
-            const container = document.getElementById('card-content-dialog');
             const d = dialogues[dialogId] || dialogues[0];
+            document.getElementById('dialog-sub-title').innerText = d.title;
+            switchTab('dialog', true); // true signalisiert: Aktiv im Pfad-Modus bleiben
+            
+            const container = document.getElementById('card-content-dialog');
             let linesHtml = "";
             d.lines.forEach((line, idx) => {
                 linesHtml += `<div class="dialog-bubble" style="display:flex; flex-direction: column;">
@@ -818,21 +875,29 @@
             } else { loadRandomMixMission(); }
         }
 
-        function switchTab(tab) {
+        function switchTab(tab, keepPathActive = false) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-alphabet', 'section-add'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.classList.add('hidden');
             });
-            const navButtons = document.querySelectorAll('.bottom-nav .nav-btn');
-            navButtons.forEach(btn => { if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tab)) btn.classList.add('active'); });
+
+            // Wenn wir uns in einer Lektion/Dialog befinden, die vom Pfad gestartet wurde, bleibt der Pfad-Tab unten markiert!
+            if (keepPathActive || tab === 'path') {
+                document.getElementById('nav-btn-path').classList.add('active');
+            } else {
+                const targetNav = document.getElementById('nav-btn-' + tab);
+                if(targetNav) targetNav.classList.add('active');
+            }
 
             if(tab === 'path') { document.getElementById('section-path').classList.remove('hidden'); updateHUD(); renderPath(); }
             else if(tab === 'mix') { document.getElementById('section-mix').classList.remove('hidden'); loadRandomMixMission(); }
+            else if(tab === 'dialog') { document.getElementById('section-dialog').classList.remove('hidden'); }
             else if(tab === 'train') { document.getElementById('section-train').classList.remove('hidden'); loadTrainCard(); }
             else if(tab === 'exam') { document.getElementById('section-exam').classList.remove('hidden'); loadExamCard(); }
             else if(tab === 'lessons') { document.getElementById('section-lessons').classList.remove('hidden'); renderLessons(); }
             else if(tab === 'alphabet') { document.getElementById('section-alphabet').classList.remove('hidden'); renderAlphabet(); }
+            else if(tab === 'add') { document.getElementById('section-add').classList.remove('hidden'); }
         }
 
         function loadRandomMixMission() {
@@ -1164,6 +1229,7 @@
 
         function addVocab(e) {
             e.preventDefault();
+            vocabs.path;
             vocabs.push({
                 thai: document.getElementById('input-thai').value,
                 translit: document.getElementById('input-translit').value,
