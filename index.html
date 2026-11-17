@@ -781,7 +781,7 @@
             sessionGainedXP = 0; 
             const lName = lessons[lessonId] ? lessons[lessonId].name : `Lektion ${lessonId}`;
             document.getElementById('mix-sub-title').innerText = lName;
-            switchTab('mix', true); // true signalisiert: Aktiv im Pfad-Modus bleiben
+            switchTab('mix', true);
         }
 
         function renderAlphabet() {
@@ -819,7 +819,7 @@
         function startDialogSession(dialogId) {
             const d = dialogues[dialogId] || dialogues[0];
             document.getElementById('dialog-sub-title').innerText = d.title;
-            switchTab('dialog', true); // true signalisiert: Aktiv im Pfad-Modus bleiben
+            switchTab('dialog', true);
             
             const container = document.getElementById('card-content-dialog');
             let linesHtml = "";
@@ -882,7 +882,6 @@
                 if(el) el.classList.add('hidden');
             });
 
-            // Wenn wir uns in einer Lektion/Dialog befinden, die vom Pfad gestartet wurde, bleibt der Pfad-Tab unten markiert!
             if (keepPathActive || tab === 'path') {
                 document.getElementById('nav-btn-path').classList.add('active');
             } else {
@@ -1229,7 +1228,6 @@
 
         function addVocab(e) {
             e.preventDefault();
-            vocabs.path;
             vocabs.push({
                 thai: document.getElementById('input-thai').value,
                 translit: document.getElementById('input-translit').value,
