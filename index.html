@@ -450,7 +450,6 @@
             <div id="alphabet-container" style="width: 100%;"></div>
         </section>
 
-        <!-- NEU: Buchstaben Studio (Deep Dive / Nachzeichnen im Chinesisch-Stil) -->
         <section id="section-letter-studio" class="hidden" style="width: 100%;">
             <div class="sub-header-bar">
                 <button class="back-nav-btn" onclick="switchTab('alphabet')">← Zurück</button>
@@ -475,8 +474,8 @@
                     <label style="font-size:0.8rem; color:var(--muted);">Emoji-Symbol:</label>
                     <input type="text" id="input-image" placeholder="z.B. 🐘" style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
 
-                    <label style="font-size:0.8rem; color:var(--muted);">Lektion (1-3):</label>
-                    <input type="number" id="input-lesson" value="1" min="1" max="3" style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
+                    <label style="font-size:0.8rem; color:var(--muted);">Lektion (1-6):</label>
+                    <input type="number" id="input-lesson" value="1" min="1" max="6" style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
 
                     <label style="font-size:0.8rem; color:var(--muted);">Ton (0=Mid, 1=Low, 2=Falling, 3=High, 4=Rising):</label>
                     <input type="number" id="input-tone" value="0" min="0" max="4" style="padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:#fff;">
@@ -520,24 +519,65 @@
     </nav>
 
     <script>
+        // Erweiterter Open-Source Alltags- und Reise-Wortschatz (50+ Wörter)
         let defaultVocabs = [
+            // Lektion 1: Urlaub & Begrüßung
             { thai: "สวัสดี", translit: "sà-wàt-dee", meaning: "Hallo / Guten Tag", tone: 3, lesson: 1, emoji: "👋" },
             { thai: "ขอบคุณ", translit: "kàwp-kun", meaning: "Danke", tone: 2, lesson: 1, emoji: "🙏" },
             { thai: "ใช่", translit: "châi", meaning: "Ja", tone: 2, lesson: 1, emoji: "✅" },
             { thai: "ไม่", translit: "mâi", meaning: "Nein / Nicht", tone: 2, lesson: 1, emoji: "❌" },
             { thai: "ห้องน้ำ", translit: "hɔ̂ng-náam", meaning: "Toilette / WC", tone: 2, lesson: 1, emoji: "🚻" },
             { thai: "เท่าไหร่", translit: "thâo-ràai", meaning: "Wieviel kostet das?", tone: 1, lesson: 1, emoji: "💰" },
+            { thai: "ขอโทษ", translit: "kǎw thôot", meaning: "Entschuldigung", tone: 2, lesson: 1, emoji: "🙋‍♂️" },
+            { thai: "ช่วยด้วย", translit: "chûay dûay", meaning: "Hilfe!", tone: 2, lesson: 1, emoji: "🚨" },
+
+            // Lektion 2: Essen & Restaurant
             { thai: "น้ำ", translit: "náam", meaning: "Wasser", tone: 3, lesson: 2, emoji: "💧" },
             { thai: "กิน", translit: "gin", meaning: "essen", tone: 0, lesson: 2, emoji: "🍚" },
             { thai: "หิว", translit: "hǐw", meaning: "hungrig", tone: 4, lesson: 2, emoji: "😋" },
             { thai: "อร่อย", translit: "à-rɔ̀y", meaning: "Lecker!", tone: 1, lesson: 2, emoji: "🍲" },
             { thai: "เผ็ด", translit: "phèt", meaning: "Scharf", tone: 1, lesson: 2, emoji: "🔥" },
             { thai: "ไม่เผ็ด", translit: "mâi-phèt", meaning: "Nicht scharf", tone: 2, lesson: 2, emoji: "🥛" },
+            { thai: "เบียร์", translit: "bia", meaning: "Bier", tone: 0, lesson: 2, emoji: "🍺" },
+            { thai: "กาแฟ", translit: "gaa-fɛɛ", meaning: "Kaffee", tone: 0, lesson: 2, emoji: "☕" },
+            { thai: "ผลไม้", translit: "phǒn-la-máai", meaning: "Obst / Früchte", tone: 4, lesson: 2, emoji: "🥭" },
+
+            // Lektion 3: Familie & Freunde
             { thai: "เพื่อน", translit: "phûan", meaning: "Freund / Freundin", tone: 2, lesson: 3, emoji: "🧑‍🤝‍🧑" },
             { thai: "ครอบครัว", translit: "krɔ̀ːp-krūa", meaning: "Familie", tone: 1, lesson: 3, emoji: "👨‍👩‍👧‍👦" },
             { thai: "สบายดีไหม", translit: "sà-baai-dee mǎai", meaning: "Wie geht es dir?", tone: 0, lesson: 3, emoji: "💬" },
             { thai: "สบายดี", translit: "sà-baai-dee", meaning: "Mir geht es gut", tone: 0, lesson: 3, emoji: "😊" },
-            { thai: "รัก", translit: "rák", meaning: "Liebe / Lieben", tone: 4, lesson: 3, emoji: "❤️" }
+            { thai: "รัก", translit: "rák", meaning: "Liebe / Lieben", tone: 4, lesson: 3, emoji: "❤️" },
+            { thai: "พ่อ", translit: "phɔ̂ɔ", meaning: "Vater", tone: 2, lesson: 3, emoji: "👨" },
+            { thai: "แม่", translit: "mɛ̂ɛ", meaning: "Mutter", tone: 2, lesson: 3, emoji: "👩" },
+
+            // Lektion 4: Unterwegs & Transport
+            { thai: "รถ", translit: "rót", meaning: "Auto / Fahrzeug", tone: 4, lesson: 4, emoji: "🚗" },
+            { thai: "บ้าน", translit: "bâan", meaning: "Haus / Zuhause", tone: 2, lesson: 4, emoji: "🏠" },
+            { thai: "ไป", translit: "bpai", meaning: "gehen / fahren", tone: 0, lesson: 4, emoji: "🚶‍♂️" },
+            { thai: "มา", translit: "maa", meaning: "kommen", tone: 0, lesson: 4, emoji: "📍" },
+            { thai: "สนามบิน", translit: "sà-nǎam-bin", meaning: "Flughafen", tone: 4, lesson: 4, emoji: "✈️" },
+            { thai: "โรงแรม", translit: "roong-rɛɛm", meaning: "Hotel", tone: 0, lesson: 4, emoji: "🏨" },
+            { thai: "ไกล", translit: "glai", meaning: "weit", tone: 0, lesson: 4, emoji: "🗺️" },
+            { thai: "ใกล้", translit: "glâi", meaning: "nah", tone: 2, lesson: 4, emoji: "📍" },
+
+            // Lektion 5: Zahlen & Einkaufen
+            { thai: "หนึ่ง", n: 1, translit: "nùeng", meaning: "Eins (1)", tone: 1, lesson: 5, emoji: "1️⃣" },
+            { thai: "สอง", n: 2, translit: "sɔ̌ɔng", meaning: "Zwei (2)", tone: 4, lesson: 5, emoji: "2️⃣" },
+            { thai: "สาม", n: 3, translit: "sǎam", meaning: "Drei (3)", tone: 4, lesson: 5, emoji: "3️⃣" },
+            { thai: "แพง", translit: "phɛɛng", meaning: "Teuer", tone: 0, lesson: 5, emoji: "💎" },
+            { thai: "ถูก", translit: "thùuk", meaning: "Günstig / Billig", tone: 1, lesson: 5, emoji: "🏷️" },
+            { thai: "เงิน", translit: "ngern", meaning: "Geld", tone: 0, lesson: 5, emoji: "💵" },
+
+            // Lektion 6: Natur, Zeit & Alltag
+            { thai: "แมว", translit: "mɛɛo", meaning: "Katze", tone: 0, lesson: 6, emoji: "🐱" },
+            { thai: "หมา", translit: "mǎa", meaning: "Hund", tone: 4, lesson: 6, emoji: "🐶" },
+            { thai: "ช้าง", translit: "cháang", meaning: "Elefant", tone: 3, lesson: 6, emoji: "🐘" },
+            { thai: "วัน", translit: "wan", meaning: "Tag", tone: 0, lesson: 6, emoji: "☀️" },
+            { thai: "คืน", translit: "khuun", meaning: "Nacht", tone: 0, lesson: 6, emoji: "🌙" },
+            { thai: "ร้อน", translit: "rɔ́ɔn", meaning: "Heiß", tone: 3, lesson: 6, emoji: "🌡️" },
+            { thai: "หนาว", translit: "nǎao", meaning: "Kalt", tone: 4, lesson: 6, emoji: "❄️" },
+            { thai: "สวย", translit: "suǎy", meaning: "Schön / Hübsch", tone: 4, lesson: 6, emoji: "✨" }
         ];
 
         let defaultLetters = [
@@ -560,7 +600,10 @@
         let lessons = JSON.parse(localStorage.getItem('thai_quest_lessons')) || {
             1: { name: "1. Urlaub & Begrüßung", completed: false },
             2: { name: "2. Essen & Restaurant", completed: false },
-            3: { name: "3. Familie & Freunde", completed: false }
+            3: { name: "3. Familie & Freunde", completed: false },
+            4: { name: "4. Unterwegs & Transport", completed: false },
+            5: { name: "5. Zahlen & Einkaufen", completed: false },
+            6: { name: "6. Natur, Zeit & Alltag", completed: false }
         };
 
         let dialogues = [
@@ -729,7 +772,7 @@
         const sessionTarget = 5;
         let sessionGainedXP = 0;
         let activeLessonFilter = null; 
-        let isReviewMode = false; // Flag für reinen Wiederholungs-Modus
+        let isReviewMode = false;
 
         let currentTrainIndex = null;
         let currentExamIndex = null;
@@ -754,7 +797,8 @@
                 { id: 2, title: "Essen & Restaurant", icon: "🍲", type: "lesson", lessonId: 2 },
                 { id: 3, title: "Hör-Dialog 1", icon: "🎧", type: "dialog", dialogId: 0 },
                 { id: 4, title: "Freunde & Familie", icon: "💬", type: "lesson", lessonId: 3 },
-                { id: 5, title: "Hör-Dialog 2", icon: "🎧", type: "dialog", dialogId: 1 }
+                { id: 5, title: "Transport & Weg", icon: "🚗", type: "lesson", lessonId: 4 },
+                { id: 6, title: "Hör-Dialog 2", icon: "🎧", type: "dialog", dialogId: 1 }
             ];
 
             stationList.forEach((station, index) => {
@@ -795,7 +839,6 @@
             switchTab('mix', true);
         }
 
-        // Startet eine reine Wiederholungs-Session für gelerntes Vokabular
         function startReviewSession() {
             activeLessonFilter = null;
             isReviewMode = true;
@@ -829,7 +872,6 @@
             container.innerHTML = html;
         }
 
-        // Öffnet das interaktive Buchstaben-Studio zum Nachzeichnen und Lernen
         function openLetterStudio(index) {
             const l = letters[index];
             document.getElementById('studio-title').innerText = `Studio: ${l.name} (${l.char})`;
@@ -866,7 +908,6 @@
             canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
             studioPoints = [];
             
-            // Zeichne Ghost-Anzeige des Zeichens im Hintergrund als Vorlage
             ctx.font = "bold 90px sans-serif";
             ctx.fillStyle = "rgba(71, 85, 105, 0.25)";
             ctx.textAlign = "center";
