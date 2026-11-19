@@ -450,6 +450,15 @@
             <div id="alphabet-container" style="width: 100%;"></div>
         </section>
 
+        <!-- NEU: Buchstaben Studio (Deep Dive / Nachzeichnen im Chinesisch-Stil) -->
+        <section id="section-letter-studio" class="hidden" style="width: 100%;">
+            <div class="sub-header-bar">
+                <button class="back-nav-btn" onclick="switchTab('alphabet')">← Zurück</button>
+                <div class="sub-header-title" id="studio-title">Buchstaben-Studio</div>
+            </div>
+            <div class="card" id="card-content-studio"></div>
+        </section>
+
         <section id="section-add" class="hidden" style="width: 100%;">
             <div class="card" style="align-items: stretch;">
                 <h3 style="margin-top:0; text-align:center; color: var(--accent);">✍️ Eigenes Wort hinzufügen</h3>
@@ -720,6 +729,7 @@
         const sessionTarget = 5;
         let sessionGainedXP = 0;
         let activeLessonFilter = null; 
+        let isReviewMode = false; // Flag für reinen Wiederholungs-Modus
 
         let currentTrainIndex = null;
         let currentExamIndex = null;
@@ -777,10 +787,21 @@
         
         function startSessionForLesson(lessonId) { 
             activeLessonFilter = lessonId; 
+            isReviewMode = false;
             sessionCurrent = 0; 
             sessionGainedXP = 0; 
             const lName = lessons[lessonId] ? lessons[lessonId].name : `Lektion ${lessonId}`;
             document.getElementById('mix-sub-title').innerText = lName;
+            switchTab('mix', true);
+        }
+
+        // Startet eine reine Wiederholungs-Session für gelerntes Vokabular
+        function startReviewSession() {
+            activeLessonFilter = null;
+            isReviewMode = true;
+            sessionCurrent = 0;
+            sessionGainedXP = 0;
+            document.getElementById('mix-sub-title').innerText = "🔄 Wortschatz-Wiederholung";
             switchTab('mix', true);
         }
 
@@ -789,12 +810,12 @@
             if (!container) return;
             let html = `<div style="margin-bottom: 15px; text-align: center;">
                 <h3 style="color: #38bdf8; margin-bottom: 5px;">🔤 Thailändisches Alphabet & Eselsbrücken</h3>
-                <p style="color: #94a3b8; font-size: 0.85rem;">Chineasy-Stil: Visuelle Eselsbrücken zum Einprägen.</p>
+                <p style="color: #94a3b8; font-size: 0.85rem;">Tippe auf einen Buchstaben für das interaktive Buchstaben-Studio.</p>
             </div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">`;
 
-            letters.forEach((item) => {
+            letters.forEach((item, idx) => {
                 let classColor = item.class === 'high' ? '#f43f5e' : (item.class === 'low' ? '#38bdf8' : '#eab308');
-                html += `<div class="card" style="padding: 15px; text-align: center; border-bottom: 3px solid ${classColor}; background: #1e293b; border-radius: 12px; margin-bottom:0;">
+                html += `<div class="card" onclick="openLetterStudio(${idx})" style="padding: 15px; text-align: center; border-bottom: 3px solid ${classColor}; background: #1e293b; border-radius: 12px; margin-bottom:0; cursor:pointer;">
                     <div class="chineasy-graphic">
                         <span style="font-size: 2.2rem; position: absolute; z-index: 2; color: #f8fafc; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.8);">${item.char}</span>
                         <span style="font-size: 3rem; position: absolute; z-index: 1; opacity: 0.4;">${item.graphic}</span>
@@ -802,11 +823,78 @@
                     <div style="font-size: 0.9rem; font-weight: bold; color: #38bdf8; margin-top: 5px;">${item.name}</div>
                     <div style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0;">${item.meaning}</div>
                     <div style="background: #0f172a; padding: 8px; border-radius: 8px; font-size: 0.75rem; color: #cbd5e1; margin-top: 6px;">💡 ${item.mnem}</div>
-                    <button class="action-btn" onclick="playAudio('${item.char}')" style="margin-top: 8px; padding: 6px; font-size: 0.8rem; width: 100%;">🔊 Anhören</button>
                 </div>`;
             });
             html += `</div>`;
             container.innerHTML = html;
+        }
+
+        // Öffnet das interaktive Buchstaben-Studio zum Nachzeichnen und Lernen
+        function openLetterStudio(index) {
+            const l = letters[index];
+            document.getElementById('studio-title').innerText = `Studio: ${l.name} (${l.char})`;
+            switchTab('letter-studio');
+
+            const container = document.getElementById('card-content-studio');
+            container.innerHTML = `
+                <div style="font-size: 0.8rem; color: var(--accent); text-transform: uppercase;">Chineasy & Schreib-Training</div>
+                <div class="chineasy-graphic" style="width: 110px; height: 110px; margin: 15px auto;">
+                    <span style="font-size: 3rem; position: absolute; z-index: 2; color: #f8fafc; font-weight: bold;">${l.char}</span>
+                    <span style="font-size: 4rem; position: absolute; z-index: 1; opacity: 0.3;">${l.graphic}</span>
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: #f8fafc;">${l.name}</div>
+                <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 10px;">Bedeutung: ${l.meaning}</div>
+                <div style="background: #0f172a; padding: 10px; border-radius: 8px; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 15px; width:100%; box-sizing:border-box;">💡 Eselsbrücke: "${l.mnem}"</div>
+                
+                <div style="font-size: 0.8rem; color: #38bdf8; margin-bottom: 4px;">Zeichne den Buchstaben nach:</div>
+                <div class="canvas-container"><canvas id="studioCanvas"></canvas></div>
+                
+                <div class="btn-group">
+                    <button class="action-btn" onclick="playAudio('${l.char}')">🔊 Anhören</button>
+                    <button class="action-btn btn-primary" onclick="showToast('Buchstabe gemeistert! 🎉 +10 XP'); xp+=10; updateHUD(); switchTab('alphabet');">Fertig ➔</button>
+                </div>
+            `;
+            setupStudioCanvas(l.char);
+        }
+
+        let studioPoints = [];
+        let studioDrawing = false;
+        function setupStudioCanvas(char) {
+            const canvas = document.getElementById('studioCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
+            studioPoints = [];
+            
+            // Zeichne Ghost-Anzeige des Zeichens im Hintergrund als Vorlage
+            ctx.font = "bold 90px sans-serif";
+            ctx.fillStyle = "rgba(71, 85, 105, 0.25)";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(char, canvas.width / 2, canvas.height / 2);
+
+            const getCoord = (e) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX || e.touches[0].clientX) - r.left, y: (e.clientY || e.touches[0].clientY) - r.top }; };
+            
+            canvas.onmousedown = (e) => { studioPoints = [getCoord(e)]; studioDrawing = true; };
+            canvas.onmousemove = (e) => { if(studioDrawing) { studioPoints.push(getCoord(e)); redrawStudio(ctx, canvas, char); } };
+            canvas.onmouseup = () => { studioDrawing = false; };
+            canvas.ontouchstart = (e) => { studioPoints = [getCoord(e.touches[0])]; studioDrawing = true; e.preventDefault(); };
+            canvas.ontouchmove = (e) => { if(studioDrawing) { studioPoints.push(getCoord(e.touches[0])); redrawStudio(ctx, canvas, char); e.preventDefault(); } };
+            canvas.ontouchend = () => { studioDrawing = false; };
+        }
+
+        function redrawStudio(ctx, canvas, char) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "bold 90px sans-serif";
+            ctx.fillStyle = "rgba(71, 85, 105, 0.25)";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(char, canvas.width / 2, canvas.height / 2);
+
+            if (studioPoints.length < 2) return;
+            ctx.beginPath(); ctx.moveTo(studioPoints[0].x, studioPoints[0].y);
+            for(let p of studioPoints) ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.stroke();
         }
 
         function toggleDialogDetails(elementId) {
@@ -865,7 +953,7 @@
             const fill = document.getElementById('session-fill');
             if(fill) fill.style.width = ((sessionCurrent / sessionTarget) * 100) + "%";
             if (sessionCurrent >= sessionTarget) {
-                if (activeLessonFilter && lessons[activeLessonFilter]) {
+                if (!isReviewMode && activeLessonFilter && lessons[activeLessonFilter]) {
                     lessons[activeLessonFilter].completed = true;
                     localStorage.setItem('thai_quest_lessons', JSON.stringify(lessons));
                 }
@@ -877,7 +965,7 @@
 
         function switchTab(tab, keepPathActive = false) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-alphabet', 'section-add'].forEach(id => {
+            ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-alphabet', 'section-letter-studio', 'section-add'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.classList.add('hidden');
             });
@@ -896,6 +984,7 @@
             else if(tab === 'exam') { document.getElementById('section-exam').classList.remove('hidden'); loadExamCard(); }
             else if(tab === 'lessons') { document.getElementById('section-lessons').classList.remove('hidden'); renderLessons(); }
             else if(tab === 'alphabet') { document.getElementById('section-alphabet').classList.remove('hidden'); renderAlphabet(); }
+            else if(tab === 'letter-studio') { document.getElementById('section-letter-studio').classList.remove('hidden'); }
             else if(tab === 'add') { document.getElementById('section-add').classList.remove('hidden'); }
         }
 
@@ -904,7 +993,7 @@
             const container = document.getElementById('card-content-mix');
             if (!container) return;
             let availableVocabs = vocabs;
-            if (activeLessonFilter) {
+            if (activeLessonFilter && !isReviewMode) {
                 availableVocabs = vocabs.filter(v => v.lesson == activeLessonFilter);
                 if (!availableVocabs || availableVocabs.length === 0) availableVocabs = vocabs;
             }
@@ -1214,7 +1303,11 @@
         function renderLessons() {
             const container = document.getElementById('lessons-container');
             if (!container) return;
-            let html = "";
+            let html = `<div class="lesson-card" style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--accent);">
+                <div><h4 style="margin:0; color:var(--accent);">🔄 Wortschatz-Wiederholung</h4><p style="margin:2px 0 0 0; font-size:0.75rem; color:#94a3b8;">Trainiere alle bereits gelernten Wörter</p></div>
+                <button class="action-btn btn-primary" onclick="startReviewSession()" style="padding: 6px 12px; font-size: 0.8rem;">Starten 🚀</button>
+            </div><h4 style="color:var(--muted); margin: 15px 0 8px 0; font-size:0.85rem;">Lektionen:</h4>`;
+
             for (let id in lessons) {
                 let l = lessons[id];
                 let count = vocabs.filter(v => v.lesson == id).length;
