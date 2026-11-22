@@ -394,15 +394,12 @@
     </div>
 
     <header>
-        <div class="hud-item" style="color: var(--xp);">
-            ⭐ <span id="xp-count">0</span> XP
+        <div style="display: flex; gap: 12px;">
+            <div class="hud-item" style="color: var(--xp);">⭐ <span id="xp-count">0</span></div>
+            <div class="hud-item" style="color: var(--streak);">🔥 <span id="streak-count">1</span></div>
+            <div class="hud-item" style="color: var(--accent);">🏆 Lvl <span id="level-num">1</span></div>
         </div>
-        <div class="hud-item" style="color: var(--streak);">
-            🔥 <span id="streak-count">1</span>
-        </div>
-        <div class="hud-item" style="color: var(--accent);">
-            🏆 Lvl <span id="level-num">1</span>
-        </div>
+        <button onclick="switchTab('settings')" style="background: #334155; border: none; color: var(--text); padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;">⚙️</button>
     </header>
 
     <main>
@@ -456,6 +453,25 @@
                 <div class="sub-header-title" id="studio-title">Buchstaben-Studio</div>
             </div>
             <div class="card" id="card-content-studio"></div>
+        </section>
+
+        <!-- NEU: Einstellungs-Sektion für die Lautschrift -->
+        <section id="section-settings" class="hidden" style="width: 100%;">
+            <div class="sub-header-bar">
+                <button class="back-nav-btn" onclick="switchTab('path')">← Zurück</button>
+                <div class="sub-header-title">Einstellungen</div>
+            </div>
+            <div class="card" style="align-items: stretch;">
+                <h3 style="margin-top:0; color: var(--accent); text-align: center;">⚙️ Lern-Optionen</h3>
+                <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; text-align: center;">Steuere, wann die Lautschrift (Transliteration) angezeigt wird.</p>
+                
+                <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; color: #f8fafc;">Lautschrift-Modus:</label>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="action-btn choice-btn" id="opt-always" onclick="setTranslitMode('always')">✅ Immer anzeigen (Standard)</button>
+                    <button class="action-btn choice-btn" id="opt-smart" onclick="setTranslitMode('smart')">🎯 Smart: Aus bei Ton- & Zeichenaufgaben</button>
+                    <button class="action-btn choice-btn" id="opt-never" onclick="setTranslitMode('never')">❌ Immer ausgeblendet</button>
+                </div>
+            </div>
         </section>
 
         <section id="section-add" class="hidden" style="width: 100%;">
@@ -519,9 +535,7 @@
     </nav>
 
     <script>
-        // Erweiterter Open-Source Alltags- und Reise-Wortschatz (50+ Wörter)
         let defaultVocabs = [
-            // Lektion 1: Urlaub & Begrüßung
             { thai: "สวัสดี", translit: "sà-wàt-dee", meaning: "Hallo / Guten Tag", tone: 3, lesson: 1, emoji: "👋" },
             { thai: "ขอบคุณ", translit: "kàwp-kun", meaning: "Danke", tone: 2, lesson: 1, emoji: "🙏" },
             { thai: "ใช่", translit: "châi", meaning: "Ja", tone: 2, lesson: 1, emoji: "✅" },
@@ -530,8 +544,6 @@
             { thai: "เท่าไหร่", translit: "thâo-ràai", meaning: "Wieviel kostet das?", tone: 1, lesson: 1, emoji: "💰" },
             { thai: "ขอโทษ", translit: "kǎw thôot", meaning: "Entschuldigung", tone: 2, lesson: 1, emoji: "🙋‍♂️" },
             { thai: "ช่วยด้วย", translit: "chûay dûay", meaning: "Hilfe!", tone: 2, lesson: 1, emoji: "🚨" },
-
-            // Lektion 2: Essen & Restaurant
             { thai: "น้ำ", translit: "náam", meaning: "Wasser", tone: 3, lesson: 2, emoji: "💧" },
             { thai: "กิน", translit: "gin", meaning: "essen", tone: 0, lesson: 2, emoji: "🍚" },
             { thai: "หิว", translit: "hǐw", meaning: "hungrig", tone: 4, lesson: 2, emoji: "😋" },
@@ -541,8 +553,6 @@
             { thai: "เบียร์", translit: "bia", meaning: "Bier", tone: 0, lesson: 2, emoji: "🍺" },
             { thai: "กาแฟ", translit: "gaa-fɛɛ", meaning: "Kaffee", tone: 0, lesson: 2, emoji: "☕" },
             { thai: "ผลไม้", translit: "phǒn-la-máai", meaning: "Obst / Früchte", tone: 4, lesson: 2, emoji: "🥭" },
-
-            // Lektion 3: Familie & Freunde
             { thai: "เพื่อน", translit: "phûan", meaning: "Freund / Freundin", tone: 2, lesson: 3, emoji: "🧑‍🤝‍🧑" },
             { thai: "ครอบครัว", translit: "krɔ̀ːp-krūa", meaning: "Familie", tone: 1, lesson: 3, emoji: "👨‍👩‍👧‍👦" },
             { thai: "สบายดีไหม", translit: "sà-baai-dee mǎai", meaning: "Wie geht es dir?", tone: 0, lesson: 3, emoji: "💬" },
@@ -550,8 +560,6 @@
             { thai: "รัก", translit: "rák", meaning: "Liebe / Lieben", tone: 4, lesson: 3, emoji: "❤️" },
             { thai: "พ่อ", translit: "phɔ̂ɔ", meaning: "Vater", tone: 2, lesson: 3, emoji: "👨" },
             { thai: "แม่", translit: "mɛ̂ɛ", meaning: "Mutter", tone: 2, lesson: 3, emoji: "👩" },
-
-            // Lektion 4: Unterwegs & Transport
             { thai: "รถ", translit: "rót", meaning: "Auto / Fahrzeug", tone: 4, lesson: 4, emoji: "🚗" },
             { thai: "บ้าน", translit: "bâan", meaning: "Haus / Zuhause", tone: 2, lesson: 4, emoji: "🏠" },
             { thai: "ไป", translit: "bpai", meaning: "gehen / fahren", tone: 0, lesson: 4, emoji: "🚶‍♂️" },
@@ -560,16 +568,12 @@
             { thai: "โรงแรม", translit: "roong-rɛɛm", meaning: "Hotel", tone: 0, lesson: 4, emoji: "🏨" },
             { thai: "ไกล", translit: "glai", meaning: "weit", tone: 0, lesson: 4, emoji: "🗺️" },
             { thai: "ใกล้", translit: "glâi", meaning: "nah", tone: 2, lesson: 4, emoji: "📍" },
-
-            // Lektion 5: Zahlen & Einkaufen
             { thai: "หนึ่ง", n: 1, translit: "nùeng", meaning: "Eins (1)", tone: 1, lesson: 5, emoji: "1️⃣" },
             { thai: "สอง", n: 2, translit: "sɔ̌ɔng", meaning: "Zwei (2)", tone: 4, lesson: 5, emoji: "2️⃣" },
             { thai: "สาม", n: 3, translit: "sǎam", meaning: "Drei (3)", tone: 4, lesson: 5, emoji: "3️⃣" },
             { thai: "แพง", translit: "phɛɛng", meaning: "Teuer", tone: 0, lesson: 5, emoji: "💎" },
             { thai: "ถูก", translit: "thùuk", meaning: "Günstig / Billig", tone: 1, lesson: 5, emoji: "🏷️" },
             { thai: "เงิน", translit: "ngern", meaning: "Geld", tone: 0, lesson: 5, emoji: "💵" },
-
-            // Lektion 6: Natur, Zeit & Alltag
             { thai: "แมว", translit: "mɛɛo", meaning: "Katze", tone: 0, lesson: 6, emoji: "🐱" },
             { thai: "หมา", translit: "mǎa", meaning: "Hund", tone: 4, lesson: 6, emoji: "🐶" },
             { thai: "ช้าง", translit: "cháang", meaning: "Elefant", tone: 3, lesson: 6, emoji: "🐘" },
@@ -601,10 +605,43 @@
             1: { name: "1. Urlaub & Begrüßung", completed: false },
             2: { name: "2. Essen & Restaurant", completed: false },
             3: { name: "3. Familie & Freunde", completed: false },
-            4: { name: "4. Unterwegs & Transport", completed: false },
+            4: { name: "4. Transport & Weg", completed: false },
             5: { name: "5. Zahlen & Einkaufen", completed: false },
             6: { name: "6. Natur, Zeit & Alltag", completed: false }
         };
+
+        // Einstellung für Lautschrift: 'always' (immer an), 'never' (immer aus), 'smart' (aus bei Ton/Zeichnen)
+        let translitSetting = localStorage.getItem('thai_quest_translit') || 'smart';
+
+        function setTranslitMode(mode) {
+            translitSetting = mode;
+            localStorage.setItem('thai_quest_translit', mode);
+            updateSettingsUI();
+            showToast("Einstellung gespeichert! ⚙️", true);
+        }
+
+        function updateSettingsUI() {
+            ['always', 'smart', 'never'].forEach(m => {
+                const btn = document.getElementById('opt-' + m);
+                if(btn) {
+                    if(translitSetting === m) {
+                        btn.style.border = "2px solid var(--accent)";
+                        btn.style.background = "#334155";
+                    } else {
+                        btn.style.border = "1px solid #475569";
+                        btn.style.background = "#283548";
+                    }
+                }
+            });
+        }
+
+        // Prüft, ob die Transliteration in der aktuellen Aufgabe angezeigt werden soll
+        function shouldShowTranslit(isDrawingOrToneTask = false) {
+            if (translitSetting === 'always') return true;
+            if (translitSetting === 'never') return false;
+            if (translitSetting === 'smart' && isDrawingOrToneTask) return false;
+            return true;
+        }
 
         let dialogues = [
             {
@@ -953,6 +990,7 @@
             const container = document.getElementById('card-content-dialog');
             let linesHtml = "";
             d.lines.forEach((line, idx) => {
+                let showTranslitInDialog = shouldShowTranslit(false);
                 linesHtml += `<div class="dialog-bubble" style="display:flex; flex-direction: column;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="font-size: 0.75rem; color: var(--accent); font-weight: bold;">${line.speaker}</div>
@@ -961,7 +999,7 @@
                     <div style="font-size: 1.4rem; font-weight: bold; margin: 4px 0;">${line.thai}</div>
                     <button class="action-btn" onclick="toggleDialogDetails('dialog-details-${dialogId}-${idx}')" style="font-size: 0.75rem; padding: 4px; background: #1e293b; border: 1px solid #475569; color: #94a3b8; text-align: left;">👁️ Details</button>
                     <div id="dialog-details-${dialogId}-${idx}" style="display: none; margin-top: 6px; font-size: 0.8rem; color: #94a3b8;">
-                        <div>🔤 Umschrift: ${line.translit}</div>
+                        ${showTranslitInDialog ? `<div>🔤 Umschrift: ${line.translit}</div>` : ''}
                         <div>🇩🇪 Bedeutung: ${line.meaning}</div>
                     </div>
                 </div>`;
@@ -1006,7 +1044,7 @@
 
         function switchTab(tab, keepPathActive = false) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-alphabet', 'section-letter-studio', 'section-add'].forEach(id => {
+            ['section-path', 'section-mix', 'section-dialog', 'section-complete', 'section-train', 'section-exam', 'section-lessons', 'section-alphabet', 'section-letter-studio', 'section-settings', 'section-add'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.classList.add('hidden');
             });
@@ -1026,6 +1064,7 @@
             else if(tab === 'lessons') { document.getElementById('section-lessons').classList.remove('hidden'); renderLessons(); }
             else if(tab === 'alphabet') { document.getElementById('section-alphabet').classList.remove('hidden'); renderAlphabet(); }
             else if(tab === 'letter-studio') { document.getElementById('section-letter-studio').classList.remove('hidden'); }
+            else if(tab === 'settings') { document.getElementById('section-settings').classList.remove('hidden'); updateSettingsUI(); }
             else if(tab === 'add') { document.getElementById('section-add').classList.remove('hidden'); }
         }
 
@@ -1087,20 +1126,22 @@
         }
 
         function renderMixTrainCanvas(v) {
+            const showTranslit = shouldShowTranslit(true);
             document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--accent);">✨ Tonkurve nachzeichnen</div>
                 <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
                 <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
-                <div class="translit">${v.translit}</div>
+                ${showTranslit ? `<div class="translit">${v.translit}</div>` : `<div style="font-size:0.8rem; color:#64748b; margin-bottom:15px;">🔒 Umschrift ausgeblendet (Ton-Training)</div>`}
                 <div class="canvas-container"><canvas id="mixTrainCanvas"></canvas></div>
                 <div class="btn-group"><button class="action-btn" onclick="loadRandomMixMission()">Überspringen</button><button class="action-btn btn-primary" onclick="advanceSession(15)">Richtig ➔</button></div>`;
             setupMixCanvas('mixTrainCanvas', v.tone, true, v);
         }
 
         function renderMixExamCanvas(v) {
+            const showTranslit = shouldShowTranslit(true);
             document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: #ef4444;">🧠 Freies Zeichnen</div>
                 <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
                 <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
-                <div class="translit">${v.translit}</div>
+                ${showTranslit ? `<div class="translit">${v.translit}</div>` : `<div style="font-size:0.8rem; color:#64748b; margin-bottom:15px;">🔒 Umschrift ausgeblendet (Prüfung)</div>`}
                 <div class="canvas-container" style="border-color: #ef4444;"><canvas id="mixExamCanvas"></canvas></div>
                 <div class="btn-group"><button class="action-btn" onclick="clearExamCanvas()">Löschen</button><button class="action-btn btn-primary" onclick="checkMixExamDrawing()" style="background:var(--falling);">Einreichen ➔</button></div>`;
             setupMixExamCanvas('mixExamCanvas');
@@ -1135,6 +1176,7 @@
         }
 
         function renderMixAudioMC(v, pool) {
+            const showTranslit = shouldShowTranslit(false);
             let options = [v.meaning];
             while(options.length < 4 && options.length < pool.length) {
                 let rm = pool[Math.floor(Math.random() * pool.length)].meaning;
@@ -1146,7 +1188,7 @@
             document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--xp);">👂 Was bedeutet das?</div>
                 <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
                 <div class="word-row" style="margin: 10px 0;"><button class="audio-btn" style="width:50px;height:50px;" onclick="playAudio('${v.thai}')">🔊</button></div>
-                <div class="translit">${v.translit}</div>
+                ${showTranslit ? `<div class="translit">${v.translit}</div>` : `<div style="font-size:0.8rem; color:#64748b; margin-bottom:15px;">🔒 Umschrift ausgeblendet</div>`}
                 <div style="width:100%; margin-top:10px;">${htmlOptions}</div>`;
         }
 
@@ -1156,6 +1198,7 @@
         }
 
         function renderMixToneMatch(v) {
+            const showTranslit = shouldShowTranslit(true);
             let options = [v.tone];
             while(options.length < 4) { let rt = Math.floor(Math.random() * 5); if(!options.includes(rt)) options.push(rt); }
             options.sort(() => Math.random() - 0.5);
@@ -1166,7 +1209,7 @@
             document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--streak);">🎯 Welcher Ton gehört dazu?</div>
                 <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
                 <div class="thai-word" style="margin:5px 0;">${v.thai}</div>
-                <div class="translit">${v.translit}</div>
+                ${showTranslit ? `<div class="translit">${v.translit}</div>` : `<div style="font-size:0.8rem; color:#64748b; margin-bottom:15px;">🔒 Umschrift ausgeblendet (Ton-Aufgabe)</div>`}
                 <div style="width:100%; margin-top:5px;">${htmlOptions}</div>`;
         }
 
@@ -1176,6 +1219,7 @@
         }
 
         function renderMixEmojiMatch(v, pool) {
+            const showTranslit = shouldShowTranslit(false);
             let options = [v];
             while(options.length < 4 && options.length < pool.length) {
                 let rv = pool[Math.floor(Math.random() * pool.length)];
@@ -1188,7 +1232,7 @@
             });
             document.getElementById('card-content-mix').innerHTML = `<div style="font-size: 0.8rem; color: var(--accent);">🖼️ Welches Symbol passt?</div>
                 <div class="thai-word" style="margin:5px 0;" onclick="playAudio('${v.thai}')">${v.thai}</div>
-                <div class="translit">${v.translit}</div>
+                ${showTranslit ? `<div class="translit">${v.translit}</div>` : `<div style="font-size:0.8rem; color:#64748b; margin-bottom:15px;">🔒 Umschrift ausgeblendet</div>`}
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px; width:100%;">${htmlEmojis}</div>`;
         }
 
@@ -1229,10 +1273,11 @@
             const v = vocabs[currentTrainIndex];
             trainSnapped = false;
             setTimeout(() => playAudio(v.thai), 300);
+            const showTranslit = shouldShowTranslit(true);
             document.getElementById('card-content-train').innerHTML = `<div style="font-size: 0.8rem; color: #38bdf8;">🏋️ Training (Mit Ghost-Linie)</div>
                 <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
                 <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
-                <div class="translit">${v.translit}</div>
+                ${showTranslit ? `<div class="translit">${v.translit}</div>` : `<div style="font-size:0.8rem; color:#64748b; margin-bottom:15px;">🔒 Umschrift ausgeblendet (Trainings-Modus)</div>`}
                 <div class="canvas-container"><canvas id="trainCanvas"></canvas></div>
                 <div class="btn-group"><button class="action-btn" onclick="clearTrainCanvas()">Löschen</button><button class="action-btn btn-primary" onclick="checkTrainDrawing()">Richtig ➔</button></div>`;
             setupTrainCanvas();
@@ -1275,10 +1320,11 @@
             currentExamIndex = Math.floor(Math.random() * vocabs.length);
             const v = vocabs[currentExamIndex];
             setTimeout(() => playAudio(v.thai), 300);
+            const showTranslit = shouldShowTranslit(true);
             document.getElementById('card-content-exam').innerHTML = `<div style="font-size: 0.8rem; color: #ef4444;">🎓 Prüfung (Aus dem Gedächtnis)</div>
                 <div class="vocab-emoji-card">${getVocabEmoji(v)}</div>
                 <div class="word-row"><div class="thai-word">${v.thai}</div><button class="audio-btn" onclick="playAudio('${v.thai}')">🔊</button></div>
-                <div class="translit">${v.translit}</div>
+                ${showTranslit ? `<div class="translit">${v.translit}</div>` : `<div style="font-size:0.8rem; color:#64748b; margin-bottom:15px;">🔒 Umschrift ausgeblendet (Prüfungs-Modus)</div>`}
                 <div class="canvas-container" style="border-color: #ef4444;"><canvas id="examCanvas"></canvas></div>
                 <div class="btn-group"><button class="action-btn" onclick="clearExamCanvas()">Löschen</button><button class="action-btn btn-primary" onclick="checkExamDrawing()" style="background:var(--falling);">Einreichen ➔</button></div>`;
             setupExamCanvas();
